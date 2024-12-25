@@ -13,6 +13,12 @@ let MANIM_VERSION: string | undefined;
 let isCanceledByUser = false;
 
 /**
+ * Key for the global state to store the last warning time for missing Manim
+ * version detection.
+ */
+export const LAST_WARNING_NO_VERSION_KEY = 'manim-notebook.lastWarningTimeMissingVersionDetection';
+
+/**
  * Checks if the given version is at least the required version.
  * 
  * @param versionRequired The required version, e.g. '1.2.3'.
@@ -40,8 +46,6 @@ function isAtLeastVersion(versionRequired: string, version: string): boolean {
 
     return true;
 }
-
-export const LAST_WARNING_NO_VERSION_KEY = 'manim-notebook.lastWarningTimeMissingVersionDetection';
 
 /**
  * Returns true if the current Manim version is at least the required version.
@@ -132,9 +136,9 @@ async function fetchLatestManimVersion(): Promise<string | undefined> {
  */
 export async function tryToDetermineManimVersion(isAtStartup = false) {
     MANIM_VERSION = undefined;
-    let res = false;
+    let couldDetermineManimVersion = false;
     isCanceledByUser = false;
-    const latestVersionPromise = fetchLatestManimVersion();
+    const latestManimVersion = fetchLatestManimVersion();
 
     const terminal = await window.createTerminal(
         {
@@ -149,7 +153,7 @@ export async function tryToDetermineManimVersion(isAtStartup = false) {
         cancellable: true,
     }, async (progress, token) => {
         try {
-            res = await new Promise<boolean>(async (resolve, reject) => {
+            couldDetermineManimVersion = await new Promise<boolean>(async (resolve, reject) => {
                 progress.report({ increment: 0 });
 
                 ManimShell.instance.lockManimWelcomeStringDetection = true;
@@ -171,47 +175,63 @@ export async function tryToDetermineManimVersion(isAtStartup = false) {
         }
     });
 
-    await showUserFeedbackForVersion(res, terminal, latestVersionPromise, isAtStartup);
-}
-
-async function showUserFeedbackForVersion(
-    versionCouldBeDetermined: boolean,
-    terminal: vscode.Terminal, latestVersionPromise: Promise<string | undefined>,
-    isAtStartup: boolean
-) {
-    if (versionCouldBeDetermined) {
+    if (couldDetermineManimVersion) {
         terminal.dispose();
-        const latestVersion = await latestVersionPromise;
-        if (latestVersion) {
-            if (latestVersion === MANIM_VERSION) {
-                window.showInformationMessage(
-                    `You're using the latest ManimGL version: v${MANIM_VERSION}`);
-            } else {
-                window.showInformationMessage(
-                    `You're using ManimGL version v${MANIM_VERSION}.`
-                    + ` The latest version is v${latestVersion}.`);
-            }
-        } else {
-            window.showInformationMessage(`You're using ManimGL version: v${MANIM_VERSION}`);
-        }
-    } else if (!isCanceledByUser) {
+        await showPositiveUserVersionFeedback(latestManimVersion);
+    } else {
         terminal.show();
-        const tryAgainAnswer = "Try again";
-        let errMessage = "Your ManimGL version could not be determined.";
-        if (isAtStartup) {
-            errMessage += " This can happen at startup since"
-                + " a virtual environment might not have been activated yet."
-                + " Please try again...";
-        }
-        const answer = await Window.showErrorMessage(errMessage, tryAgainAnswer);
-        if (answer === tryAgainAnswer) {
-            await tryToDetermineManimVersion();
-        }
+        await showNegativeUserVersionFeedback(isAtStartup);
     }
 }
 
-function constructTimeoutPromise(timeout: number,
-    progress: vscode.Progress<unknown>, token: vscode.CancellationToken): Promise<boolean> {
+async function showPositiveUserVersionFeedback(latestManimVersion: Promise<string | undefined>) {
+    const latestVersion = await latestManimVersion;
+    if (latestVersion) {
+        if (latestVersion === MANIM_VERSION) {
+            Window.showInformationMessage(
+                `You're using the latest ManimGL version: v${MANIM_VERSION}`);
+        } else {
+            Window.showInformationMessage(
+                `You're using ManimGL version v${MANIM_VERSION}.`
+                + ` The latest version is v${latestVersion}.`);
+        }
+    } else {
+        Window.showInformationMessage(`You're using ManimGL version: v${MANIM_VERSION}`);
+    }
+}
+
+async function showNegativeUserVersionFeedback(isAtStartup: boolean) {
+    if (isCanceledByUser) {
+        return;
+    }
+
+    const tryAgainAnswer = "Try again";
+    let errMessage = "Your ManimGL version could not be determined.";
+    if (isAtStartup) {
+        errMessage += " This can happen at startup since"
+            + " a virtual environment might not have been activated yet."
+            + " Please try again...";
+    }
+    const answer = await Window.showErrorMessage(errMessage, tryAgainAnswer);
+    if (answer === tryAgainAnswer) {
+        await tryToDetermineManimVersion();
+    }
+}
+
+/**
+ * Constructs a promise that times out after the given time and reports progress
+ * automatically in the meantime every 500ms.
+ * 
+ * @param timeout The time in milliseconds after which the promise should time out.
+ * @param progress The progress indicator to report to.
+ * @param token The cancellation token to listen to.
+ * @returns A promise that times out after the given time.
+ */
+function constructTimeoutPromise(
+    timeout: number,
+    progress: vscode.Progress<unknown>,
+    token: vscode.CancellationToken
+): Promise<boolean> {
     return new Promise<boolean>(async (resolve, reject) => {
         const timeoutId = setTimeout(() => {
             clearTimeout(timeoutId);
@@ -232,6 +252,13 @@ function constructTimeoutPromise(timeout: number,
     });
 }
 
+/**
+ * Looks for the ManimGL version string in the terminal output.
+ * 
+ * @param terminaL The terminal to listen TO:
+ * @returnS True if the version string could be found and assigned to the
+ * `MANIM_VERSION` variable. False otherwise.
+ */
 async function lookForManimVersionString(terminal: vscode.Terminal): Promise<boolean> {
     return new Promise<boolean>(async (resolve, reject) => {
         onTerminalOutput(terminal, (data: string) => {
