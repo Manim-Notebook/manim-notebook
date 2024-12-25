@@ -3,7 +3,7 @@ import { ManimShell, NoActiveShellError } from './manimShell';
 import { window, workspace } from 'vscode';
 import { Logger, Window } from './logger';
 import { findClassLines, findManimSceneName } from './pythonParsing';
-import { isAtLeastManimVersion } from './utils/version';
+import { isAtLeastManimVersion } from './manimVersion';
 
 /**
  * Runs the `manimgl` command in the terminal, with the current cursor's line number:

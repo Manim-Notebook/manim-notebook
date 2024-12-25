@@ -4,7 +4,7 @@ import { ManimShell } from './manimShell';
 import { EventEmitter } from 'events';
 import { ManimCellRanges } from './pythonParsing';
 import { Logger, Window } from './logger';
-import { hasUserMinimalManimVersion } from './utils/version';
+import { hasUserMinimalManimVersion } from './manimVersion';
 
 // \x0C: is Ctrl + L, which clears the terminal screen
 const PREVIEW_COMMAND = `\x0Ccheckpoint_paste()`;

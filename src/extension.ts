@@ -9,8 +9,7 @@ import { exportScene } from './export';
 import { Logger, Window, LogRecorder } from './logger';
 import { registerWalkthroughCommands } from './walkthrough/commands';
 import { ExportSceneCodeLens } from './export';
-import { tryToDetermineManimVersion } from './utils/version';
-import { LAST_WARNING_NO_VERSION_KEY } from './utils/version';
+import { tryToDetermineManimVersion, LAST_WARNING_NO_VERSION_KEY } from './manimVersion';
 
 export let manimNotebookContext: vscode.ExtensionContext;
 

@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import { window } from 'vscode';
-import { waitNewTerminalDelay, withoutAnsiCodes, onTerminalOutput } from './terminal';
+import { waitNewTerminalDelay, withoutAnsiCodes, onTerminalOutput } from './utils/terminal';
 import { EventEmitter } from 'events';
-import { Window, Logger } from '../logger';
-import { ManimShell } from '../manimShell';
-import { manimNotebookContext } from '../extension';
+import { Window, Logger } from './logger';
+import { ManimShell } from './manimShell';
+import { manimNotebookContext } from './extension';
 
 /**
  * Manim version that the user has installed without the 'v' prefix, e.g. '1.2.3'.
