@@ -79,7 +79,7 @@ export async function isAtLeastManimVersion(versionRequired: string): Promise<bo
 }
 
 /**
- * Returns whether the user has at least the given minimal Manim version installed.
+ * Returns whether user has at least the given minimal Manim version installed.
  * If this is not the case, a warning message is shown.
  * 
  * @param requiredVersion The minimal Manim version required, e.g. '1.2.3'.

@@ -6,12 +6,6 @@ import fs from 'fs';
 import path from 'path';
 
 export function registerWalkthroughCommands(context: ExtensionContext) {
-    const checkManimVersionCommand = commands.registerCommand(
-        'manim-notebook-walkthrough.checkManimVersion', async () => {
-            Logger.info("💠 Command Check Manim Version requested");
-            await checkManimVersion();
-        });
-
     const openSampleFileCommand = commands.registerCommand(
         'manim-notebook-walkthrough.openSample', async () => {
             Logger.info("💠 Command Open Sample File requested");
@@ -47,20 +41,12 @@ export function registerWalkthroughCommands(context: ExtensionContext) {
     );
 
     context.subscriptions.push(
-        checkManimVersionCommand,
         openSampleFileCommand,
         showAllCommandsCommand,
         showKeyboardShortcutsCommand,
         showSettingsCommand,
         openWikiCommand
     );
-}
-
-async function checkManimVersion() {
-    const terminal = window.createTerminal("Manim Version");
-    terminal.show()
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    terminal.sendText("manimgl --version");
 }
 
 /**

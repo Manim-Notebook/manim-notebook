@@ -179,12 +179,12 @@
           {
             "id": "checkManimInstallation",
             "title": "Check Manim Installation",
-            "description": "Let's see if you have installed ManimGL.\n[Check Manim version](command:manim-notebook-walkthrough.checkManimVersion)\n[Open installation guide](https://3b1b.github.io/manim/getting_started/installation.html)",
+            "description": "Let's see if you have installed ManimGL.\n[Check Manim version](command:manim-notebook.redetectManimVersion)\n[Open installation guide](https://3b1b.github.io/manim/getting_started/installation.html)",
             "media": {
               "markdown": "src/walkthrough/manim-installation.md"
             },
             "completionEvents": [
-              "onCommand:manim-notebook-walkthrough.checkManimVersion"
+              "onCommand:manim-notebook.redetectManimVersion"
             ]
           },
           {
