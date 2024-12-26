@@ -51,23 +51,27 @@ enum ManimShellEvent {
    * Event emitted when an IPython cell has finished executing, i.e. when the
    * IPYTHON_CELL_START_REGEX is matched.
    */
+  // eslint-disable-next-line no-unused-vars
   IPYTHON_CELL_FINISHED = "ipythonCellFinished",
 
   /**
    * Event emitted when a log info message is detected in the terminal.
    */
+  // eslint-disable-next-line no-unused-vars
   LOG_INFO_MESSAGE = "logInfoMessage",
 
   /**
    * Event emitted when a keyboard interrupt is detected in the terminal, e.g.
    * when `Ctrl+C` is pressed to stop the current command execution.
    */
+  // eslint-disable-next-line no-unused-vars
   KEYBOARD_INTERRUPT = "keyboardInterrupt",
 
   /**
    * Event emitted when data is received from the terminal, but stripped of
    * ANSI control codes.
    */
+  // eslint-disable-next-line no-unused-vars
   DATA = "ansiStrippedData",
 
   /**
@@ -75,11 +79,13 @@ enum ManimShellEvent {
    * execution has ended before we have detected the start of the ManimGL
    * session.
    */
+  // eslint-disable-next-line no-unused-vars
   MANIM_NOT_STARTED = "manimglNotStarted",
 
   /**
    * Event emitted when the active shell is reset.
    */
+  // eslint-disable-next-line no-unused-vars
   RESET = "reset",
 }
 
@@ -97,7 +103,7 @@ export interface CommandExecutionEventHandler {
    * during Manim startup), the shell might not exist anymore after the
    * command was issued.
    */
-  onCommandIssued?: (shellStillExists: boolean) => void;
+  onCommandIssued?: (_shellStillExists: boolean) => void;
 
   /**
    * Callback that is invoked when data is received from the active Manim
@@ -106,7 +112,7 @@ export interface CommandExecutionEventHandler {
    * @param data The data that was received from the terminal, but stripped
    * of ANSI control codes.
    */
-  onData?: (data: string) => void;
+  onData?: (_data: string) => void;
 
   /**
    * Callback that is invoked when the manim shell is reset. This indicates
@@ -439,7 +445,7 @@ export class ManimShell {
         ? "Previewing whole scene..."
         : "Starting Manim...",
       cancellable: false,
-    }, async (progress, token) => {
+    }, async (_progress, _token) => {
       // We are sure that the active shell is set since it is invoked
       // in `retrieveOrInitActiveShell()` or in the line above.
       this.shellWeTryToSpawnIn = this.activeShell;
