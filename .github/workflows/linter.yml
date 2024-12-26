@@ -29,11 +29,11 @@ jobs:
           uses: actions/setup-node@v4
           with:
             node-version: '20' # End of Life (EOL): April 2026
-            cache: 'yarn'
+            cache: 'npm'
 
         - name: Install dependencies
           if: ${{ steps.js-changed.outputs.changed-files != ''}}
-          run: yarn install
+          run: npm install
 
         # with ESLint v9 --ignore-path does not exist anymore
         # see [1] for the PR. However, my feeling for this is totally reflected
@@ -43,5 +43,5 @@ jobs:
         - name: Run ESLint
           if: ${{ steps.js-changed.outputs.changed-files != ''}}
           run: |
-            echo "🚨 Running ESLint version: $(yarn run --silent eslint --version)"
-            yarn run eslint --config ./.config/eslint.mjs --max-warnings 0 --no-warn-ignored ${{ steps.js-changed.outputs.changed-files }}
+            echo "🚨 Running ESLint version: $(npm run --silent eslint --version)"
+            npm run eslint --config ./.config/eslint.mjs --max-warnings 0 --no-warn-ignored ${{ steps.js-changed.outputs.changed-files }}
