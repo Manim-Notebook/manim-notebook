@@ -170,7 +170,7 @@ class PreviewProgress {
       location: vscode.ProgressLocation.Notification,
       title: "Previewing Manim",
       cancellable: false,
-    }, async (progressIndicator, token) => {
+    }, async (progressIndicator, _token) => {
       await new Promise((resolve) => {
         this.eventEmitter.on(this.FINISH_EVENT, resolve);
         this.eventEmitter.on(this.REPORT_EVENT,

@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { window } from "vscode";
-import { waitNewTerminalDelay, withoutAnsiCodes, onTerminalOutput } from "./utils/terminal";
-import { EventEmitter } from "events";
+import { waitNewTerminalDelay, onTerminalOutput } from "./utils/terminal";
 import { Window, Logger } from "./logger";
 import { ManimShell } from "./manimShell";
 import { manimNotebookContext } from "./extension";
@@ -154,7 +153,7 @@ export async function tryToDetermineManimVersion(isAtStartup = false) {
     cancellable: true,
   }, async (progress, token) => {
     try {
-      couldDetermineManimVersion = await new Promise<boolean>(async (resolve, reject) => {
+      couldDetermineManimVersion = await new Promise<boolean>(async (resolve, _reject) => {
         progress.report({ increment: 0 });
 
         ManimShell.instance.lockManimWelcomeStringDetection = true;
@@ -262,7 +261,7 @@ function constructTimeoutPromise(
  * `MANIM_VERSION` variable. False otherwise.
  */
 async function lookForManimVersionString(terminal: vscode.Terminal): Promise<boolean> {
-  return new Promise<boolean>(async (resolve, reject) => {
+  return new Promise<boolean>(async (resolve, _reject) => {
     onTerminalOutput(terminal, (data: string) => {
       const versionMatch = data.match(/^\s*ManimGL v([0-9]+\.[0-9]+\.[0-9]+)/);
       if (!versionMatch) {
