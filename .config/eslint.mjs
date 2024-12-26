@@ -20,9 +20,10 @@ export default [
         "jsx": false,
         "quote-props": "always",
         "semi": true,
-        "brace-style": "1tbs",
       }).rules,
-      "@stylistic/max-len": ["error", { code: 100, comments: 80, ignoreUrls: true }],
+      "@stylistic/brace-style": ["error", "1tbs"],
+      "@stylistic/max-len": ["error", {
+        code: 100, comments: 80, ignoreUrls: true, ignoreRegExpLiterals: true }],
       "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },

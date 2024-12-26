@@ -1,38 +1,38 @@
-import * as vscode from 'vscode';
-import { window } from 'vscode';
+import * as vscode from "vscode";
+import { window } from "vscode";
 
 /**
- * Waits a user-defined delay before allowing the terminal to be used. This 
+ * Waits a user-defined delay before allowing the terminal to be used. This
  * might be useful for some activation scripts to load like virtualenvs etc.
- * 
+ *
  * Note that this function must be awaited by the caller, otherwise the delay
  * will not be respected.
- * 
+ *
  * This function does not have any reference to the actual terminal, it just
  * waits, and that's it.
  */
 export async function waitNewTerminalDelay() {
-    const delay: number = await vscode.workspace
-        .getConfiguration("manim-notebook").get("delayNewTerminal")!;
+  const delay: number = await vscode.workspace
+    .getConfiguration("manim-notebook").get("delayNewTerminal")!;
 
-    if (delay > 600) {
-        await window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Waiting a user-defined delay for the new terminal...",
-            cancellable: false
-        }, async (progress, token) => {
-            progress.report({ increment: 0 });
+  if (delay > 600) {
+    await window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      title: "Waiting a user-defined delay for the new terminal...",
+      cancellable: false,
+    }, async (progress, token) => {
+      progress.report({ increment: 0 });
 
-            // split user-defined timeout into 500ms chunks and show progress
-            const numChunks = Math.ceil(delay / 500);
-            for (let i = 0; i < numChunks; i++) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-                progress.report({ increment: 100 / numChunks });
-            }
-        });
-    } else {
-        await new Promise(resolve => setTimeout(resolve, delay));
-    }
+      // split user-defined timeout into 500ms chunks and show progress
+      const numChunks = Math.ceil(delay / 500);
+      for (let i = 0; i < numChunks; i++) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        progress.report({ increment: 100 / numChunks });
+      }
+    });
+  } else {
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
 }
 
 /**
@@ -45,43 +45,43 @@ const ANSI_CONTROL_SEQUENCE_REGEX = /(?:\x1B[@-Z\\-_]|[\x80-\x9A\x9C-\x9F]|(?:\x
 /**
  * Removes ANSI control codes from the given stream of strings and yields the
  * cleaned strings.
- * 
+ *
  * @param stream The stream of strings to clean.
  * @returns An async iterable stream of strings without ANSI control codes.
  */
 export async function* withoutAnsiCodes(stream: AsyncIterable<string>): AsyncIterable<string> {
-    for await (const data of stream) {
-        yield data.replace(ANSI_CONTROL_SEQUENCE_REGEX, '');
-    }
+  for await (const data of stream) {
+    yield data.replace(ANSI_CONTROL_SEQUENCE_REGEX, "");
+  }
 }
 
 /**
  * Registers a callback to read the stdout from the terminal. The callback is
  * invoked whenever the given terminal emits output. The output is cleaned from
  * ANSI control codes by default.
- * 
+ *
  * Note that you should execute the command in the terminal after registering
  * the callback, otherwise the callback might not be invoked.
- * 
+ *
  * @param terminal The terminal to listen to.
  * @param callback The callback to invoke when output is emitted.
  * @param withoutAnsi Whether to clean the output from ANSI control codes.
  */
 export async function onTerminalOutput(
-    terminal: vscode.Terminal, callback: (data: string) => void, withoutAnsi = true) {
-    window.onDidStartTerminalShellExecution(
-        async (event: vscode.TerminalShellExecutionStartEvent) => {
-            if (event.terminal !== terminal) {
-                return;
-            }
+  terminal: vscode.Terminal, callback: (data: string) => void, withoutAnsi = true) {
+  window.onDidStartTerminalShellExecution(
+    async (event: vscode.TerminalShellExecutionStartEvent) => {
+      if (event.terminal !== terminal) {
+        return;
+      }
 
-            let stream = event.execution.read();
-            if (withoutAnsi) {
-                stream = withoutAnsiCodes(stream);
-            }
+      let stream = event.execution.read();
+      if (withoutAnsi) {
+        stream = withoutAnsiCodes(stream);
+      }
 
-            for await (const data of stream) {
-                callback(data);
-            }
-        });
+      for await (const data of stream) {
+        callback(data);
+      }
+    });
 }
