@@ -3,7 +3,6 @@ import { window } from "vscode";
 import { ManimShell, NoActiveShellError } from "./manimShell";
 import { ManimCell } from "./manimCell";
 import { previewManimCell, reloadAndPreviewManimCell, previewCode } from "./previewCode";
-import { ManimCellRanges } from "./pythonParsing";
 import { startScene, exitScene } from "./startStopScene";
 import { exportScene } from "./export";
 import { Logger, Window, LogRecorder } from "./logger";
@@ -114,6 +113,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     previewManimCellCommand,
     previewSelectionCommand,
+    reloadAndPreviewManimCellCommand,
     startSceneCommand,
     exitSceneCommand,
     clearSceneCommand,
@@ -134,7 +134,7 @@ export function deactivate() {
 /**
  * Previews the selected code.
  *
- * - both ends of the selection automatically extend to the start and end of lines
+ * - both ends of the selection automatically extend to the start & end of lines
  *   (for convenience)
  * - if Multi-Cursor selection:
  *   only the first selection is considered

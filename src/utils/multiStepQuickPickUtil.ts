@@ -1,6 +1,5 @@
 import {
-  QuickPickItem, window, Disposable, CancellationToken, QuickInputButton,
-  QuickInput, ExtensionContext, QuickInputButtons, Uri,
+  QuickPickItem, window, Disposable, QuickInputButton, QuickInput, QuickInputButtons,
 } from "vscode";
 
 export function toQuickPickItem(names: string): QuickPickItem {
@@ -46,7 +45,7 @@ class InputFlowAction {
   static resume = new InputFlowAction();
 }
 
-type InputStep = (input: MultiStepInput) => Thenable<InputStep | void>;
+type InputStep = (_input: MultiStepInput) => Thenable<InputStep | void>;
 
 interface QuickPickParameters<T extends QuickPickItem> {
   title: string;
@@ -66,7 +65,7 @@ interface InputBoxParameters {
   totalSteps: number;
   value: string;
   prompt: string;
-  validate: (value: string) => Promise<string | undefined>;
+  validate: (_value: string) => Promise<string | undefined>;
   buttons?: QuickInputButton[];
   ignoreFocusOut?: boolean;
   placeholder?: string;
@@ -110,10 +109,13 @@ export class MultiStepInput {
     }
   }
 
-  async showQuickPick<T extends QuickPickItem, P extends QuickPickParameters<T>>({ title, step, totalSteps, items, activeItem, ignoreFocusOut, placeholder, buttons, shouldResume }: P) {
+  async showQuickPick<T extends QuickPickItem, P extends QuickPickParameters<T>>(
+    { title, step, totalSteps, items, activeItem, ignoreFocusOut,
+      placeholder, buttons, shouldResume }: P) {
     const disposables: Disposable[] = [];
     try {
-      return await new Promise<T | (P extends { buttons: (infer I)[] } ? I : never)>((resolve, reject) => {
+      return await
+      new Promise<T | (P extends { buttons: (infer I)[] } ? I : never)>((resolve, reject) => {
         const input = window.createQuickPick<T>();
         input.title = title;
         input.step = step;
@@ -133,14 +135,15 @@ export class MultiStepInput {
             if (item === QuickInputButtons.Back) {
               reject(InputFlowAction.back);
             } else {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               resolve((item as any));
             }
           }),
           input.onDidChangeSelection(items => resolve(items[0])),
           input.onDidHide(() => {
             (async () => {
-              reject(shouldResume && await shouldResume() ? InputFlowAction.resume : InputFlowAction.cancel);
+              reject(shouldResume && await shouldResume()
+                ? InputFlowAction.resume
+                : InputFlowAction.cancel);
             })()
               .catch(reject);
           }),
@@ -156,10 +159,13 @@ export class MultiStepInput {
     }
   }
 
-  async showInputBox<P extends InputBoxParameters>({ title, step, totalSteps, value, prompt, validate, buttons, ignoreFocusOut, placeholder, shouldResume }: P) {
+  async showInputBox<P extends InputBoxParameters>(
+    { title, step, totalSteps, value, prompt, validate,
+      buttons, ignoreFocusOut, placeholder, shouldResume }: P) {
     const disposables: Disposable[] = [];
     try {
-      return await new Promise<string | (P extends { buttons: (infer I)[] } ? I : never)>((resolve, reject) => {
+      return await
+      new Promise<string | (P extends { buttons: (infer I)[] } ? I : never)>((resolve, reject) => {
         const input = window.createInputBox();
         input.title = title;
         input.step = step;
@@ -178,7 +184,6 @@ export class MultiStepInput {
             if (item === QuickInputButtons.Back) {
               reject(InputFlowAction.back);
             } else {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               resolve(item as any);
             }
           }),
@@ -202,7 +207,9 @@ export class MultiStepInput {
           }),
           input.onDidHide(() => {
             (async () => {
-              reject(shouldResume && await shouldResume() ? InputFlowAction.resume : InputFlowAction.cancel);
+              reject(shouldResume && await shouldResume()
+                ? InputFlowAction.resume
+                : InputFlowAction.cancel);
             })()
               .catch(reject);
           }),

@@ -7,7 +7,8 @@ import { ManimShell } from "./manimShell";
 import { manimNotebookContext } from "./extension";
 
 /**
- * Manim version that the user has installed without the 'v' prefix, e.g. '1.2.3'.
+ * Manim version that the user has installed without the 'v' prefix,
+ * e.g. '1.2.3'.
  */
 let MANIM_VERSION: string | undefined;
 let isCanceledByUser = false;
@@ -99,8 +100,8 @@ export async function hasUserMinimalManimVersion(requiredVersion: string): Promi
 }
 
 /**
- * Returns the tag name of the latest Manim release if the GitHub API is reachable.
- * This tag name won't include the 'v' prefix, e.g. '1.2.3'.
+ * Returns the tag name of the latest Manim release if the GitHub API is
+ * reachable. This tag name won't include the 'v' prefix, e.g. '1.2.3'.
  */
 async function fetchLatestManimVersion(): Promise<string | undefined> {
   const url = "https://api.github.com/repos/3b1b/manim/releases/latest";
@@ -222,7 +223,8 @@ async function showNegativeUserVersionFeedback(isAtStartup: boolean) {
  * Constructs a promise that times out after the given time and reports progress
  * automatically in the meantime every 500ms.
  *
- * @param timeout The time in milliseconds after which the promise should time out.
+ * @param timeout The time in milliseconds after which the promise
+ *                should time out.
  * @param progress The progress indicator to report to.
  * @param token The cancellation token to listen to.
  * @returns A promise that times out after the given time.

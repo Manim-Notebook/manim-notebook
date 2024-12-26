@@ -48,8 +48,10 @@ function parsePreviewCellArgs(cellCode?: string, startLine?: number) {
  * A Manim cell starts with `##`.
  *
  * This can be invoked by either:
- * - clicking the code lens (the button above the cell) -> this cell is previewed
- * - command pallette -> the 1 cell where the cursor is is previewed
+ * - clicking the code lens (the button above the cell)
+ *   -> this cell is previewed
+ * - command pallette
+ *   -> the 1 cell where the cursor is is previewed
  *
  * If Manim isn't running, it will be automatically started
  * (at the start of the cell which will be previewed: on its starting ## line),
@@ -97,7 +99,8 @@ export async function reloadAndPreviewManimCell(cellCode?: string, startLine?: n
  * [2] https://github.com/ManimCommunity/manim/discussions/3954#discussioncomment-10933720
  * [3] https://youtu.be/rbu7Zu5X1zI
  *
- * @param code The code to preview (e.g. from a Manim cell or from a custom selection).
+ * @param code The code to preview (e.g. from a Manim cell or from a
+ *             custom selection).
  * @param startLine The line number in the active editor where the Manim session
  * should start in case a new terminal is spawned. Also see `startScene().
  */
@@ -153,13 +156,13 @@ class PreviewProgress {
   private REPORT_EVENT = "report";
 
   /**
-     * Current progress of the preview command.
-     */
+   * Current progress of the preview command.
+   */
   private progress: number = 0;
 
   /**
-     * Name of the animation being previewed.
-     */
+   * Name of the animation being previewed.
+   */
   private animationName: string | undefined;
 
   constructor() {
@@ -184,11 +187,11 @@ class PreviewProgress {
   }
 
   /**
-     * Updates the progress based on the given Manim preview output.
-     * E.g. `2 ShowCreationNumberPlane, etc.:   7%| 2  /30  16.03it/s`
-     *
-     * @param data The Manim preview output to parse.
-     */
+   * Updates the progress based on the given Manim preview output.
+   * E.g. `2 ShowCreationNumberPlane, etc.:   7%| 2  /30  16.03it/s`
+   *
+   * @param data The Manim preview output to parse.
+   */
   public reportOnData(data: string) {
     const newProgress = this.extractProgressFromString(data);
     if (newProgress === -1) {
@@ -217,20 +220,20 @@ class PreviewProgress {
   }
 
   /**
-     * Finishes the progress notification, i.e. closes the progress bar.
-     */
+   * Finishes the progress notification, i.e. closes the progress bar.
+   */
   public finish() {
     Logger.debug("📊 Finishing progress notification");
     this.eventEmitter.emit(this.FINISH_EVENT);
   }
 
   /**
-     * Extracts the progress information from the given Manim preview output.
-     *
-     * @param data The Manim preview output to parse.
-     * @returns The progress percentage as in the interval [0, 100],
-     * or -1 if no progress information was found.
-     */
+   * Extracts the progress information from the given Manim preview output.
+   *
+   * @param data The Manim preview output to parse.
+   * @returns The progress percentage as in the interval [0, 100],
+   * or -1 if no progress information was found.
+   */
   private extractProgressFromString(data: string): number {
     if (!data.includes("%")) {
       return -1;

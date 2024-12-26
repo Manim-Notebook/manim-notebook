@@ -1,29 +1,30 @@
 import * as vscode from "vscode";
+import { TextDocument } from "vscode";
 
 export class ManimCellRanges {
   /**
-     * Regular expression to match the start of a Manim cell.
-     *
-     * The marker is a comment line starting with "##". Since the comment might
-     * be indented, we allow for any number of leading whitespaces.
-     *
-     * Manim cells themselves might contain further comments, but no nested
-     * Manim cells, i.e. no further comment starting with "##".
-     */
+   * Regular expression to match the start of a Manim cell.
+   *
+   * The marker is a comment line starting with "##". Since the comment might
+   * be indented, we allow for any number of leading whitespaces.
+   *
+   * Manim cells themselves might contain further comments, but no nested
+   * Manim cells, i.e. no further comment starting with "##".
+   */
   private static readonly MARKER = /^(\s*##)/;
 
   /**
-     * Calculates the ranges of Manim cells in the given document.
-     *
-     * A new Manim cell starts at a custom MARKER. The cell ends either:
-     * - when the next line starts with the MARKER
-     * - when the indentation level decreases
-     * - at the end of the document
-     *
-     * This method is performance-intensive as it has to go through every single
-     * line of the document. Despite this, we call it many times and caching
-     * could be beneficial in the future.
-     */
+   * Calculates the ranges of Manim cells in the given document.
+   *
+   * A new Manim cell starts at a custom MARKER. The cell ends either:
+   * - when the next line starts with the MARKER
+   * - when the indentation level decreases
+   * - at the end of the document
+   *
+   * This method is performance-intensive as it has to go through every single
+   * line of the document. Despite this, we call it many times and caching
+   * could be beneficial in the future.
+   */
   public static calculateRanges(document: vscode.TextDocument): vscode.Range[] {
     const ranges: vscode.Range[] = [];
     let start: number | null = null;
@@ -59,12 +60,12 @@ export class ManimCellRanges {
   }
 
   /**
-     * Returns the cell range that contains the given line number.
-     *
-     * Returns null if no cell range contains the line, e.g. if the cursor is
-     * outside of a Manim cell.
-     */
-  public static getCellRangeAtLine(document: vscode.TextDocument, line: number): vscode.Range | null {
+   * Returns the cell range that contains the given line number.
+   *
+   * Returns null if no cell range contains the line, e.g. if the cursor is
+   * outside of a Manim cell.
+   */
+  public static getCellRangeAtLine(document: TextDocument, line: number): vscode.Range | null {
     const ranges = ManimCellRanges.calculateRanges(document);
     for (const range of ranges) {
       if (range.start.line <= line && line <= range.end.line) {
@@ -75,9 +76,9 @@ export class ManimCellRanges {
   }
 
   /**
-     * Constructs a new cell range from the given start and end line numbers.
-     * Discards all trailing empty lines at the end of the range.
-     */
+   * Constructs a new cell range from the given start and end line numbers.
+   * Discards all trailing empty lines at the end of the range.
+   */
   private static getRangeDiscardEmpty(
     document: vscode.TextDocument, start: number, end: number,
   ): vscode.Range {
@@ -124,7 +125,7 @@ export function findClassLines(document: vscode.TextDocument): ClassLine[] {
  * @param cursorLine The line number of the cursor.
  * @returns The ClassLine associated to the Manim scene, or null if not found.
  */
-export function findManimSceneName(document: vscode.TextDocument, cursorLine: number): ClassLine | null {
+export function findManimSceneName(document: TextDocument, cursorLine: number): ClassLine | null {
   const classLines = findClassLines(document);
   const matchingClass = classLines
     .reverse()

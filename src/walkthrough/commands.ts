@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
-import { ExtensionContext, window, workspace, commands, extensions } from "vscode";
-import { Logger, Window } from "../logger";
-import { ManimShell } from "../manimShell";
+import { ExtensionContext, window, workspace, commands } from "vscode";
+import { Logger } from "../logger";
 import fs from "fs";
 import path from "path";
 
@@ -50,7 +49,7 @@ export function registerWalkthroughCommands(context: ExtensionContext) {
 }
 
 /**
- * Opens a sample Manim file in a new editor that the user can use to get started.
+ * Opens a sample Manim file in a new editor that users can use to get started.
  *
  * @param context The extension context.
  */

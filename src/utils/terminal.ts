@@ -20,7 +20,7 @@ export async function waitNewTerminalDelay() {
       location: vscode.ProgressLocation.Notification,
       title: "Waiting a user-defined delay for the new terminal...",
       cancellable: false,
-    }, async (progress, token) => {
+    }, async (progress, _token) => {
       progress.report({ increment: 0 });
 
       // split user-defined timeout into 500ms chunks and show progress
@@ -68,7 +68,7 @@ export async function* withoutAnsiCodes(stream: AsyncIterable<string>): AsyncIte
  * @param withoutAnsi Whether to clean the output from ANSI control codes.
  */
 export async function onTerminalOutput(
-  terminal: vscode.Terminal, callback: (data: string) => void, withoutAnsi = true) {
+  terminal: vscode.Terminal, callback: (_data: string) => void, withoutAnsi = true) {
   window.onDidStartTerminalShellExecution(
     async (event: vscode.TerminalShellExecutionStartEvent) => {
       if (event.terminal !== terminal) {

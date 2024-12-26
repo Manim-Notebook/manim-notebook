@@ -2,12 +2,12 @@ import * as vscode from "vscode";
 import { ManimShell, NoActiveShellError } from "./manimShell";
 import { window, workspace } from "vscode";
 import { Logger, Window } from "./logger";
-import { findClassLines, findManimSceneName } from "./pythonParsing";
+import { findManimSceneName } from "./pythonParsing";
 import { isAtLeastManimVersion } from "./manimVersion";
 
 /**
- * Runs the `manimgl` command in the terminal, with the current cursor's line number:
- * manimgl <file_name> <ClassName> [-se <lineNumber>]
+ * Runs the `manimgl` command in the terminal, with the current cursor's
+ * line number: manimgl <file_name> <ClassName> [-se <lineNumber>]
  *
  * - Saves the active file.
  * - Previews the scene at the cursor's line (end of line)
@@ -42,7 +42,6 @@ export async function startScene(lineStart?: number) {
   }
 
   const lines = editor.document.getText().split("\n");
-  const classLines = findClassLines(editor.document);
   let cursorLine = lineStart || editor.selection.start.line;
   const sceneClassLine = findManimSceneName(editor.document, cursorLine);
   if (!sceneClassLine) {

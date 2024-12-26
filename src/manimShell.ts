@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { window } from "vscode";
 import { Terminal } from "vscode";
-import { startScene, exitScene } from "./startStopScene";
+import { startScene } from "./startStopScene";
 import { EventEmitter } from "events";
 import { Logger, Window } from "./logger";
 import { waitNewTerminalDelay, withoutAnsiCodes } from "./utils/terminal";
@@ -48,38 +48,38 @@ const MANIM_WELCOME_REGEX = /^\s*ManimGL/m;
 
 enum ManimShellEvent {
   /**
-     * Event emitted when an IPython cell has finished executing, i.e. when the
-     * IPYTHON_CELL_START_REGEX is matched.
-     */
+   * Event emitted when an IPython cell has finished executing, i.e. when the
+   * IPYTHON_CELL_START_REGEX is matched.
+   */
   IPYTHON_CELL_FINISHED = "ipythonCellFinished",
 
   /**
-     * Event emitted when a log info message is detected in the terminal.
-     */
+   * Event emitted when a log info message is detected in the terminal.
+   */
   LOG_INFO_MESSAGE = "logInfoMessage",
 
   /**
-     * Event emitted when a keyboard interrupt is detected in the terminal, e.g.
-     * when `Ctrl+C` is pressed to stop the current command execution.
-     */
+   * Event emitted when a keyboard interrupt is detected in the terminal, e.g.
+   * when `Ctrl+C` is pressed to stop the current command execution.
+   */
   KEYBOARD_INTERRUPT = "keyboardInterrupt",
 
   /**
-     * Event emitted when data is received from the terminal, but stripped of
-     * ANSI control codes.
-     */
+   * Event emitted when data is received from the terminal, but stripped of
+   * ANSI control codes.
+   */
   DATA = "ansiStrippedData",
 
   /**
-     * Event emitted when ManimGL could not be started, i.e. the terminal
-     * execution has ended before we have detected the start of the ManimGL
-     * session.
-     */
+   * Event emitted when ManimGL could not be started, i.e. the terminal
+   * execution has ended before we have detected the start of the ManimGL
+   * session.
+   */
   MANIM_NOT_STARTED = "manimglNotStarted",
 
   /**
-     * Event emitted when the active shell is reset.
-     */
+   * Event emitted when the active shell is reset.
+   */
   RESET = "reset",
 }
 
@@ -88,30 +88,30 @@ enum ManimShellEvent {
  */
 export interface CommandExecutionEventHandler {
   /**
-     * Callback that is invoked when the command is issued, i.e. sent to the
-     * terminal. At this point, the command is probably not yet finished
-     * executing.
-     *
-     * @param shellStillExists Whether the shell still exists after the command
-     * was issued. In certain scenarios (e.g. user manually exits the shell
-     * during Manim startup), the shell might not exist anymore after the
-     * command was issued.
-     */
+   * Callback that is invoked when the command is issued, i.e. sent to the
+   * terminal. At this point, the command is probably not yet finished
+   * executing.
+   *
+   * @param shellStillExists Whether the shell still exists after the command
+   * was issued. In certain scenarios (e.g. user manually exits the shell
+   * during Manim startup), the shell might not exist anymore after the
+   * command was issued.
+   */
   onCommandIssued?: (shellStillExists: boolean) => void;
 
   /**
-     * Callback that is invoked when data is received from the active Manim
-     * session (IPython shell).
-     *
-     * @param data The data that was received from the terminal, but stripped
-     * of ANSI control codes.
-     */
+   * Callback that is invoked when data is received from the active Manim
+   * session (IPython shell).
+   *
+   * @param data The data that was received from the terminal, but stripped
+   * of ANSI control codes.
+   */
   onData?: (data: string) => void;
 
   /**
-     * Callback that is invoked when the manim shell is reset. This indicates
-     * that the event handler should clean up any resources.
-     */
+   * Callback that is invoked when the manim shell is reset. This indicates
+   * that the event handler should clean up any resources.
+   */
   onReset?: () => void;
 }
 
@@ -125,10 +125,11 @@ export class NoActiveShellError extends Error { }
  * Wrapper around the IPython terminal that ManimGL uses. Ensures that commands
  * are executed at the right place and spans a new Manim session if necessary.
  *
- * The words "shell" and "terminal" are used interchangeably. "ManimShell" refers
- * to a VSCode terminal that has a ManimGL IPython session running. The notion
- * of "just a terminal", without a running Manim session, is not needed, as we
- * always ensure that commands are run inside an active Manim session.
+ * The words "shell" and "terminal" are used interchangeably. "ManimShell"
+ * refers to a VSCode terminal that has a ManimGL IPython session running.
+ * The notion of "just a terminal", without a running Manim session, is not
+ * needed, as we always ensure that commands are run inside an active
+ * Manim session.
  *
  * This class is a singleton and should be accessed via `ManimShell.instance`.
  */
@@ -140,55 +141,55 @@ export class ManimShell {
   private eventEmitter = new EventEmitter();
 
   /**
-     * The current IPython cell count. Updated whenever a cell indicator is
-     * detected in the terminal output. This is used to determine when a new cell
-     * has started, i.e. when the command has finished executing.
-     */
+   * The current IPython cell count. Updated whenever a cell indicator is
+   * detected in the terminal output. This is used to determine when a new cell
+   * has started, i.e. when the command has finished executing.
+   */
   private iPythonCellCount: number = 0;
 
   /**
-     * Whether to wait for a restarted IPython instance, i.e. for an IPython
-     * cell count of 1. This is set to `true` before the `reload()` command is
-     * issued and set back to `false` after the IPython cell count is 1.
-     */
+   * Whether to wait for a restarted IPython instance, i.e. for an IPython
+   * cell count of 1. This is set to `true` before the `reload()` command is
+   * issued and set back to `false` after the IPython cell count is 1.
+   */
   waitForRestartedIPythonInstance = false;
 
   /**
-    * Whether to lock the detection of the Manim welcome string in the terminal.
-    * This is used since this string is also printed during ManimGL version
-    * detection in another terminal (that we don't want to detect).
-    */
+   * Whether to lock the detection of the Manim welcome string in the terminal.
+   * This is used since this string is also printed during ManimGL version
+   * detection in another terminal (that we don't want to detect).
+   */
   lockManimWelcomeStringDetection = false;
 
   /**
-     * Whether the execution of a new command is locked. This is used to prevent
-     * multiple new scenes from being started at the same time, e.g. when users
-     * click on "Preview Manim Cell" multiple times in quick succession.
-     */
+   * Whether the execution of a new command is locked. This is used to prevent
+   * multiple new scenes from being started at the same time, e.g. when users
+   * click on "Preview Manim Cell" multiple times in quick succession.
+   */
   private lockDuringStartup = false;
 
   /**
-     * Whether to lock the execution of a new command while another command is
-     * currently running. On MacOS, we do lock since the IPython terminal *exits*
-     * when sending Ctrl+C instead of just interrupting the current command.
-     * See issue #16: https://github.com/Manim-Notebook/manim-notebook/issues/16
-     */
+   * Whether to lock the execution of a new command while another command is
+   * currently running. On MacOS, we do lock since the IPython terminal *exits*
+   * when sending Ctrl+C instead of just interrupting the current command.
+   * See issue #16: https://github.com/Manim-Notebook/manim-notebook/issues/16
+   */
   private shouldLockDuringCommandExecution = false;
   private isExecutingCommand = false;
 
   /**
-     * Whether to detect the end of a shell execution.
-     *
-     * We disable this while programmatically executing commands in the shell
-     * (over the whole duration of the command execution) since we only want to
-     * detect user-triggered "shell execution ends". The only such event is
-     * when the user somehow exists the IPython shell (e.g. Ctrl + D) or typing
-     * exit() etc. A "shell execution end" is not triggered when they run a
-     * command manually inside the active Manim session.
-     *
-     * If the user invokes the exit() command via the command pallette, we
-     * also reset the active shell.
-     */
+   * Whether to detect the end of a shell execution.
+   *
+   * We disable this while programmatically executing commands in the shell
+   * (over the whole duration of the command execution) since we only want to
+   * detect user-triggered "shell execution ends". The only such event is
+   * when the user somehow exists the IPython shell (e.g. Ctrl + D) or typing
+   * exit() etc. A "shell execution end" is not triggered when they run a
+   * command manually inside the active Manim session.
+   *
+   * If the user invokes the exit() command via the command pallette, we
+   * also reset the active shell.
+   */
   private detectShellExecutionEnd = true;
 
   private constructor() {
@@ -208,10 +209,10 @@ export class ManimShell {
   }
 
   /**
-     * Indicates that the next command should wait until a restarted IPython
-     * instance is detected, i.e. starting with cell 1 again. This should be
-     * called before the `reload()` command is issued.
-     */
+   * Indicates that the next command should wait until a restarted IPython
+   * instance is detected, i.e. starting with cell 1 again. This should be
+   * called before the `reload()` command is issued.
+   */
   public async nextTimeWaitForRestartedIPythonInstance() {
     if (await this.isLocked()) {
       return;
@@ -222,15 +223,15 @@ export class ManimShell {
   }
 
   /**
-     * Executes the given command. If no active terminal running Manim is found,
-     * a new terminal is spawned, and a new Manim session is started in it
-     * before executing the given command.
-     *
-     * This command is locked during startup to prevent multiple new scenes from
-     * being started at the same time, see `lockDuringStartup`.
-     *
-     * For params explanations, see the docs for `execCommand()`.
-     */
+   * Executes the given command. If no active terminal running Manim is found,
+   * a new terminal is spawned, and a new Manim session is started in it
+   * before executing the given command.
+   *
+   * This command is locked during startup to prevent multiple new scenes from
+   * being started at the same time, see `lockDuringStartup`.
+   *
+   * For params explanations, see the docs for `execCommand()`.
+   */
   public async executeCommand(
     command: string, startLine: number, waitUntilFinished = false,
     handler?: CommandExecutionEventHandler,
@@ -240,12 +241,12 @@ export class ManimShell {
   }
 
   /**
-     * Executes the given command, but only if an active ManimGL shell exists.
-     * Otherwise throws a `NoActiveShellError`.
-     *
-     * For params explanations, see the docs for `execCommand()`.
-     * @throws NoActiveShellError If no active shell is found.
-     */
+   * Executes the given command, but only if an active ManimGL shell exists.
+   * Otherwise throws a `NoActiveShellError`.
+   *
+   * For params explanations, see the docs for `execCommand()`.
+   * @throws NoActiveShellError If no active shell is found.
+   */
   public async executeCommandErrorOnNoActiveSession(
     command: string, waitUntilFinished = false, forceExecute = false,
   ) {
@@ -254,12 +255,12 @@ export class ManimShell {
   }
 
   /**
-     * Returns whether the command execution is currently locked, i.e. when
-     * Manim is starting up or another command is currently running.
-     *
-     * @param forceExecute see `execCommand()`
-     * @returns true if the command execution is locked, false otherwise.
-     */
+   * Returns whether the command execution is currently locked, i.e. when
+   * Manim is starting up or another command is currently running.
+   *
+   * @param forceExecute see `execCommand()`
+   * @returns true if the command execution is locked, false otherwise.
+   */
   private async isLocked(forceExecute = false): Promise<boolean> {
     if (this.lockDuringStartup) {
       Window.showWarningMessage("Manim is currently starting. Please wait a moment.");
@@ -284,33 +285,33 @@ export class ManimShell {
   }
 
   /**
-     * Executes a given command and bundles many different behaviors and options.
-     *
-     * This method is internal and only exposed via other public methods that
-     * select a specific behavior.
-     *
-     * @param command The command to execute in the VSCode terminal.
-     * @param waitUntilFinished Whether to wait until the actual command has
-     * finished executing, e.g. when the whole animation has been previewed.
-     * If set to false (default), we only wait until the command has been issued,
-     * i.e. sent to the terminal.
-     * @param forceExecute Whether to force the execution of the command even if
-     * another command is currently running. This is only taken into account
-     * when the `shouldLockDuringCommandExecution` is set to true.
-     * @param errorOnNoActiveShell Whether to execute the command only if an
-     * active shell exists. If no active shell is found, an error is thrown.
-     * @param startLine The line number in the active editor where the Manim
-     * session should start in case a new terminal is spawned.
-     * Also see `startScene(). You MUST set a startLine if `errorOnNoActiveShell`
-     * is set to false, since the method might invoke a new shell in this case
-     * and needs to know at which line to start it.
-     * @param handler Event handler for command execution events. See the
-     * interface `CommandExecutionEventHandler`.
-     *
-     * @throws NoActiveShellError If no active shell is found, but an active
-     * shell is required for the command execution (when `errorOnNoActiveShell`
-     * is set to true).
-     */
+   * Executes a given command and bundles many different behaviors and options.
+   *
+   * This method is internal and only exposed via other public methods that
+   * select a specific behavior.
+   *
+   * @param command The command to execute in the VSCode terminal.
+   * @param waitUntilFinished Whether to wait until the actual command has
+   * finished executing, e.g. when the whole animation has been previewed.
+   * If set to false (default), we only wait until the command has been issued,
+   * i.e. sent to the terminal.
+   * @param forceExecute Whether to force the execution of the command even if
+   * another command is currently running. This is only taken into account
+   * when the `shouldLockDuringCommandExecution` is set to true.
+   * @param errorOnNoActiveShell Whether to execute the command only if an
+   * active shell exists. If no active shell is found, an error is thrown.
+   * @param startLine The line number in the active editor where the Manim
+   * session should start in case a new terminal is spawned.
+   * Also see `startScene(). You MUST set a startLine if `errorOnNoActiveShell`
+   * is set to false, since the method might invoke a new shell in this case
+   * and needs to know at which line to start it.
+   * @param handler Event handler for command execution events. See the
+   * interface `CommandExecutionEventHandler`.
+   *
+   * @throws NoActiveShellError If no active shell is found, but an active
+   * shell is required for the command execution (when `errorOnNoActiveShell`
+   * is set to true).
+   */
   private async execCommand(
     command: string,
     waitUntilFinished: boolean,
@@ -376,8 +377,8 @@ export class ManimShell {
   }
 
   /**
-     * Errors if no active shell is found.
-     */
+   * Errors if no active shell is found.
+   */
   public errorOnNoActiveShell() {
     if (!this.hasActiveShell()) {
       throw new NoActiveShellError();
@@ -385,27 +386,27 @@ export class ManimShell {
   }
 
   /**
-     * This command should only be used from within the actual `startScene()`
-     * method. It starts a new ManimGL scene in the terminal and waits until
-     * Manim is initialized. If an active shell is already running, it will be
-     * exited before starting the new scene.
-     *
-     * This method is needed to avoid recursion issues since the usual
-     * command execution will already start a new scene if no active shell is
-     * found.
-     *
-     * @param command The command to execute in the VSCode terminal. This is
-     * usually the command to start the ManimGL scene (at a specific line).
-     * @param isRequestedForAnotherCommand Whether the command is executed
-     * because another command needed to have a new shell started.
-     * Only if the user manually starts a new scene, we want to exit a
-     * potentially already running scene beforehand.
-     * @param shouldPreviewWholeScene Whether the command requests to preview
-     * the whole scene, i.e. without the `-se <lineNumber>` argument. In this
-     * case, we wait until an info message is shown in the terminal to detect
-     * when the whole scene has been previewed. Otherwise, we wait until the
-     * first IPython cell is found.
-     */
+   * This command should only be used from within the actual `startScene()`
+   * method. It starts a new ManimGL scene in the terminal and waits until
+   * Manim is initialized. If an active shell is already running, it will be
+   * exited before starting the new scene.
+   *
+   * This method is needed to avoid recursion issues since the usual
+   * command execution will already start a new scene if no active shell is
+   * found.
+   *
+   * @param command The command to execute in the VSCode terminal. This is
+   * usually the command to start the ManimGL scene (at a specific line).
+   * @param isRequestedForAnotherCommand Whether the command is executed
+   * because another command needed to have a new shell started.
+   * Only if the user manually starts a new scene, we want to exit a
+   * potentially already running scene beforehand.
+   * @param shouldPreviewWholeScene Whether the command requests to preview
+   * the whole scene, i.e. without the `-se <lineNumber>` argument. In this
+   * case, we wait until an info message is shown in the terminal to detect
+   * when the whole scene has been previewed. Otherwise, we wait until the
+   * first IPython cell is found.
+   */
   public async executeStartCommand(command: string,
     isRequestedForAnotherCommand: boolean, shouldPreviewWholeScene: boolean) {
     if (!isRequestedForAnotherCommand) {
@@ -459,13 +460,13 @@ export class ManimShell {
   }
 
   /**
-    * Resets the active shell such that a new terminal is created on the next
-    * command execution.
-    *
-    * This will also remove all event listeners! Having called this method,
-    * you should NOT emit any events anymore before a new Manim shell is
-    * detected, as those events would not be caught by any listeners.
-    */
+   * Resets the active shell such that a new terminal is created on the next
+   * command execution.
+   *
+   * This will also remove all event listeners! Having called this method,
+   * you should NOT emit any events anymore before a new Manim shell is
+   * detected, as those events would not be caught by any listeners.
+   */
   public resetActiveShell() {
     Logger.debug("💫 Reset active shell");
     this.isExecutingCommand = false;
@@ -477,19 +478,19 @@ export class ManimShell {
   }
 
   /**
-     * Forces the terminal to quit and thus the ManimGL session to end.
-     *
-     * Beforehand, this was implemented more gracefully by sending a keyboard
-     * interrupt (`Ctrl+C`), followed by the `exit()` command in the IPython
-     * session. However, on MacOS, the keyboard interrupt itself already exits
-     * from the entire IPython session and does not just interrupt the current
-     * running command (inside IPython) as would be expected.
-     * See https://github.com/3b1b/manim/discussions/2236
-     *
-     * @param sendManimNotStartedEvent Whether to emit the `MANIM_NOT_STARTED`
-     * event. E.g. this is set to false when we detect a Manim welcome string
-     * in a new terminal and close the old one.
-     */
+   * Forces the terminal to quit and thus the ManimGL session to end.
+   *
+   * Beforehand, this was implemented more gracefully by sending a keyboard
+   * interrupt (`Ctrl+C`), followed by the `exit()` command in the IPython
+   * session. However, on MacOS, the keyboard interrupt itself already exits
+   * from the entire IPython session and does not just interrupt the current
+   * running command (inside IPython) as would be expected.
+   * See https://github.com/3b1b/manim/discussions/2236
+   *
+   * @param sendManimNotStartedEvent Whether to emit the `MANIM_NOT_STARTED`
+   * event. E.g. this is set to false when we detect a Manim welcome string
+   * in a new terminal and close the old one.
+   */
   public async forceQuitActiveShell(sendManimNotStartedEvent = true) {
     if (this.activeShell) {
       Logger.debug("🔚 Force-quitting active shell");
@@ -510,11 +511,11 @@ export class ManimShell {
   }
 
   /**
-     * Ask the user if they want to kill the active scene. Might modify the
-     * setting that controls if the user should be asked in the future.
-     *
-     * @returns true if the user wants to kill the active scene, false otherwise.
-     */
+   * Ask the user if they want to kill the active scene. Might modify the
+   * setting that controls if the user should be asked in the future.
+   *
+   * @returns true if the user wants to kill the active scene, false otherwise.
+   */
   private async doesUserWantToKillActiveScene(): Promise<boolean> {
     const CANCEL_OPTION = "Cancel";
     const KILL_IT_ALWAYS_OPTION = "Kill it (don't ask the next time)";
@@ -539,12 +540,12 @@ export class ManimShell {
   }
 
   /**
-     * Returns whether an active shell exists, i.e. a terminal that has an
-     * active ManimGL IPython session running.
-     *
-     * A shell that was previously used to run Manim, but has exited from the
-     * Manim session (IPython environment), is considered inactive.
-     */
+   * Returns whether an active shell exists, i.e. a terminal that has an
+   * active ManimGL IPython session running.
+   *
+   * A shell that was previously used to run Manim, but has exited from the
+   * Manim session (IPython environment), is considered inactive.
+   */
   public hasActiveShell(): boolean {
     const hasActiveShell
             = this.activeShell !== null && this.activeShell.exitStatus === undefined;
@@ -553,22 +554,22 @@ export class ManimShell {
   }
 
   /**
-     * Executes the command in the shell using shell integration if available,
-     * otherwise using `sendText`.
-     *
-     * This method is NOT asynchronous by design, as Manim commands run in the
-     * IPython terminal that the VSCode API does not natively support. I.e.
-     * the event does not actually end when the command has finished running,
-     * since we are still in the IPython environment.
-     *
-     * Note that this does not hold true for the initial setup of the terminal
-     * and the first `checkpoint_paste()` call, which is why we disable the
-     * detection of the "shell execution end" while the commands are issued.
-     *
-     * @param shell The shell to execute the command in.
-     * @param command The command to execute in the shell.
-     * @param useShellIntegration Whether to use shell integration if available
-     */
+   * Executes the command in the shell using shell integration if available,
+   * otherwise using `sendText`.
+   *
+   * This method is NOT asynchronous by design, as Manim commands run in the
+   * IPython terminal that the VSCode API does not natively support. I.e.
+   * the event does not actually end when the command has finished running,
+   * since we are still in the IPython environment.
+   *
+   * Note that this does not hold true for the initial setup of the terminal
+   * and the first `checkpoint_paste()` call, which is why we disable the
+   * detection of the "shell execution end" while the commands are issued.
+   *
+   * @param shell The shell to execute the command in.
+   * @param command The command to execute in the shell.
+   * @param useShellIntegration Whether to use shell integration if available
+   */
   private exec(shell: Terminal, command: string, useShellIntegration = true) {
     this.detectShellExecutionEnd = false;
     Logger.debug("🔒 Shell execution end detection disabled");
@@ -586,14 +587,14 @@ export class ManimShell {
   }
 
   /**
-     * Retrieves the active shell or spawns a new one if no active shell can
-     * be found. If a new shell is spawned, the Manim session is started at the
-     * given line.
-     *
-     * @param startLine The line number in the active editor where the Manim
-     * session should start in case a new terminal is spawned.
-     * Also see: `startScene()`.
-     */
+   * Retrieves the active shell or spawns a new one if no active shell can
+   * be found. If a new shell is spawned, the Manim session is started at the
+   * given line.
+   *
+   * @param startLine The line number in the active editor where the Manim
+   * session should start in case a new terminal is spawned.
+   * Also see: `startScene()`.
+   */
   private async retrieveOrInitActiveShell(startLine: number): Promise<Terminal> {
     if (!this.hasActiveShell()) {
       Logger.debug("🔍 No active shell found, requesting startScene");
@@ -607,10 +608,10 @@ export class ManimShell {
   }
 
   /**
-     * Opens a new terminal and sets it as the active shell. Afterwards, waits
-     * for a user-defined delay before allowing the terminal to be used, which
-     * might be useful for some activation scripts to load like virtualenvs etc.
-     */
+   * Opens a new terminal and sets it as the active shell. Afterwards, waits
+   * for a user-defined delay before allowing the terminal to be used, which
+   * might be useful for some activation scripts to load like virtualenvs etc.
+   */
   private async openNewTerminal() {
     // We don't want to detect shell execution ends here, since commands like
     // `source venv/bin/activate` might on their own trigger a terminal
@@ -624,20 +625,20 @@ export class ManimShell {
   }
 
   /**
-     * Waits until the current command has finished executing by waiting for
-     * the start of the next IPython cell. This is used to ensure that the
-     * command has actually finished executing, e.g. when the whole animation
-     * has been previewed.
-     *
-     * Can be interrupted by a keyboard interrupt.
-     *
-     * @param currentExecutionCount The current IPython cell count when the
-     * command was issued. This is used to detect when the next cell has started.
-     * @param callback An optional callback that is invoked when the command
-     * has finished executing. This is useful when the caller does not want to
-     * await the async function, but still wants to execute some code after the
-     * command has finished.
-     */
+   * Waits until the current command has finished executing by waiting for
+   * the start of the next IPython cell. This is used to ensure that the
+   * command has actually finished executing, e.g. when the whole animation
+   * has been previewed.
+   *
+   * Can be interrupted by a keyboard interrupt.
+   *
+   * @param currentExecutionCount The current IPython cell count when the
+   * command was issued. This is used to detect when the next cell has started.
+   * @param callback An optional callback that is invoked when the command
+   * has finished executing. This is useful when the caller does not want to
+   * await the async function, but still wants to execute some code after the
+   * command has finished.
+   */
   private async waitUntilCommandFinished(
     currentExecutionCount: number, callback?: () => void) {
     await new Promise<void>((resolve) => {
@@ -662,14 +663,16 @@ export class ManimShell {
   }
 
   /**
-     * Waits until an info message is shown in the terminal.
-     *
-     * Can be interrupted by a keyboard interrupt.
-     */
+   * Waits until an info message is shown in the terminal.
+   *
+   * Can be interrupted by a keyboard interrupt.
+   */
   private async waitUntilInfoMessageShown() {
     await Promise.race([
-      new Promise<void>(resolve => this.eventEmitter.once(ManimShellEvent.KEYBOARD_INTERRUPT, resolve)),
-      new Promise<void>(resolve => this.eventEmitter.once(ManimShellEvent.LOG_INFO_MESSAGE, resolve)),
+      new Promise<void>(resolve =>
+        this.eventEmitter.once(ManimShellEvent.KEYBOARD_INTERRUPT, resolve)),
+      new Promise<void>(resolve =>
+        this.eventEmitter.once(ManimShellEvent.LOG_INFO_MESSAGE, resolve)),
     ]);
   }
 
@@ -680,17 +683,17 @@ export class ManimShell {
   }
 
   /**
-     * Inits the reading of data from the terminal and issues actions/events
-     * based on the data received:
-     *
-     * - If the Manim welcome string is detected, the terminal is marked as
-     *   active.
-     * - If an IPython cell has finished executing, an event is emitted such
-     *   that commands know when they are actually completely finished, e.g.
-     *   when the whole animation has been previewed.
-     * - If an error is detected, the terminal is opened to show the error.
-     * - If the whole Manim session has ended, the active shell is reset.
-     */
+   * Inits the reading of data from the terminal and issues actions/events
+   * based on the data received:
+   *
+   * - If the Manim welcome string is detected, the terminal is marked as
+   *   active.
+   * - If an IPython cell has finished executing, an event is emitted such
+   *   that commands know when they are actually completely finished, e.g.
+   *   when the whole animation has been previewed.
+   * - If an error is detected, the terminal is opened to show the error.
+   * - If the whole Manim session has ended, the active shell is reset.
+   */
   private initiateTerminalDataReading() {
     window.onDidStartTerminalShellExecution(
       async (event: vscode.TerminalShellExecutionStartEvent) => {
@@ -798,17 +801,17 @@ export class ManimShell {
       });
 
     /**
-         * This event is fired when a terminal is closed manually by the user.
-         * In this case, we can only do our best to clean up since the terminal
-         * is probably not able to receive commands anymore. It's mostly for us
-         * to reset all states such that we're ready for the next command.
-         *
-         * When closing while previewing a scene, the terminal is closed, however
-         * we are not able to send a keyboard interrupt anymore. Therefore,
-         * ManimGL will take a few seconds to actually close its window. When
-         * the user employs our "Quit preview" command instead, the preview will
-         * be closed immediately.
-         */
+     * This event is fired when a terminal is closed manually by the user.
+     * In this case, we can only do our best to clean up since the terminal
+     * is probably not able to receive commands anymore. It's mostly for us
+     * to reset all states such that we're ready for the next command.
+     *
+     * When closing while previewing a scene, the terminal is closed, however
+     * we are not able to send a keyboard interrupt anymore. Therefore,
+     * ManimGL will take a few seconds to actually close its window. When
+     * the user employs our "Quit preview" command instead, the preview will
+     * be closed immediately.
+     */
     window.onDidCloseTerminal(async (terminal: Terminal) => {
       if (terminal !== this.activeShell) {
         return;

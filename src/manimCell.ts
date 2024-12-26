@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { window } from "vscode";
+import { window, TextDocument, CancellationToken,
+  CodeLens, FoldingContext, FoldingRange } from "vscode";
 import { ManimCellRanges } from "./pythonParsing";
 
 export class ManimCell implements vscode.CodeLensProvider, vscode.FoldingRangeProvider {
@@ -34,7 +35,7 @@ export class ManimCell implements vscode.CodeLensProvider, vscode.FoldingRangePr
     });
   }
 
-  public provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.CodeLens[] {
+  public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] {
     if (!window.activeTextEditor) {
       return [];
     }
@@ -71,7 +72,10 @@ export class ManimCell implements vscode.CodeLensProvider, vscode.FoldingRangePr
     return codeLenses;
   }
 
-  public provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext, token: vscode.CancellationToken): vscode.FoldingRange[] {
+  public provideFoldingRanges(
+    document: TextDocument,
+    _context: FoldingContext,
+    _token: CancellationToken): FoldingRange[] {
     const ranges = ManimCellRanges.calculateRanges(document);
     return ranges.map(range => new vscode.FoldingRange(range.start.line, range.end.line));
   }

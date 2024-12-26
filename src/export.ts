@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
-import { QuickPickItem, window } from "vscode";
+import { window, TextDocument, CancellationToken, CodeLens } from "vscode";
 import {
-  MultiStepInput, toQuickPickItem, toQuickPickItems,
-  shouldResumeNoOp,
+  MultiStepInput, toQuickPickItems, shouldResumeNoOp,
 } from "./utils/multiStepQuickPickUtil";
 import { findClassLines, findManimSceneName } from "./pythonParsing";
 import { Logger, Window } from "./logger";
@@ -14,11 +13,12 @@ class VideoQuality {
   static readonly HIGH = new VideoQuality("High Quality (1080p)", "--hd");
   static readonly VERY_HIGH = new VideoQuality("Very High Quality (4K)", "--uhd");
 
+  // eslint-disable-next-line no-unused-vars
   private constructor(public readonly name: string, public readonly cliFlag: string) { }
 
   /**
-     * Returns the names of all VideoQuality objects.
-     */
+   * Returns the names of all VideoQuality objects.
+   */
   static names(): string[] {
     return Object.values(VideoQuality).map(quality => quality.name);
   }
@@ -69,8 +69,8 @@ export async function exportScene(sceneName?: string) {
   const QUICK_PICK_TITLE = "Export scene as video";
 
   /**
-     * Lets the user pick the quality of the video to export.
-     */
+   * Lets the user pick the quality of the video to export.
+   */
   async function pickQuality(input: MultiStepInput, state: Partial<VideoSettings>) {
     const qualityPick = await input.showQuickPick({
       title: QUICK_PICK_TITLE,
@@ -86,8 +86,8 @@ export async function exportScene(sceneName?: string) {
   }
 
   /**
-     * Lets the user pick the frames per second (fps) of the video to export.
-     */
+   * Lets the user pick the frames per second (fps) of the video to export.
+   */
   async function pickFps(input: MultiStepInput, state: Partial<VideoSettings>) {
     const fps = await input.showInputBox({
       title: QUICK_PICK_TITLE,
@@ -114,12 +114,12 @@ export async function exportScene(sceneName?: string) {
   }
 
   /**
-     * Lets the user pick the filename of the video to export. The default value
-     * is the name of the scene followed by ".mp4".
-     *
-     * It is ok to not append `.mp4` here as Manim will also do it if it is not
-     * present in the filename.
-     */
+   * Lets the user pick the filename of the video to export. The default value
+   * is the name of the scene followed by ".mp4".
+   *
+   * It is ok to not append `.mp4` here as Manim will also do it if it is not
+   * present in the filename.
+   */
   async function pickFileName(input: MultiStepInput, state: Partial<VideoSettings>) {
     const fileName = await input.showInputBox({
       title: QUICK_PICK_TITLE,
@@ -152,8 +152,8 @@ export async function exportScene(sceneName?: string) {
   }
 
   /**
-     * Lets the user pick the folder location where the video should be saved.
-     */
+   * Lets the user pick the folder location where the video should be saved.
+   */
   async function pickFileLocation(input: MultiStepInput, state: Partial<VideoSettings>) {
     const folderUri = await window.showOpenDialog({
       canSelectFiles: false,
@@ -168,9 +168,9 @@ export async function exportScene(sceneName?: string) {
   }
 
   /**
-     * Initiates the multi-step wizard and returns the collected inputs
-     * from the user.
-     */
+   * Initiates the multi-step wizard and returns the collected inputs
+   * from the user.
+   */
   async function collectInputs(): Promise<VideoSettings> {
     const state = {} as Partial<VideoSettings>;
     state.sceneName = sceneName;
@@ -225,7 +225,7 @@ function toManimExportCommand(settings: VideoSettings, editor: vscode.TextEditor
  * class definition line in the active document.
  */
 export class ExportSceneCodeLens implements vscode.CodeLensProvider {
-  public provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.CodeLens[] {
+  public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] {
     const codeLenses: vscode.CodeLens[] = [];
 
     for (const classLine of findClassLines(document)) {
@@ -242,7 +242,7 @@ export class ExportSceneCodeLens implements vscode.CodeLensProvider {
     return codeLenses;
   }
 
-  public resolveCodeLens(codeLens: vscode.CodeLens, token: vscode.CancellationToken): vscode.CodeLens {
+  public resolveCodeLens(codeLens: CodeLens, _token: CancellationToken): CodeLens {
     return codeLens;
   }
 }
