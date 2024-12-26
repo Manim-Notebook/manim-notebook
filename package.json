@@ -256,7 +256,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src",
+    "lint": "eslint src --config ./.config/eslint.mjs",
     "test": "vscode-test"
   },
   "devDependencies": {
