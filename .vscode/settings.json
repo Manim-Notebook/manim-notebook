@@ -1,5 +1,29 @@
 {
     //////////////////////////////////////
+    // Linting (TS with ESLint)
+    //////////////////////////////////////
+    "editor.formatOnSave": false, // it still autosaves with the options below
+    // https://eslint.style/guide/faq#how-to-auto-format-on-save
+    // https://github.com/microsoft/vscode-eslint#settings-options
+    "[typescript]": {
+        "editor.formatOnSave": false, // to avoid formatting twice (ESLint + VSCode)
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[javascript]": {
+        "editor.formatOnSave": false, // to avoid formatting twice (ESLint + VSCode)
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    // this disables VSCode built-in formatter (instead we want to use ESLint)
+    "typescript.validate.enable": false,
+    "javascript.validate.enable": false,
+    "eslint.format.enable": true, // use ESLint as formatter
+    "eslint.options": {
+        "overrideConfigFile": ".config/eslint.mjs"
+    },
+    //////////////////////////////////////
     // TypeScript
     //////////////////////////////////////
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
