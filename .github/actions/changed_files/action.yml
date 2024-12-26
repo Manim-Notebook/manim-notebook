@@ -1,0 +1,42 @@
+# Why is this file in a subdirectory? Because GitHub Actions requires it to be :(
+# see: https://github.com/orgs/community/discussions/26245#discussioncomment-5962450
+name: "Get changed files"
+description: "Checks out the code and returns the filenames of files that have changed in the pull request"
+
+inputs:
+  file-extensions:
+    # for example: "\.rb$" or something like "\.js$|\.js.erb$"
+    description: "Regex expressions for grep to filter for specific files"
+    required: true
+
+outputs:
+  changed-files:
+    description: "A space-separated list of the files that have changed in the pull request"
+    value: ${{ steps.get-changed-files.outputs.files }}
+
+runs:
+  using: "composite"
+  steps:
+    # This has to be done in the main workflow, not in the action, because
+    # otherwise this reusable action is not available in the workflow.
+    # - name: "Checkout code (on a PR branch)"
+    #   uses: actions/checkout@v4
+    #   with:
+    #     fetch-depth: 2 # to also fetch parent of PR
+
+    # Adapted from this great comment [1]. Git diff adapted from [2].
+    # "|| test $? = 1;" is used to ignore the exit code of grep when no files
+    # are found matching the pattern. For the "three dots" ... syntax, see [3].
+    #
+    # Resources:
+    # number [1] being most important
+    # [1] https://github.com/actions/checkout/issues/520#issuecomment-1167205721
+    # [2] https://robertfaldo.medium.com/commands-to-run-rubocop-and-specs-you-changed-in-your-branch-e6d2f2e4110b
+    # [3] https://community.atlassian.com/t5/Bitbucket-questions/Git-diff-show-different-files-than-PR-Pull-Request/qaq-p/2331786
+    - name: Get changed files
+      shell: bash
+      id: get-changed-files
+      run: |
+        files_pretty=$(git diff --name-only --diff-filter=ACMR -r HEAD^1...HEAD | egrep '${{inputs.file-extensions}}' || test $? = 1;)
+        printf "🎴 Changed files: \n$files_pretty"
+        echo "files=$(echo ${files_pretty} | xargs)" >> $GITHUB_OUTPUT
