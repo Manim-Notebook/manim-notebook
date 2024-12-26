@@ -43,5 +43,5 @@ jobs:
         - name: Run ESLint
           if: ${{ steps.js-changed.outputs.changed-files != ''}}
           run: |
-            echo "🚨 Running ESLint version: $(npm run --silent eslint --version)"
-            npm run eslint --config ./.config/eslint.mjs --max-warnings 0 --no-warn-ignored ${{ steps.js-changed.outputs.changed-files }}
+            echo "🚨 Running ESLint version: $(npx --quiet eslint --version)"
+            npx eslint --config ./.config/eslint.mjs --max-warnings 0 --no-warn-ignored ${{ steps.js-changed.outputs.changed-files }}
