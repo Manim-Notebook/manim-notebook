@@ -22,7 +22,8 @@ export default [
         "semi": true,
       }).rules,
       "@stylistic/brace-style": ["error", "1tbs"],
-      "@stylistic/max-len": ["error", { code: 100, comments: 80, ignoreUrls: true }],
+      "@stylistic/max-len": ["error", {
+        code: 100, comments: 80, ignoreUrls: true, ignoreRegExpLiterals: true }],
       "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },
