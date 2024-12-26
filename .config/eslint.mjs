@@ -22,11 +22,12 @@ export default [
         "semi": true,
         "brace-style": "1tbs",
       }).rules,
+      "@stylistic/max-len": ["error", { code: 100, comments: 80, ignoreUrls: true }],
       "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },
     languageOptions: {
-      ecmaVersion: 2022,
+      ecmaVersion: "latest",
       parser: parserTs,
       sourceType: "module",
       globals: {
