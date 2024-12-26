@@ -54,11 +54,11 @@ export class Logger {
   }
 
   /**
-     * Clears the output panel and the log file. This is necessary since clearing
-     * is not performed automatically on MacOS. See issue #58.
-     *
-     * @param logFilePath The URI of the log file.
-     */
+   * Clears the output panel and the log file. This is necessary since clearing
+   * is not performed automatically on MacOS. See issue #58.
+   *
+   * @param logFilePath The URI of the log file.
+   */
   public static async clear(logFilePath: vscode.Uri) {
     // This logging statement here is important to ensure that something
     // is written to the log file, such that the file is created on disk.
@@ -82,31 +82,32 @@ export class Logger {
   }
 
   /**
-     * Returns formatted caller information in the form of
-     * "[filename] [methodname]".
-     *
-     * It works by creating a stack trace and extracting the file name from the
-     * third line of the stack trace, e.g.
-     *
-     * Error:
-     *      at Logger.getCurrentFileName (manim-notebook/out/logger.js:32:19)
-     *      at Logger.info (manim-notebook/out/logger.js:46:39)
-     *      at activate (manim-notebook/out/extension.js:37:21)
-     * ...
-     *
-     * where "extension.js:37:21" is the file that called the logger method
-     * and "activate" is the respective method.
-     *
-     * Another example where the Logger is called in a Promise might be:
-     *
-     * Error:
-     *     at Function.getFormattedCallerInformation (manim-notebook/src/logger.ts:46:23)
-     *     at Function.info (manim-notebook/src/logger.ts:18:31)
-     *     at manim-notebook/src/extension.ts:199:12
-     *
-     * where "extension.ts:199:12" is the file that called the logger method
-     * and the method is unknown.
-     */
+   * Returns formatted caller information in the form of
+   * "[filename] [methodname]".
+   *
+   * It works by creating a stack trace and extracting the file name from the
+   * third line of the stack trace, e.g.
+   *
+   * Error:
+   *      at Logger.getCurrentFileName (manim-notebook/out/logger.js:32:19)
+   *      at Logger.info (manim-notebook/out/logger.js:46:39)
+   *      at activate (manim-notebook/out/extension.js:37:21)
+   * ...
+   *
+   * where "extension.js:37:21" is the file that called the logger method
+   * and "activate" is the respective method.
+   *
+   * Another example where the Logger is called in a Promise might be:
+   *
+   * Error:
+   *   at Function.getFormattedCallerInformation
+   *      (manim-notebook/src/logger.ts:46:23)
+   *   at Function.info (manim-notebook/src/logger.ts:18:31)
+   *   at manim-notebook/src/extension.ts:199:12
+   *
+   * where "extension.ts:199:12" is the file that called the logger method
+   * and the method is unknown.
+   */
   private static getFormattedCallerInformation(): string {
     const error = new Error();
     const stack = error.stack;
@@ -173,11 +174,11 @@ export class LogRecorder {
   private static recorderStatusBar: vscode.StatusBarItem;
 
   /**
-     * Starts recording a log file. Initializes a new status bar item that
-     * allows the user to stop the recording.
-     *
-     * @param context The extension context.
-     */
+   * Starts recording a log file. Initializes a new status bar item that
+   * allows the user to stop the recording.
+   *
+   * @param context The extension context.
+   */
   public static async recordLogFile(context: vscode.ExtensionContext) {
     if (Logger.isRecording) {
       window.showInformationMessage("A log file is already being recorded.");
@@ -191,7 +192,7 @@ export class LogRecorder {
       location: vscode.ProgressLocation.Notification,
       title: "Setting up Manim Notebook Log recording...",
       cancellable: false,
-    }, async (progressIndicator, token) => {
+    }, async (_progressIndicator, _token) => {
       try {
         await Logger.clear(this.getLogFilePath(context));
         isClearSuccessful = true;
@@ -225,11 +226,11 @@ export class LogRecorder {
   }
 
   /**
-     * Finishes the active recording of a log file. Called when the user
-     * clicks on the status bar item initialized in `recordLogFile()`.
-     *
-     * @param context The extension context.
-     */
+   * Finishes the active recording of a log file. Called when the user
+   * clicks on the status bar item initialized in `recordLogFile()`.
+   *
+   * @param context The extension context.
+   */
   public static async finishRecordingLogFile(context: vscode.ExtensionContext) {
     Logger.isRecording = false;
     this.recorderStatusBar.dispose();
@@ -238,25 +239,26 @@ export class LogRecorder {
   }
 
   /**
-     * Returns the URI of the log file that VSCode initializes for us.
-     *
-     * @param context The extension context.
-     */
+   * Returns the URI of the log file that VSCode initializes for us.
+   *
+   * @param context The extension context.
+   */
   private static getLogFilePath(context: vscode.ExtensionContext): vscode.Uri {
     return vscode.Uri.joinPath(context.logUri, `${LOGGER_NAME}.log`);
   }
 
   /**
-     * Tries to open the log file in an editor and reveal it in the OS file explorer.
-     *
-     * @param logFilePath The URI of the log file.
-     */
+   * Tries to open the log file in an editor and reveal it in the
+   * OS file explorer.
+   *
+   * @param logFilePath The URI of the log file.
+   */
   private static async openLogFile(logFilePath: vscode.Uri) {
     await window.withProgress({
       location: vscode.ProgressLocation.Notification,
       title: "Opening Manim Notebook log file...",
       cancellable: false,
-    }, async (progressIndicator, token) => {
+    }, async (_progressIndicator, _token) => {
       await new Promise<void>(async (resolve) => {
         try {
           const doc = await vscode.workspace.openTextDocument(logFilePath);

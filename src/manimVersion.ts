@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
 import { window } from "vscode";
-import { waitNewTerminalDelay, withoutAnsiCodes, onTerminalOutput } from "./utils/terminal";
-import { EventEmitter } from "events";
+import { waitNewTerminalDelay, onTerminalOutput } from "./utils/terminal";
 import { Window, Logger } from "./logger";
 import { ManimShell } from "./manimShell";
 import { manimNotebookContext } from "./extension";
 
 /**
- * Manim version that the user has installed without the 'v' prefix, e.g. '1.2.3'.
+ * Manim version that the user has installed without the 'v' prefix,
+ * e.g. '1.2.3'.
  */
 let MANIM_VERSION: string | undefined;
 let isCanceledByUser = false;
@@ -99,8 +99,8 @@ export async function hasUserMinimalManimVersion(requiredVersion: string): Promi
 }
 
 /**
- * Returns the tag name of the latest Manim release if the GitHub API is reachable.
- * This tag name won't include the 'v' prefix, e.g. '1.2.3'.
+ * Returns the tag name of the latest Manim release if the GitHub API is
+ * reachable. This tag name won't include the 'v' prefix, e.g. '1.2.3'.
  */
 async function fetchLatestManimVersion(): Promise<string | undefined> {
   const url = "https://api.github.com/repos/3b1b/manim/releases/latest";
@@ -153,7 +153,7 @@ export async function tryToDetermineManimVersion(isAtStartup = false) {
     cancellable: true,
   }, async (progress, token) => {
     try {
-      couldDetermineManimVersion = await new Promise<boolean>(async (resolve, reject) => {
+      couldDetermineManimVersion = await new Promise<boolean>(async (resolve, _reject) => {
         progress.report({ increment: 0 });
 
         ManimShell.instance.lockManimWelcomeStringDetection = true;
@@ -222,7 +222,8 @@ async function showNegativeUserVersionFeedback(isAtStartup: boolean) {
  * Constructs a promise that times out after the given time and reports progress
  * automatically in the meantime every 500ms.
  *
- * @param timeout The time in milliseconds after which the promise should time out.
+ * @param timeout The time in milliseconds after which the promise
+ *                should time out.
  * @param progress The progress indicator to report to.
  * @param token The cancellation token to listen to.
  * @returns A promise that times out after the given time.
@@ -260,7 +261,7 @@ function constructTimeoutPromise(
  * `MANIM_VERSION` variable. False otherwise.
  */
 async function lookForManimVersionString(terminal: vscode.Terminal): Promise<boolean> {
-  return new Promise<boolean>(async (resolve, reject) => {
+  return new Promise<boolean>(async (resolve, _reject) => {
     onTerminalOutput(terminal, (data: string) => {
       const versionMatch = data.match(/^\s*ManimGL v([0-9]+\.[0-9]+\.[0-9]+)/);
       if (!versionMatch) {
