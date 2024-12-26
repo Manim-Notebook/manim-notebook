@@ -18,21 +18,20 @@ jobs:
             fetch-depth: 2 # to also fetch parent of PR (used to get changed files)
 
         - name: Get changed files
-          id: js-changed
+          id: ts-changed
           uses: ./.github/actions/changed_files/
           with:
-            # .(mjs is only used for eslint.config.mjs as of January 2024)
-            file-extensions: \.js$|\.mjs$|\.js.erb$
+            file-extensions: \.js$|\.mjs$|\.ts$
 
         - name: Setup Node.js
-          if: ${{ steps.js-changed.outputs.changed-files != ''}}
+          if: ${{ steps.ts-changed.outputs.changed-files != ''}}
           uses: actions/setup-node@v4
           with:
             node-version: '20' # End of Life (EOL): April 2026
             cache: 'npm'
 
         - name: Install dependencies
-          if: ${{ steps.js-changed.outputs.changed-files != ''}}
+          if: ${{ steps.ts-changed.outputs.changed-files != ''}}
           run: npm install
 
         # with ESLint v9 --ignore-path does not exist anymore
@@ -41,7 +40,7 @@ jobs:
         # [1] https://github.com/eslint/eslint/pull/16355
         # [2] https://github.com/eslint/eslint/issues/16264#issuecomment-1292858747
         - name: Run ESLint
-          if: ${{ steps.js-changed.outputs.changed-files != ''}}
+          if: ${{ steps.ts-changed.outputs.changed-files != ''}}
           run: |
             echo "🚨 Running ESLint version: $(npx --quiet eslint --version)"
-            npx eslint --config ./.config/eslint.mjs --max-warnings 0 --no-warn-ignored ${{ steps.js-changed.outputs.changed-files }}
+            npx eslint --config ./.config/eslint.mjs --max-warnings 0 --no-warn-ignored ${{ steps.ts-changed.outputs.changed-files }}
