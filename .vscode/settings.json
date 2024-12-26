@@ -1,87 +1,89 @@
 {
-    //////////////////////////////////////
-    // Linting (TS with ESLint)
-    //////////////////////////////////////
-    "editor.formatOnSave": false, // it still autosaves with the options below
-    // https://eslint.style/guide/faq#how-to-auto-format-on-save
-    // https://github.com/microsoft/vscode-eslint#settings-options
-    "[typescript]": {
-        "editor.formatOnSave": false, // to avoid formatting twice (ESLint + VSCode)
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  //////////////////////////////////////
+  // Linting (TS with ESLint)
+  //////////////////////////////////////
+  "editor.formatOnSave": false, // it still autosaves with the options below
+  // https://eslint.style/guide/faq#how-to-auto-format-on-save
+  // https://github.com/microsoft/vscode-eslint#settings-options
+  "[typescript]": {
+    "editor.formatOnSave": false, // to avoid formatting twice (ESLint + VSCode)
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[javascript]": {
+    "editor.formatOnSave": false, // to avoid formatting twice (ESLint + VSCode)
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  // this disables VSCode built-in formatter (instead we want to use ESLint)
+  "typescript.validate.enable": false,
+  "javascript.validate.enable": false,
+  "eslint.format.enable": true, // use ESLint as formatter
+  "eslint.options": {
+    "overrideConfigFile": ".config/eslint.mjs"
+  },
+  //////////////////////////////////////
+  // TypeScript
+  //////////////////////////////////////
+  // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+  "typescript.tsc.autoDetect": "off",
+  //////////////////////////////////////
+  // Files & Folders
+  //////////////////////////////////////
+  "files.exclude": {
+    "out": false // set this to true to hide the "out" folder with the compiled JS files
+  },
+  "search.exclude": {
+    "out": true // set this to false to include "out" folder in search results
+  },
+  //////////////////////////////////////
+  // Editor
+  //////////////////////////////////////
+  "editor.indentSize": 2,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.renderFinalNewline": "on",
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.wordWrapColumn": 100, // toggle via Alt + Z shortcut
+  "editor.mouseWheelZoom": true,
+  "editor.rulers": [
+    {
+      "column": 80, // soft limit
+      "color": "#e5e5e5"
     },
-    "[javascript]": {
-        "editor.formatOnSave": false, // to avoid formatting twice (ESLint + VSCode)
-        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    },
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit"
-    },
-    // this disables VSCode built-in formatter (instead we want to use ESLint)
-    "typescript.validate.enable": false,
-    "javascript.validate.enable": false,
-    "eslint.format.enable": true, // use ESLint as formatter
-    "eslint.options": {
-        "overrideConfigFile": ".config/eslint.mjs"
-    },
-    //////////////////////////////////////
-    // TypeScript
-    //////////////////////////////////////
-    // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-    "typescript.tsc.autoDetect": "off",
-    //////////////////////////////////////
-    // Files & Folders
-    //////////////////////////////////////
-    "files.exclude": {
-        "out": false // set this to true to hide the "out" folder with the compiled JS files
-    },
-    "search.exclude": {
-        "out": true // set this to false to include "out" folder in search results
-    },
-    //////////////////////////////////////
-    // Editor
-    //////////////////////////////////////
-    "editor.tabSize": 4,
-    "editor.insertSpaces": true,
-    "editor.detectIndentation": false,
-    "editor.wordWrap": "wordWrapColumn",
-    "editor.wordWrapColumn": 100, // toggle via Alt + Z shortcut
-    "editor.mouseWheelZoom": true,
-    "editor.rulers": [
-        {
-            "column": 80, // soft limit
-            "color": "#e5e5e5"
-        },
-        {
-            "column": 100, // hard limit
-            "color": "#c9c9c9"
-        }
-    ],
-    //////////////////////////////////////
-    // Git
-    //////////////////////////////////////
-    "git.inputValidation": true,
-    "git.inputValidationSubjectLength": 50,
-    "git.inputValidationLength": 72,
-    //////////////////////////////////////
-    // Spell Checker
-    //////////////////////////////////////
-    "cSpell.words": [
-        "ansi",
-        "Ansi",
-        "autoplay",
-        "autoreload",
-        "cmds",
-        "github",
-        "ipython",
-        "Keybord",
-        "Logfile",
-        "manim",
-        "Manim",
-        "MANIM",
-        "manimgl",
-        "Millis",
-        "Sanderson's",
-        "venv",
-        "youtube"
-    ]
+    {
+      "column": 100, // hard limit
+      "color": "#c9c9c9"
+    }
+  ],
+  //////////////////////////////////////
+  // Git
+  //////////////////////////////////////
+  "git.inputValidation": true,
+  "git.inputValidationSubjectLength": 50,
+  "git.inputValidationLength": 72,
+  //////////////////////////////////////
+  // Spell Checker
+  //////////////////////////////////////
+  "cSpell.words": [
+    "ansi",
+    "Ansi",
+    "autoplay",
+    "autoreload",
+    "cmds",
+    "github",
+    "ipython",
+    "Keybord",
+    "Logfile",
+    "manim",
+    "Manim",
+    "MANIM",
+    "manimgl",
+    "Millis",
+    "Sanderson's",
+    "venv",
+    "youtube"
+  ]
 }
