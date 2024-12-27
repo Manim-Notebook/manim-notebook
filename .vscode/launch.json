@@ -16,6 +16,20 @@
         "${workspaceFolder}/out/**/*.js"
       ],
       "preLaunchTask": "Watch src files"
+    },
+    {
+      "name": "Test Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionTestsPath=${workspaceFolder}/out/test/tests/utils/testRunner.js"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/out/test/**/*.js"
+      ],
+      "preLaunchTask": "Watch test files"
     }
   ]
 }
