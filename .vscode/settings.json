@@ -40,6 +40,13 @@
     "out": true // set this to false to include "out" folder in search results
   },
   //////////////////////////////////////
+  // Testing
+  //////////////////////////////////////
+  // https://github.com/microsoft/vscode-extension-test-runner/issues/57
+  // "extension-test-runner.debugOptions": {
+  //   "preLaunchTask": "Watch src & test"
+  // },
+  //////////////////////////////////////
   // Editor
   //////////////////////////////////////
   "editor.indentSize": 2,

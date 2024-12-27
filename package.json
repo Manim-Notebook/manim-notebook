@@ -255,7 +255,8 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc --project .config/tsconfig.src.json",
     "compile-test": "tsc --project .config/tsconfig.test.json",
-    "watch": "tsc --project .config/tsconfig.json -watch",
+    "watch": "tsc --project .config/tsconfig.src.json -watch",
+    "watch-test": "tsc --project .config/tsconfig.test.json -watch",
     "pretest": "npm run compile && npm run compile-test",
     "lint": "eslint src --config ./.config/eslint.mjs",
     "test": "vscode-test"
