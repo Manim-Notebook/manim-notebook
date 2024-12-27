@@ -4,6 +4,8 @@
     "outDir": "../out/test/",
   },
   "include": [
-    "../tests/**/*.test.ts"
+    "../tests/utils/**/*.ts",
+    "../tests/main.ts",
+    "../tests/**/*.test.ts",
   ],
 }
