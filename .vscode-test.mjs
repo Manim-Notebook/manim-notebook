@@ -4,5 +4,6 @@ export default defineConfig({
   files: "out/test/**/*.test.js",
   version: "stable",
   workspaceFolder: "tests/fixtures",
-  extensionDevelopmentPath: "../",
+  // https://github.com/microsoft/vscode-extension-test-runner/issues/56
+  // extensionDevelopmentPath: "../"
 });
