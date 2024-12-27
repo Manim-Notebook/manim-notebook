@@ -253,8 +253,8 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "compile": "tsc --project .config/tsconfig.json",
+    "watch": "tsc --project .config/tsconfig.json -watch",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --config ./.config/eslint.mjs",
     "test": "vscode-test"

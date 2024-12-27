@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "target": "ES2024",
+    "outDir": "../out/",
+    "lib": [
+      "ES2024"
+    ],
+    "sourceMap": true,
+    "rootDir": "../src/",
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "removeComments": true,
+  },
+  "include": [
+    "../src/**/*.ts"
+  ],
+}
