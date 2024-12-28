@@ -1,0 +1,36 @@
+name: Testing
+
+on:
+  push:
+    branches:
+      - main
+  # Trigger each time HEAD branch is updated in a pull request
+  # see https://github.com/orgs/community/discussions/26366
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+jobs:
+
+  test:
+      name: Integration tests
+
+      strategy:
+        matrix:
+          os: [macos-latest, ubuntu-latest, windows-latest]
+      runs-on: ${{ matrix.os }}
+
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x # LTS until Oct 2025
+      - run: npm install
+
+      # The xvfb-run command starts an X virtual framebuffer (Xvfb) server,
+      # which emulates a display server without requiring a physical display.
+      - run: xvfb-run -a npm test
+        if: runner.os == 'Linux'
+      - run: npm test
+        if: runner.os != 'Linux'
