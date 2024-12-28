@@ -1,16 +1,18 @@
+import { describe, it } from "mocha";
 import { window } from "vscode";
 import { before } from "mocha";
 import * as assert from "assert";
+// eslint-disable-next-line no-unused-vars
 import * as note from "../src/extension";
 
-suite("Sample test", function () {
+describe("Sample test", function () {
   this.timeout(10000);
 
   before(() => {
     window.showInformationMessage("Start all tests.");
   });
 
-  test("Sample test", async () => {
+  it("Sample test", async () => {
     const terminal = await window.createTerminal("yo");
     terminal.show();
     terminal.sendText("ls -la");
@@ -20,5 +22,10 @@ suite("Sample test", function () {
 
     assert.strictEqual(-1, [1, 2, 3].indexOf(5));
     assert.strictEqual(-1, [1, 2, 3].indexOf(1));
+  });
+
+  it("Second test", async () => {
+    assert.strictEqual(-1, [1, 2, 3].indexOf(5));
+    assert.strictEqual(1, [1, 2, 3].indexOf(2));
   });
 });
