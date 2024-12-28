@@ -21,7 +21,7 @@ describe("Sample test", function () {
     console.log("Done");
 
     assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-    assert.strictEqual(-1, [1, 2, 3].indexOf(1));
+    assert.strictEqual(-1, [1, 2, 3].indexOf(0));
   });
 
   it("Second test", async () => {
