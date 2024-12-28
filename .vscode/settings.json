@@ -44,7 +44,7 @@
   //////////////////////////////////////
   // https://github.com/microsoft/vscode-extension-test-runner/issues/57
   // "extension-test-runner.debugOptions": {
-  //   "preLaunchTask": "Watch src & test"
+  //   "preLaunchTask": "Watch test files"
   // },
   //////////////////////////////////////
   // Editor

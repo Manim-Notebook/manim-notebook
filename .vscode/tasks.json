@@ -18,6 +18,9 @@
       }
     },
     {
+      // Note that this also compiles the src files into out/test/src
+      // and test files into out/test/tests. This is to have a strict
+      // separation between usual compilation and testing.
       "label": "Watch test files",
       "type": "npm",
       "script": "watch-test",
@@ -29,13 +32,6 @@
       "group": {
         "kind": "build"
       }
-    },
-    {
-      "label": "Watch src & test",
-      "dependsOn": [
-        "Watch src files",
-        "Watch test files"
-      ]
     }
   ]
 }
