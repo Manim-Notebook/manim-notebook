@@ -14,15 +14,21 @@ import Mocha from "mocha";
 import { globSync } from "glob";
 import "source-map-support/register";
 
+import { ManimInstaller } from "./manimInstaller";
+const MANIM_INSTALLER = new ManimInstaller();
+
 export function run(): Promise<void> {
   const mocha = new Mocha({
     ui: "tdd",
   });
 
-  const testsRoot = path.resolve(__dirname, "..");
-
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
+      const testsRoot = path.resolve(__dirname, "..");
+
+      await MANIM_INSTALLER.setup(testsRoot);
+      await MANIM_INSTALLER.download();
+
       const files: string[] = globSync("**/**.test.js",
         { cwd: testsRoot, ignore: ["**/node_modules/**"] });
 
