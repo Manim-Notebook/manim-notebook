@@ -15,7 +15,9 @@ import { globSync } from "glob";
 import "source-map-support/register";
 
 import { ManimInstaller } from "./manimInstaller";
+import { ManimCaller } from "./manimCaller";
 const MANIM_INSTALLER = new ManimInstaller();
+export const manimCaller = new ManimCaller();
 
 export function run(): Promise<void> {
   const mocha = new Mocha({
@@ -29,6 +31,7 @@ export function run(): Promise<void> {
       await MANIM_INSTALLER.setup(testsRoot);
       await MANIM_INSTALLER.download();
       await MANIM_INSTALLER.install();
+      manimCaller.venvPath = MANIM_INSTALLER.venvPath;
 
       const files: string[] = globSync("**/**.test.js",
         { cwd: testsRoot, ignore: ["**/node_modules/**"] });

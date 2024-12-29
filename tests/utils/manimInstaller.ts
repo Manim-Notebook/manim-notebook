@@ -24,7 +24,7 @@ export class ManimInstaller {
   /**
    * Path to the virtual Python environment.
    */
-  private venvPath: string = "";
+  public venvPath: string = "";
 
   /**
    * Sets up the Manim installation path.
