@@ -32,11 +32,20 @@
   // Files & Folders
   //////////////////////////////////////
   "files.exclude": {
-    "out": false // set this to true to hide the "out" folder with the compiled JS files
+    "out": false,
+    "node_modules": true,
+    ".vscode-test": true
   },
   "search.exclude": {
     "out": true // set this to false to include "out" folder in search results
   },
+  //////////////////////////////////////
+  // Testing
+  //////////////////////////////////////
+  // https://github.com/microsoft/vscode-extension-test-runner/issues/57
+  // "extension-test-runner.debugOptions": {
+  //   "preLaunchTask": "Watch test files"
+  // },
   //////////////////////////////////////
   // Editor
   //////////////////////////////////////
@@ -82,6 +91,7 @@
     "MANIM",
     "manimgl",
     "Millis",
+    "nodenext",
     "prerun",
     "Sanderson",
     "Sanderson's",

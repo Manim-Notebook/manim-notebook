@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "target": "ES2024",
+    "lib": [
+      "ES2024"
+    ],
+    "sourceMap": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "removeComments": true,
+  },
+}
