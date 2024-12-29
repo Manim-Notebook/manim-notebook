@@ -20,6 +20,11 @@ export class ManimInstaller {
   private manimPath: string = "";
 
   /**
+   * Path to the virtual Python environment.
+   */
+  private venvPath: string = "";
+
+  /**
    * Sets up the Manim installation path.
    *
    * @param testDir The path where the tests are located.
@@ -28,9 +33,21 @@ export class ManimInstaller {
   public async setup(testDir: string) {
     console.log("🎈 SETTING UP MANIM INSTALLATION");
     assert.ok(testDir.endsWith("out/test/tests"));
+
     this.manimPath = path.join(testDir, "../../..", "tmp", "manim");
     await run(`mkdir -p ${this.manimPath}`);
-    console.log(`Manim installation path: ${this.manimPath}`);
+    console.log(`🍭 Manim installation path: ${this.manimPath}`);
+
+    await this.setupPythonVenv();
+  }
+
+  /**
+   * Sets up the Python virtual environment.
+   */
+  private async setupPythonVenv() {
+    const venvPath = path.join(this.manimPath, "..", "manimVenv");
+    console.log(`🍭 Python virtual environment path: ${venvPath}`);
+    await run(`python3 -m venv ${venvPath}`);
   }
 
   /**
@@ -50,12 +67,31 @@ export class ManimInstaller {
    */
   public async download() {
     if (await this.isAlreadyDownloaded()) {
-      console.log("Manim already downloaded.");
+      console.log("🎁 Manim already downloaded.");
       return;
     }
 
-    console.log("Downloading Manim... (this might take a while)");
+    console.log("🎁 Downloading Manim... (this might take a while)");
     await run(`git clone https://github.com/3b1b/manim.git ${this.manimPath}`,
       { cwd: this.manimPath });
+  }
+
+  public async installRequirements() {
+    console.log("Installing Manim...");
+    // const requirementsPath = path.join(this.manimPath, "requirements.txt");
+    // await run(`pip install -r ${requirementsPath}`, { cwd: this.manimPath });
+  }
+
+  /**
+   * Runs a command in the Python virtual environment by sourcing the
+   * `activate` script beforehand.
+   *
+   * @param cmd The command to run.
+   */
+  private runInVenv(cmd: string): Promise<string> {
+    if (!this.venvPath) {
+      throw new Error("Python virtual environment not set up yet.");
+    }
+    return run(`. ${path.join(this.venvPath, "bin", "activate")} && ${cmd}`);
   }
 }
