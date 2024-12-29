@@ -28,6 +28,7 @@ export function run(): Promise<void> {
 
       await MANIM_INSTALLER.setup(testsRoot);
       await MANIM_INSTALLER.download();
+      await MANIM_INSTALLER.install();
 
       const files: string[] = globSync("**/**.test.js",
         { cwd: testsRoot, ignore: ["**/node_modules/**"] });

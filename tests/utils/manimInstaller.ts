@@ -45,9 +45,9 @@ export class ManimInstaller {
    * Sets up the Python virtual environment.
    */
   private async setupPythonVenv() {
-    const venvPath = path.join(this.manimPath, "..", "manimVenv");
-    console.log(`🍭 Python virtual environment path: ${venvPath}`);
-    await run(`python3 -m venv ${venvPath}`);
+    this.venvPath = path.join(this.manimPath, "..", "manimVenv");
+    console.log(`🍭 Python virtual environment path: ${this.venvPath}`);
+    await run(`python3 -m venv ${this.venvPath}`);
   }
 
   /**
@@ -76,10 +76,13 @@ export class ManimInstaller {
       { cwd: this.manimPath });
   }
 
-  public async installRequirements() {
-    console.log("Installing Manim...");
-    // const requirementsPath = path.join(this.manimPath, "requirements.txt");
-    // await run(`pip install -r ${requirementsPath}`, { cwd: this.manimPath });
+  /**
+   * Installs Manim as (editable) Python package.
+   */
+  public async install() {
+    console.log("❇️ Installing Manim...");
+    await this.runInVenv(`pip install -e ${this.manimPath}`);
+    console.log("❇️ Manim installed successfully.");
   }
 
   /**
