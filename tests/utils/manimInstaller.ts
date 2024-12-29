@@ -5,9 +5,11 @@ import * as assert from "assert";
 
 function run(cmd: string, ...args: any): Promise<string> {
   return new Promise((resolve, reject) => {
+    console.log(`🌟 Running command: ${cmd}`);
     exec(cmd, ...args, (error: any, stdout: any, stderr: any) => {
       if (error) return reject(error);
       if (stderr) return reject(stderr);
+      console.log(stdout);
       resolve(stdout);
     });
   });
