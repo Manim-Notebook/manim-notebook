@@ -23,9 +23,10 @@ export class ManimInstaller {
    * Sets up the Manim installation path.
    *
    * @param testDir The path where the tests are located.
-   * We expect it to be the `out/test/tests` directory.
+   * We expect it to be the `out/test/tests/` directory.
    */
   public async setup(testDir: string) {
+    console.log("🎈 SETTING UP MANIM INSTALLATION");
     assert.ok(testDir.endsWith("out/test/tests"));
     this.manimPath = path.join(testDir, "../../..", "tmp", "manim");
     await run(`mkdir -p ${this.manimPath}`);
@@ -48,7 +49,13 @@ export class ManimInstaller {
    * Downloads Manim from the official repository if not already done.
    */
   public async download() {
-    const alreadyDownloaded = await this.isAlreadyDownloaded();
-    console.log(`Manim already downloaded: ${alreadyDownloaded}`);
+    if (await this.isAlreadyDownloaded()) {
+      console.log("Manim already downloaded.");
+      return;
+    }
+
+    console.log("Downloading Manim... (this might take a while)");
+    await run(`git clone https://github.com/3b1b/manim.git ${this.manimPath}`,
+      { cwd: this.manimPath });
   }
 }
