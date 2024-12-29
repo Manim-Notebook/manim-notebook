@@ -3,6 +3,10 @@
  * the process of downloading, unzipping, and launching VSCode with extension
  * test parameters.
  *
+ * This is only used when you call "npm test" in the terminal and not when you
+ * run the tests from the debug panel. For the latter, we have a custom
+ * launch task in .vscode/launch.json.
+ *
  * Adapted from the VSCode testing extension guide [1].
  * File on Github: [2].
  *
@@ -16,11 +20,11 @@ import { runTests } from "@vscode/test-electron";
 
 async function main() {
   try {
-    // The folder containing the Extension Manifest package.json
+    // Folder containing the extension manifest package.json
     // Passed to `--extensionDevelopmentPath`
     const extensionDevelopmentPath = path.resolve(__dirname, "../../");
 
-    // The path to the extension test script
+    // Path to the extension test script
     // Passed to --extensionTestsPath
     const extensionTestsPath = path.resolve(__dirname, "./utils/testRunner");
 
