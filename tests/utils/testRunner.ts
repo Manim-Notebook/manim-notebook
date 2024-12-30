@@ -67,7 +67,7 @@ function injectVSCodeTerminal(sourceCommand: string) {
     // Inject sendText()
     const sendTextOrig = terminal.sendText;
     terminal.sendText = (text: string, shouldExecute?: boolean): void => {
-      return sendTextOrig(`${sourceCommand} && ${text}`, shouldExecute);
+      return sendTextOrig.call(terminal, `${sourceCommand} && ${text}`, shouldExecute);
     };
 
     // Inject shellIntegration.executeCommand()
@@ -76,9 +76,12 @@ function injectVSCodeTerminal(sourceCommand: string) {
         return;
       }
       const shellIntegration = event.shellIntegration;
-      const executeCommandOrig = shellIntegration.executeCommand;
+      // only stub executeCommand(commandLine: string) method, not
+      // the executeCommand(executable: string, args: string[]) method
+      const executeCommandOrig = shellIntegration.executeCommand as
+      (_commandLine: string) => TerminalShellExecution;
       shellIntegration.executeCommand = (commandLine: string): TerminalShellExecution => {
-        return executeCommandOrig(`${sourceCommand} && ${commandLine}`);
+        return executeCommandOrig.call(shellIntegration, `${sourceCommand} && ${commandLine}`);
       };
 
       // Overwrite the readonly shellIntegration property of the terminal
