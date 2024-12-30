@@ -66,7 +66,7 @@ export class ManimInstaller {
    */
   public async download() {
     if (await this.isAlreadyDownloaded()) {
-      console.log("🎁 Manim already downloaded.");
+      console.log("🎁 Manim already downloaded");
       return;
     }
 
@@ -79,9 +79,14 @@ export class ManimInstaller {
    * Installs Manim as (editable) Python package.
    */
   public async install() {
+    const pipList = await this.runInVenv("pip list | grep manimgl");
+    if (pipList.length > 0) {
+      console.log("❇️ Manim already installed via pip");
+      return;
+    }
     console.log("❇️ Installing Manim...");
     await this.runInVenv(`pip install -e ${this.manimPath}`);
-    console.log("❇️ Manim installed successfully.");
+    console.log("❇️ Manim successfully installed");
   }
 
   /**
