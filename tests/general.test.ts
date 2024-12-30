@@ -11,12 +11,11 @@ import * as manimNotebook from "@src/extension";
 describe("Sample test", function () {
   before(async () => {
     // https://github.com/microsoft/vscode-discussions/discussions/2468
-    // manimNotebook.activate(null as any);
   });
 
   it.only("Manim test", async () => {
     console.log("Running test");
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 40000));
     console.log("Test done");
   });
 });

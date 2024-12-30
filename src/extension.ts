@@ -9,6 +9,7 @@ import { Logger, Window, LogRecorder } from "./logger";
 import { registerWalkthroughCommands } from "./walkthrough/commands";
 import { ExportSceneCodeLens } from "./export";
 import { tryToDetermineManimVersion, LAST_WARNING_NO_VERSION_KEY } from "./manimVersion";
+import { setupTestEnvironment } from "./utils/testing";
 
 export let manimNotebookContext: vscode.ExtensionContext;
 
@@ -22,6 +23,12 @@ function restoreGlobalState(context: vscode.ExtensionContext) {
 }
 
 export async function activate(context: vscode.ExtensionContext) {
+  if (process.env.IS_TESTING === "true") {
+    console.log("💠 Setting up test environment");
+    Logger.info("💠 Setting up test environment");
+    setupTestEnvironment();
+  }
+
   manimNotebookContext = context;
   restoreGlobalState(context);
 

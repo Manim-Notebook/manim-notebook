@@ -33,7 +33,11 @@
         "${workspaceFolder}/out/test/**/*.js"
       ],
       "preLaunchTask": "Prepare For Tests",
-      "sourceMaps": true
+      "sourceMaps": true,
+      "env": {
+        "IS_TESTING": "true",
+        "TEST_BASE_PATH": "${workspaceFolder}"
+      }
     }
   ]
 }
