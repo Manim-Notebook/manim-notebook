@@ -13,9 +13,7 @@ import * as path from "path";
 import Mocha from "mocha";
 import { globSync } from "glob";
 import "source-map-support/register";
-import * as vscode from "vscode";
-import { Terminal } from "vscode";
-import { window } from "vscode";
+import { window, Terminal, TerminalShellExecution } from "vscode";
 
 import { ManimInstaller } from "./manimInstaller";
 import { ManimCaller } from "./manimCaller";
@@ -36,50 +34,12 @@ export function run(): Promise<void> {
       await MANIM_INSTALLER.install();
       manimCaller.venvPath = MANIM_INSTALLER.venvPath;
       const activatePath = path.join(MANIM_INSTALLER.venvPath, "bin", "activate");
-      const sourceCommand = `. ${activatePath}`;
+      injectVSCodeTerminal(`. ${activatePath}`);
 
       const files: string[] = globSync("**/**.test.js",
         { cwd: testsRoot, ignore: ["**/node_modules/**"] });
 
       files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
-
-      // Inject the VSCode terminal
-      const createTerminalOrig = vscode.window.createTerminal;
-      vscode.window.createTerminal = (args: any): vscode.Terminal => {
-        const terminal = createTerminalOrig(args);
-
-        // Inject sendText()
-        const sendTextOrig = terminal.sendText;
-        terminal.sendText = (text: string, addNewLine?: boolean) => {
-          sendTextOrig.call(terminal, `${sourceCommand} && ${text}`, addNewLine);
-        };
-
-        // Inject shellIntegration -> executeCommand()
-        window.onDidChangeTerminalShellIntegration((event) => {
-          if (event.terminal !== terminal) {
-            return;
-          }
-          const shellIntegration: vscode.TerminalShellIntegration = event.shellIntegration;
-          shellIntegration.executeCommand = (commandLine: string):
-          vscode.TerminalShellExecution => {
-            return shellIntegration.executeCommand(`${sourceCommand} && ${commandLine}`);
-          };
-
-          // overwrite the readonly shellIntegration property of the terminal
-          Object.defineProperty(terminal, "shellIntegration", {
-            value: shellIntegration,
-            writable: false,
-          });
-        });
-
-        return terminal;
-      };
-
-      // Prepend echo "Hello world" to every terminal call
-      const originalExec = require("child_process").exec;
-      require("child_process").exec = function (command: string, ...args: any[]) {
-        return originalExec(`echo "Hello world" && ${command}`, ...args);
-      };
 
       mocha.run((failures: any) => {
         if (failures > 0) {
@@ -93,4 +53,41 @@ export function run(): Promise<void> {
       reject(err);
     }
   });
+}
+
+/**
+ * Injects the VSCode terminal such that every command is prefixed with the
+ * source command to activate the Python virtual environment.
+ */
+function injectVSCodeTerminal(sourceCommand: string) {
+  const createTerminalOrig = window.createTerminal;
+  window.createTerminal = (args: any): Terminal => {
+    const terminal = createTerminalOrig(args);
+
+    // Inject sendText()
+    const sendTextOrig = terminal.sendText;
+    terminal.sendText = (text: string, shouldExecute?: boolean): void => {
+      return sendTextOrig(`${sourceCommand} && ${text}`, shouldExecute);
+    };
+
+    // Inject shellIntegration.executeCommand()
+    window.onDidChangeTerminalShellIntegration((event) => {
+      if (event.terminal !== terminal) {
+        return;
+      }
+      const shellIntegration = event.shellIntegration;
+      const executeCommandOrig = shellIntegration.executeCommand;
+      shellIntegration.executeCommand = (commandLine: string): TerminalShellExecution => {
+        return executeCommandOrig(`${sourceCommand} && ${commandLine}`);
+      };
+
+      // Overwrite the readonly shellIntegration property of the terminal
+      Object.defineProperty(terminal, "shellIntegration", {
+        value: shellIntegration,
+        writable: false,
+      });
+    });
+
+    return terminal;
+  };
 }
