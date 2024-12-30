@@ -11,3 +11,4 @@ scripts/**
 **/.vscode-test.*
 CHANGELOG.md
 CONTRIBUTING.md
+out/tests/**

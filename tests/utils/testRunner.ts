@@ -9,32 +9,62 @@
  * [2] https://github.com/microsoft/vscode-extension-samples/blob/main/helloworld-test-sample/src/test/suite/index.ts
  */
 
+import * as vscode from "vscode";
+
 import * as path from "path";
 import Mocha from "mocha";
 import { globSync } from "glob";
 import "source-map-support/register";
 import { window, Terminal, TerminalShellExecution } from "vscode";
 
-import { ManimInstaller } from "./manimInstaller";
-import { ManimCaller } from "./manimCaller";
-const MANIM_INSTALLER = new ManimInstaller();
-export const manimCaller = new ManimCaller();
+// import * as manimNotebook from "../../src/extension";
+
+// import { ManimInstaller } from "./manimInstaller";
+// import { ManimCaller } from "./manimCaller";
+// const MANIM_INSTALLER = new ManimInstaller();
+// export const manimCaller = new ManimCaller();
 
 export function run(): Promise<void> {
   const mocha = new Mocha({
     ui: "tdd",
+    timeout: 10000,
   });
 
   return new Promise(async (resolve, reject) => {
     try {
+      // WEe need some time to install Manim first. Afterwards, the tests
+      // themselves will activate the extension
+      // (I haven't found a way to NOT let VSCode activate the extension
+      // automatically before we are done here expect this way)
+      // Hook into the extension's activation event
+      // const activateOrig = manimNotebook.activate;
+      // const newActivate = async (context: vscode.ExtensionContext) => {
+      //   console.log("IN ACTIVATION");
+      //   extensionContext = context;
+      //   // then do nothing, will activate later manually
+      //   // await activateOrig(context);
+      // };
+      // (manimNotebook as any).activate = newActivate;
+
       const testsRoot = path.resolve(__dirname, "..");
 
-      await MANIM_INSTALLER.setup(testsRoot);
-      await MANIM_INSTALLER.download();
-      await MANIM_INSTALLER.install();
-      manimCaller.venvPath = MANIM_INSTALLER.venvPath;
-      const activatePath = path.join(MANIM_INSTALLER.venvPath, "bin", "activate");
-      injectVSCodeTerminal(`. ${activatePath}`);
+      // Install Manim
+      // await MANIM_INSTALLER.setup(testsRoot);
+      // await MANIM_INSTALLER.download();
+      // await MANIM_INSTALLER.install();
+      // manimCaller.venvPath = MANIM_INSTALLER.venvPath;
+      // const activatePath =
+      // path.join(MANIM_INSTALLER.venvPath, "bin", "activate");
+      // injectVSCodeTerminal`. ${activatePath}`);
+
+      // Activate Manim Notebook
+      // console.log("🚀 Activating Manim Notebook");
+      // const extension =
+      // vscode.extensions.getExtension("Manim-Notebook.manim-notebook");
+      // if (!extension) {
+      //   throw new Error("Could not find Manim Notebook extension.");
+      // }
+      // await extension.activate();
 
       const files: string[] = globSync("**/**.test.js",
         { cwd: testsRoot, ignore: ["**/node_modules/**"] });

@@ -1,7 +1,6 @@
 import { exec } from "child_process";
 import { existsSync } from "fs";
 import * as path from "path";
-import * as assert from "assert";
 
 function run(cmd: string, ...args: any): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -15,6 +14,10 @@ function run(cmd: string, ...args: any): Promise<string> {
   });
 }
 
+/**
+ * Helper class to install Manim and set up the Python virtual environment.
+ * We expect that the setup() method is the first one to be called.
+ */
 export class ManimInstaller {
   /**
    * Path to the path where Manim will be installed to.
@@ -29,25 +32,19 @@ export class ManimInstaller {
   /**
    * Sets up the Manim installation path.
    *
-   * @param testDir The path where the tests are located.
-   * We expect it to be the `out/test/tests/` directory.
+   * @param tmpFolder The path for a temporary folder where we can install
+   * Manim and the Python virtual environment to.
    */
-  public async setup(testDir: string) {
+  public async setup(tmpFolder: string) {
     console.log("🎈 SETTING UP MANIM INSTALLATION");
-    assert.ok(testDir.endsWith("out/test/tests"));
 
-    this.manimPath = path.join(testDir, "../../..", "tmp", "manim");
+    // Manim installation path
+    this.manimPath = path.join(tmpFolder, "manim");
     await run(`mkdir -p ${this.manimPath}`);
     console.log(`🍭 Manim installation path: ${this.manimPath}`);
 
-    await this.setupPythonVenv();
-  }
-
-  /**
-   * Sets up the Python virtual environment.
-   */
-  private async setupPythonVenv() {
-    this.venvPath = path.join(this.manimPath, "..", "manimVenv");
+    // Python virtual environment path
+    this.venvPath = path.join(tmpFolder, "manimVenv");
     console.log(`🍭 Python virtual environment path: ${this.venvPath}`);
     await run(`python3 -m venv ${this.venvPath}`);
   }

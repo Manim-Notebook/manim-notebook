@@ -13,9 +13,10 @@
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
       "outFiles": [
-        "${workspaceFolder}/out/**/*.js"
+        "${workspaceFolder}/out/src/**/*.js"
       ],
-      "preLaunchTask": "Watch src files"
+      "preLaunchTask": "Watch Files",
+      "sourceMaps": true
     },
     {
       "name": "Test Extension",
@@ -26,12 +27,13 @@
         "${workspaceFolder}/tests/fixtures",
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/tests/utils/testRunner.js"
+        "--extensionTestsPath=${workspaceFolder}/out/tests/utils/testRunner.js"
       ],
       "outFiles": [
         "${workspaceFolder}/out/test/**/*.js"
       ],
-      "preLaunchTask": "Watch test files"
+      "preLaunchTask": "Prepare For Tests",
+      "sourceMaps": true
     }
   ]
 }

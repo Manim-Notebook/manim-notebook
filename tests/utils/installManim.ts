@@ -1,0 +1,17 @@
+import { ManimInstaller } from "./manimInstaller";
+import * as path from "path";
+
+async function setupManimInstallation() {
+  const baseFolder = process.cwd();
+  const tmpFolder = path.join(baseFolder, "tmp");
+  console.log(`Temporary folder: ${tmpFolder}`);
+
+  const installer = new ManimInstaller();
+  await installer.setup(tmpFolder);
+  await installer.download();
+  await installer.install();
+}
+
+(async () => {
+  await setupManimInstallation();
+})();
