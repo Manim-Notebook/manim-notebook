@@ -85,6 +85,15 @@ export class ManimInstaller {
   }
 
   /**
+   * Installs additional dependencies for Manim.
+   */
+  public async installAdditionalDependencies() {
+    console.log("🔧 Installing additional dependencies...");
+    await this.runInVenv("pip install setuptools");
+    console.log("🔧 Additional dependencies installed successfully.");
+  }
+
+  /**
    * Runs a command in the Python virtual environment by sourcing the
    * `activate` script beforehand.
    *

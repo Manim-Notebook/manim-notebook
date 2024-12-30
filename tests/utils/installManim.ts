@@ -10,6 +10,7 @@ async function setupManimInstallation() {
   await installer.setup(tmpFolder);
   await installer.download();
   await installer.install();
+  await installer.installAdditionalDependencies();
 }
 
 (async () => {
