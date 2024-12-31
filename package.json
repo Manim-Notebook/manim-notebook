@@ -263,6 +263,7 @@
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.12.1",
     "@types/node": "^22.10.2",
+    "@types/sinon": "^17.0.3",
     "@types/vscode": "^1.96.0",
     "@typescript-eslint/parser": "^8.18.2",
     "@vscode/test-cli": "^0.0.10",
@@ -271,6 +272,7 @@
     "glob": "^11.0.0",
     "globals": "^15.14.0",
     "mocha": "^11.0.1",
+    "sinon": "^19.0.2",
     "source-map-support": "^0.5.21",
     "typescript": "^5.7.2"
   },

@@ -28,6 +28,9 @@ export function run(): Promise<void> {
         { cwd: testsRoot, ignore: ["**/node_modules/**"] });
       files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
+      // wait a bit to allow the extension to have properly activated
+      await new Promise(resolve => setTimeout(resolve, 6000));
+
       mocha.run((failures: any) => {
         if (failures > 0) {
           reject(new Error(`${failures} tests failed.`));
