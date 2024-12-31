@@ -35,6 +35,7 @@
       "preLaunchTask": "Prepare For Tests",
       "sourceMaps": true,
       "env": {
+        // also see tests/main.ts
         "IS_TESTING": "true",
         "TEST_BASE_PATH": "${workspaceFolder}"
       }

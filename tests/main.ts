@@ -33,11 +33,6 @@ async function main() {
     // Passed to --extensionTestsPath
     const extensionTestsPath = path.resolve(__dirname, "./utils/testRunner");
 
-    // Set environment variables (see launch.json)
-    process.env.IS_TESTING = "true";
-    process.env.TEST_BASE_PATH = extensionDevelopmentPath;
-    process.env.IS_CALLED_IN_NPM_SCRIPT = "true";
-
     // Download VS Code, unzip it and run the integration test
     await runTests({
       extensionDevelopmentPath,
@@ -46,6 +41,12 @@ async function main() {
         "tests/fixtures",
         "--disable-extensions",
       ],
+      // also see launch.json
+      extensionTestsEnv: {
+        IS_TESTING: "true",
+        TEST_BASE_PATH: extensionDevelopmentPath,
+        IS_CALLED_IN_NPM_SCRIPT: "true",
+      },
     });
   } catch {
     console.error("Failed to run tests");

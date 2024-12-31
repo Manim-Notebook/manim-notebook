@@ -27,6 +27,8 @@ export async function activate(context: vscode.ExtensionContext) {
     console.log("💠 Setting up test environment");
     Logger.info("💠 Setting up test environment");
     setupTestEnvironment();
+  } else {
+    console.log("💠 Not setting up test environment");
   }
 
   manimNotebookContext = context;
