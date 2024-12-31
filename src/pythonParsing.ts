@@ -11,10 +11,10 @@ export class ManimCellRanges {
    * Manim cells themselves might contain further comments, but no nested
    * Manim cells, i.e. no further comment starting with the default "##".
    */
-  private static readonly MARKER = new RegExp(
-    `^(\\s*${vscode.workspace.getConfiguration("manim-notebook").cellMarker})`,
-  );
-
+  private static get MARKER(): RegExp {
+    const cellMarker = vscode.workspace.getConfiguration("manim-notebook").cellMarker;
+    return new RegExp(`^(\\s*${cellMarker})`);
+  } 
   /**
    * Calculates the ranges of Manim cells in the given document.
    *
