@@ -50,6 +50,11 @@ export class ManimInstaller {
   private venvPath: string = "";
 
   /**
+   * Name of the Python binary.
+   */
+  private pythonBinary = process.platform === "win32" ? "python" : "python3";
+
+  /**
    * Sets up the Manim installation path.
    *
    * @param tmpFolder The path for a temporary folder where we can install
@@ -66,8 +71,8 @@ export class ManimInstaller {
     // Python virtual environment path
     this.venvPath = path.join(tmpFolder, "manimVenv");
     console.log(`🍭 Python virtual environment path: ${this.venvPath}`);
-    await run(`python3 -m venv ${this.venvPath}`);
-    await this.runWithVenvBin("python3 --version");
+    await run(`${this.pythonBinary} -m venv ${this.venvPath}`);
+    await this.runWithVenvBin(`${this.pythonBinary} --version`);
     await this.runWithVenvBin("pip config set global.disable-pip-version-check true");
   }
 
@@ -120,7 +125,7 @@ export class ManimInstaller {
     console.log("🔧 Installing additional dependencies...");
     await this.runWithVenvBin("pip install setuptools");
 
-    const pythonVersion = await this.runWithVenvBin("python3 --version");
+    const pythonVersion = await this.runWithVenvBin(`${this.pythonBinary} --version`);
     if (pythonVersion.includes("3.13")) {
       // https://github.com/jiaaro/pydub/issues/815
       await this.runWithVenvBin("pip install audioop-lts");
