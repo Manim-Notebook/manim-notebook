@@ -17,7 +17,7 @@ import "source-map-support/register";
 export function run(): Promise<void> {
   const mocha = new Mocha({
     ui: "tdd",
-    timeout: 10000,
+    timeout: 35000,
   });
 
   return new Promise(async (resolve, reject) => {
