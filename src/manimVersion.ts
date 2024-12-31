@@ -263,7 +263,7 @@ function constructTimeoutPromise(
 async function lookForManimVersionString(terminal: vscode.Terminal): Promise<boolean> {
   return new Promise<boolean>(async (resolve, _reject) => {
     onTerminalOutput(terminal, (data: string) => {
-      const versionMatch = data.match(/^\s*ManimGL v([0-9]+\.[0-9]+\.[0-9]+)/);
+      const versionMatch = data.match(/^\s*ManimGL v([0-9]+\.[0-9]+\.[0-9]+)/m);
       if (!versionMatch) {
         return;
       }
