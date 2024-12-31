@@ -52,7 +52,6 @@ export class ManimInstaller {
     this.venvPath = path.join(tmpFolder, "manimVenv");
     console.log(`🍭 Python virtual environment path: ${this.venvPath}`);
     await run(`python3 -m venv ${this.venvPath}`);
-    await run("python3 -m ensurepip");
   }
 
   /**
@@ -87,13 +86,13 @@ export class ManimInstaller {
    * Installs Manim as (editable) Python package.
    */
   public async install() {
-    const pipList = await this.runWithVenvBin("pip list");
+    const pipList = await this.runWithVenvBin("python3 -m pip list");
     if (pipList.toLowerCase().includes("manimgl")) {
       console.log("❇️ Manim already installed via pip");
       return;
     }
     console.log("❇️ Installing Manim...");
-    await this.runWithVenvBin(`pip install -e ${this.manimPath}`);
+    await this.runWithVenvBin(`python3 -m pip install -e ${this.manimPath}`);
     console.log("❇️ Manim successfully installed");
   }
 
@@ -102,7 +101,7 @@ export class ManimInstaller {
    */
   public async installAdditionalDependencies() {
     console.log("🔧 Installing additional dependencies...");
-    await this.runWithVenvBin("pip install setuptools");
+    await this.runWithVenvBin("python3 -m pip install setuptools");
     console.log("🔧 Additional dependencies successfully installed");
   }
 
