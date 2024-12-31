@@ -258,7 +258,8 @@
     "lint": "eslint src --config ./.config/eslint.mjs",
     "install-manim": "node ./out/tests/utils/installManim.js",
     "pretest": "npm run compile && npm run install-manim",
-    "test": "node ./out/tests/main.js"
+    "test": "node ./out/tests/main.js",
+    "testInGithubActions": "node ./out/tests/main.js"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.12.1",

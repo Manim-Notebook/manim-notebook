@@ -73,13 +73,18 @@ jobs:
           fi
         shell: bash
 
+      - name: Install Manim (pretest)
+        run: |
+          npm run pretest
+        shell: bash
+
       - name: Install Manim & Run tests
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
             # Start an X virtual framebuffer (Xvfb) server, which emulates a
             # display server without requiring a physical display.
-            xvfb-run -a npm test
+            xvfb-run -a npm run testInGithubActions
           else
-            npm test
+            npm run testInGithubActions
           fi
         shell: bash
