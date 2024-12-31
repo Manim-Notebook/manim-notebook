@@ -82,6 +82,7 @@
     "autoplay",
     "autoreload",
     "cmds",
+    "ensurepip",
     "github",
     "ipython",
     "Keybord",
