@@ -52,8 +52,6 @@ jobs:
             # Work around 'NoneType' object has no attribute 'glGetError'
             # https://github.com/MPI-IS/mesh/issues/23#issuecomment-607784234
             sudo apt-get install python3-opengl
-            # https://github.com/mcfletch/pyopengl/issues/90#issuecomment-1407703352
-            # sudo ln -s /usr/lib/x86_64-linux-gnu/libglut.so.3.12 /usr/lib/x86_64-linux-gnu/libglut.so.3
           fi
         shell: bash
 
