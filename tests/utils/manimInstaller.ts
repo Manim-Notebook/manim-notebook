@@ -86,9 +86,8 @@ export class ManimInstaller {
    * Installs Manim as (editable) Python package.
    */
   public async install() {
-    // "|| true" to not exit from shell in case manimgl is not installed
-    const pipList = await this.runWithVenvBin("pip list | grep manimgl || true");
-    if (pipList.length > 0) {
+    const pipList = await this.runWithVenvBin("pip list");
+    if (pipList.toLowerCase().includes("manimgl")) {
       console.log("❇️ Manim already installed via pip");
       return;
     }
