@@ -29,6 +29,10 @@ jobs:
         with:
           node-version: 22.x # LTS until Oct 2025
       - run: npm install
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # end of support: 2027-10
 
       - name: Install other dependencies
         run: |
