@@ -36,13 +36,15 @@ jobs:
 
       - name: Install other dependencies
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
+          if [ "$RUNNER_OS" == "Linux" ] || [ "$RUNNER_OS" == "macOS" ]; then
             # Install OpenGL Mesa Utils
             # https://idroot.us/install-mesa-drivers-ubuntu-24-04/
             sudo add-apt-repository ppa:kisak/kisak-mesa
             sudo apt-get update
             sudo apt-get install mesa-utils -y
+          fi
 
+          if [ "$RUNNER_OS" == "Linux" ]; then
             # Install Pango
             sudo apt-get install libpango1.0-dev -y
 
@@ -56,8 +58,15 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
             xvfb-run -a glxinfo | grep "OpenGL version"
-          else
+          elif [ "$RUNNER_OS" == "macOS" ]; then
             glxinfo | grep "OpenGL version"
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            # Download wglinfo (analogous to glxinfo)
+            curl -L -o ${{ runner.temp }}/wglinfo64.exe https://github.com/gkv311/wglinfo/releases/download/22_03/wglinfo64.exe
+            ${{ runner.temp }}/wglinfo64.exe | grep "OpenGL version"
+          else
+            echo "Unknown OS"
+            exit 1
           fi
         shell: bash
 
