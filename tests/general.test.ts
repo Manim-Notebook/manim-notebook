@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import { window, commands } from "vscode";
 
 import { describe, it } from "mocha";
@@ -5,21 +6,46 @@ import * as sinon from "sinon";
 
 // eslint-disable-next-line no-unused-vars
 import * as manimNotebook from "@src/extension";
-import { onTerminalOutput } from "../src/utils/terminal";
+// import { onTerminalOutput } from "../src/utils/terminal";
+
+const ANSI_CONTROL_SEQUENCE_REGEX = /(?:\x1B[@-Z\\-_]|[\x80-\x9A\x9C-\x9F]|(?:\x1B\[|\x9B)[0-?]*[ -/]*[@-~])/g;
+
+async function* withoutAnsiCodes(stream: AsyncIterable<string>): AsyncIterable<string> {
+  for await (const data of stream) {
+    yield data.replace(ANSI_CONTROL_SEQUENCE_REGEX, "");
+  }
+}
+
+function onTerminalOutput(
+  callback: (_data: string) => void, withoutAnsi = true) {
+  window.onDidStartTerminalShellExecution(
+    async (event: vscode.TerminalShellExecutionStartEvent) => {
+      let stream = event.execution.read();
+      if (withoutAnsi) {
+        stream = withoutAnsiCodes(stream);
+      }
+
+      for await (const data of stream) {
+        callback(data);
+      }
+    });
+}
 
 describe("Manim Installation", function () {
-  it.only("Dummy terminal test", async () => {
+  it.only("Dummy terminal test", () => {
     // any Manim Notebook command to trigger the activation
-    await commands.executeCommand("manim-notebook.openWalkthrough");
+    commands.executeCommand("manim-notebook.openWalkthrough");
 
-    const terminal = window.createTerminal("Dummy terminal");
-    terminal.show();
-    return new Promise((resolve) => {
-      onTerminalOutput(terminal, (data) => {
+    return new Promise<void>((resolve) => {
+      onTerminalOutput((data) => {
         console.log(data);
         resolve();
       });
-      terminal.sendText("manimgl --version");
+      setTimeout(() => {
+        const terminal = window.createTerminal("Dummy terminal");
+        terminal.show();
+        terminal.sendText("manimgl --version");
+      }, 7000);
     });
   });
 
