@@ -66,7 +66,7 @@ export class ManimInstaller {
     // Python virtual environment path
     this.venvPath = path.join(tmpFolder, "manimVenv");
     console.log(`🍭 Python virtual environment path: ${this.venvPath}`);
-    await run(`python3.11 -m venv ${this.venvPath}`);
+    await run(`python -m venv ${this.venvPath}`);
     await this.runWithVenvBin("python --version");
     await this.runWithVenvBin("pip config set global.disable-pip-version-check true");
   }
