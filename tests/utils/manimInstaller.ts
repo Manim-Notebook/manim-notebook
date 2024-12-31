@@ -6,10 +6,22 @@ function run(cmd: string, ...args: any): Promise<string> {
   const promise = new Promise<string>((resolve, reject) => {
     console.log(`🌟 Running command: ${cmd}`);
     exec(cmd, ...args, (error: any, stdout: any, stderr: any) => {
-      if (error) return reject(error);
-      if (stderr) return reject(stderr);
-      console.log(stdout);
-      resolve(stdout);
+      let err = error || stderr;
+      if (err) {
+        if (err.includes("ffmpeg")) {
+          console.error("🔥 ffmpeg error detected and will be ignored:");
+          console.error(err);
+          console.log(stdout);
+          resolve(stdout);
+        } else {
+          console.error("🔥 Error while running command");
+          if (error) return reject(error);
+          if (stderr) return reject(stderr);
+        }
+      } else {
+        console.log(stdout);
+        resolve(stdout);
+      }
     });
   });
   promise.catch((err) => {
