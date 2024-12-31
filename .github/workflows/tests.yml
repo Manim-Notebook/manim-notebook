@@ -30,9 +30,17 @@ jobs:
           node-version: 22.x # LTS until Oct 2025
       - run: npm install
 
+      - name: Install other dependencies
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt install libpango1.0-dev -y
+          fi
+
       # The xvfb-run command starts an X virtual framebuffer (Xvfb) server,
       # which emulates a display server without requiring a physical display.
-      - run: xvfb-run -a npm test
+      - name: Run tests (with xvfb)
+        run: xvfb-run -a npm test
         if: runner.os == 'Linux'
-      - run: npm test
+      - name: Run tests (without xvfb)
+        run: npm test
         if: runner.os != 'Linux'
