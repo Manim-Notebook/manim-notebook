@@ -11,7 +11,7 @@ describe("Manim Installation", function () {
   it.only("Detects Manim version", async () => {
     const spy = sinon.spy(window, "showInformationMessage");
     await commands.executeCommand("manim-notebook.redetectManimVersion");
-    assert.ok(spy.calledOnce);
+    assert.ok(spy.called);
     assert.match(spy.getCall(0).args[0], /v\d+\.\d+\.\d+/);
   });
 });

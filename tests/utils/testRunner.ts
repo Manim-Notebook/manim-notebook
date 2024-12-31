@@ -17,7 +17,7 @@ import "source-map-support/register";
 export function run(): Promise<void> {
   const mocha = new Mocha({
     ui: "tdd",
-    timeout: 200000,
+    timeout: 40000,
   });
 
   return new Promise(async (resolve, reject) => {
@@ -28,9 +28,12 @@ export function run(): Promise<void> {
         { cwd: testsRoot, ignore: ["**/node_modules/**"] });
       files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
-      // wait a bit to allow the extension to have properly activated
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      console.log("Waiting fixed timeout of 5 seconds before running tests...");
+      console.log("(This is to ensure that the extension has properly activated.");
+      console.log("At least locally when your PC is fast enough.)");
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
+      console.log("Running tests...");
       mocha.run((failures: any) => {
         if (failures > 0) {
           reject(new Error(`${failures} tests failed.`));
