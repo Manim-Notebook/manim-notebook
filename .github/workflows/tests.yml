@@ -32,7 +32,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # end of support: 2027-10
+          python-version: '3.13' # end of support: 2029-10
 
       - name: Install other dependencies
         run: |
