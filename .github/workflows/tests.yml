@@ -49,6 +49,10 @@ jobs:
             # Work around 'NoneType' object has no attribute 'glGetError'
             # https://github.com/MPI-IS/mesh/issues/23#issuecomment-607784234
             sudo apt-get install python3-opengl
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            # Install OpenGL Mesa Utils (via homebrew)
+            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            brew install mesa
           fi
         shell: bash
 
