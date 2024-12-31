@@ -145,6 +145,11 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "If enabled, the start comment of each cell (comment that begins with `##`) will be typeset in bold."
+        },
+        "manim-notebook.cellMarker": {
+          "type": "string",
+          "default": "##",
+          "markdownDescription": "The marker that indicates the start of a Manim cell in a plain text python file."
         }
       }
     },
