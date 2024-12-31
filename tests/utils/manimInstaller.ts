@@ -120,7 +120,7 @@ export class ManimInstaller {
     console.log("🔧 Installing additional dependencies...");
     await this.runWithVenvBin("pip install setuptools");
 
-    if (process.platform === "darwin") {
+    if (process.platform === "darwin" || process.platform === "win32") {
       // https://github.com/jiaaro/pydub/issues/815
       await this.runWithVenvBin("pip install audioop-lts");
     } else if (process.platform === "linux") {
