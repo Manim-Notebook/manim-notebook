@@ -66,8 +66,8 @@ export class ManimInstaller {
     // Python virtual environment path
     this.venvPath = path.join(tmpFolder, "manimVenv");
     console.log(`🍭 Python virtual environment path: ${this.venvPath}`);
-    await run(`python -m venv ${this.venvPath}`);
-    await this.runWithVenvBin("python --version");
+    await run(`python3 -m venv ${this.venvPath}`);
+    await this.runWithVenvBin("python3 --version");
     await this.runWithVenvBin("pip config set global.disable-pip-version-check true");
   }
 
@@ -120,8 +120,11 @@ export class ManimInstaller {
     console.log("🔧 Installing additional dependencies...");
     await this.runWithVenvBin("pip install setuptools");
 
-    // https://github.com/jiaaro/pydub/issues/815
-    await this.runWithVenvBin("pip install audioop-lts");
+    const pythonVersion = await this.runWithVenvBin("python3 --version");
+    if (pythonVersion.includes("3.13")) {
+      // https://github.com/jiaaro/pydub/issues/815
+      await this.runWithVenvBin("pip install audioop-lts");
+    }
 
     if (process.platform === "linux") {
       await this.runWithVenvBin("pip install PyOpenGL");
