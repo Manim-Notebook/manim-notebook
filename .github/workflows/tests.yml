@@ -37,7 +37,15 @@ jobs:
       - name: Install other dependencies
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
+            # Install Pango
             sudo apt install libpango1.0-dev -y
+
+            # Install OpenGL Mesa Utils
+            # https://idroot.us/install-mesa-drivers-ubuntu-24-04/
+            sudo add-apt-repository ppa:kisak/kisak-mesa
+            sudo apt update
+            sudo apt install mesa-utils -y
+            glxinfo | grep "OpenGL version"
           fi
         shell: bash
 
