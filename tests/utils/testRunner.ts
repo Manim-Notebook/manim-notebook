@@ -31,7 +31,7 @@ export function run(): Promise<void> {
       console.log("Waiting fixed timeout of 5 seconds before running tests...");
       console.log("(This is to ensure that the extension has properly activated.");
       console.log("At least locally when your PC is fast enough.)");
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise(resolve => setTimeout(resolve, 20000));
 
       console.log("Running tests...");
       mocha.run((failures: any) => {

@@ -1,7 +1,6 @@
 import { window, commands } from "vscode";
 
 import { describe, it } from "mocha";
-import * as assert from "assert";
 import * as sinon from "sinon";
 
 // eslint-disable-next-line no-unused-vars
