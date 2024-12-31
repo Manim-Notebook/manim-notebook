@@ -32,7 +32,7 @@ function onTerminalOutput(
 }
 
 describe("Manim Installation", function () {
-  it.only("Dummy terminal test", () => {
+  it("Dummy terminal test", () => {
     // any Manim Notebook command to trigger the activation
     commands.executeCommand("manim-notebook.openWalkthrough");
 
@@ -59,7 +59,7 @@ describe("Manim Installation", function () {
     });
   });
 
-  it("Detects Manim version", async () => {
+  it.only("Detects Manim version", async () => {
     const spy = sinon.spy(window, "showInformationMessage");
     await commands.executeCommand("manim-notebook.redetectManimVersion");
     sinon.assert.called(spy);
