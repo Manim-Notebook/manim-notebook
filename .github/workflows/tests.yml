@@ -15,6 +15,7 @@ jobs:
       # Adapted from:
       # https://code.visualstudio.com/api/working-with-extensions/continuous-integration#github-actions
       name: Integration tests
+      environment: testing
 
       strategy:
         matrix:
