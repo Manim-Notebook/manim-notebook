@@ -3,21 +3,20 @@ import { existsSync } from "fs";
 import * as path from "path";
 
 function run(cmd: string, ...args: any): Promise<string> {
-  return new Promise((resolve, reject) => {
-    try {
-      console.log(`🌟 Running command: ${cmd}`);
-      exec(cmd, ...args, (error: any, stdout: any, stderr: any) => {
-        if (error) return reject(error);
-        if (stderr) return reject(stderr);
-        console.log(stdout);
-        resolve(stdout);
-      });
-    } catch (err) {
-      console.error("Caught error");
-      console.error(err);
-      reject(err);
-    }
+  const promise = new Promise<string>((resolve, reject) => {
+    console.log(`🌟 Running command: ${cmd}`);
+    exec(cmd, ...args, (error: any, stdout: any, stderr: any) => {
+      if (error) return reject(error);
+      if (stderr) return reject(stderr);
+      console.log(stdout);
+      resolve(stdout);
+    });
   });
+  promise.catch((err) => {
+    console.error("Caught error in promise");
+    console.error(err);
+  });
+  return promise;
 }
 
 /**
