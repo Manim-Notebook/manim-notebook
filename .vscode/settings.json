@@ -79,6 +79,7 @@
   "cSpell.words": [
     "ansi",
     "Ansi",
+    "audioop",
     "autoplay",
     "autoreload",
     "cmds",
@@ -99,6 +100,7 @@
     "setuptools",
     "venv",
     "virtualenvs",
-    "youtube"
+    "youtube",
+    "ZINK"
   ]
 }

@@ -11,6 +11,12 @@ function run(cmd: string, ...args: any): Promise<any> {
         if (errorMessage.includes("ffmpeg")) {
           console.error("🔥 ffmpeg warning detected -> will be ignored:");
           console.error(errorMessage);
+        } else if (errorMessage.includes("VK_ERROR_INCOMPATIBLE_DRIVER")) {
+          // https://gitlab.freedesktop.org/mesa/mesa/-/issues/10293
+          // MESA: error:
+          // ZINK: vkCreateInstance failed (VK_ERROR_INCOMPATIBLE_DRIVER)
+          console.error("🔥 ZINK: vkCreateInstance warning detected -> will be ignored:");
+          console.error(errorMessage);
         } else {
           console.error("🔥 Error while running command");
           if (error) return reject(error);
@@ -116,7 +122,7 @@ export class ManimInstaller {
     if (process.platform === "darwin") {
       // https://github.com/jiaaro/pydub/issues/815
       await this.runWithVenvBin("pip install audioop-lts");
-    } else {
+    } else if (process.platform === "linux") {
       await this.runWithVenvBin("pip install PyOpenGL");
     }
 
