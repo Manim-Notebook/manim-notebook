@@ -52,7 +52,6 @@ export class ManimInstaller {
     this.venvPath = path.join(tmpFolder, "manimVenv");
     console.log(`🍭 Python virtual environment path: ${this.venvPath}`);
     await run(`python3 -m venv ${this.venvPath}`);
-    await run("python3 -m ensurepip");
   }
 
   /**
