@@ -2,26 +2,23 @@ import { exec } from "child_process";
 import { existsSync } from "fs";
 import * as path from "path";
 
-function run(cmd: string, ...args: any): Promise<string> {
-  const promise = new Promise<string>((resolve, reject) => {
+function run(cmd: string, ...args: any): Promise<any> {
+  const promise = new Promise<any>((resolve, reject) => {
     console.log(`🌟 Running command: ${cmd}`);
-    exec(cmd, ...args, (error: any, stdout: any, stderr: any) => {
-      let err = error || stderr;
-      if (err) {
-        if (err.includes("ffmpeg")) {
-          console.error("🔥 ffmpeg error detected and will be ignored:");
-          console.error(err);
-          console.log(stdout);
-          resolve(stdout);
+    exec(cmd, ...args, (error: Error, stdout: string | Buffer, stderr: string | Buffer) => {
+      let errorMessage = error?.message || stderr;
+      if (errorMessage) {
+        if (errorMessage.includes("ffmpeg")) {
+          console.error("🔥 ffmpeg warning detected -> will be ignored:");
+          console.error(errorMessage);
         } else {
           console.error("🔥 Error while running command");
           if (error) return reject(error);
           if (stderr) return reject(stderr);
         }
-      } else {
-        console.log(stdout);
-        resolve(stdout);
       }
+      console.log(stdout);
+      resolve(stdout);
     });
   });
   promise.catch((err) => {
