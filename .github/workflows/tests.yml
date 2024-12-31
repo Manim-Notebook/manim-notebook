@@ -48,6 +48,10 @@ jobs:
 
             echo "Testing OpenGL version"
             xvfb-run -a glxinfo | grep "OpenGL version"
+
+            # Work around 'NoneType' object has no attribute 'glGetError'
+            # https://github.com/mcfletch/pyopengl/issues/90#issuecomment-1407703352
+            sudo ln -s /usr/lib/x86_64-linux-gnu/libglut.so.3.12 /usr/lib/x86_64-linux-gnu/libglut.so.3
           fi
         shell: bash
 
