@@ -4,7 +4,7 @@ import * as path from "path";
 
 function run(cmd: string, ...args: any): Promise<any> {
   const promise = new Promise<any>((resolve, reject) => {
-    console.log(`🌟 Running command: ${cmd}`);
+    console.log(`▶️ Running command: ${cmd}`);
     exec(cmd, ...args, (error: Error, stdout: string | Buffer, stderr: string | Buffer) => {
       let errorMessage = error?.message || stderr;
       if (errorMessage) {
