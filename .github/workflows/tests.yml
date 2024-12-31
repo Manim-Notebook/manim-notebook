@@ -61,8 +61,8 @@ jobs:
             echo "so we can't check the OpenGL version :("
           elif [ "$RUNNER_OS" == "Windows" ]; then
             # Download wglinfo (analogous to glxinfo)
-            curl -L -o ${{ runner.temp }}/wglinfo64.exe https://github.com/gkv311/wglinfo/releases/download/22_03/wglinfo64.exe
-            ${{ runner.temp }}/wglinfo64.exe | grep "OpenGL version"
+            curl -L -O https://github.com/gkv311/wglinfo/releases/latest/download/wglinfo64.exe
+            wglinfo64.exe | grep "OpenGL version"
           else
             echo "Unknown OS"
             exit 1
