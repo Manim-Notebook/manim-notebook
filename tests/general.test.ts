@@ -1,65 +1,34 @@
-import * as vscode from "vscode";
-import { window, commands } from "vscode";
+import { window, commands, extensions } from "vscode";
 
 import { describe, it } from "mocha";
 import * as sinon from "sinon";
 
 // eslint-disable-next-line no-unused-vars
 import * as manimNotebook from "@src/extension";
-// import { onTerminalOutput } from "../src/utils/terminal";
-
-const ANSI_CONTROL_SEQUENCE_REGEX = /(?:\x1B[@-Z\\-_]|[\x80-\x9A\x9C-\x9F]|(?:\x1B\[|\x9B)[0-?]*[ -/]*[@-~])/g;
-
-async function* withoutAnsiCodes(stream: AsyncIterable<string>): AsyncIterable<string> {
-  for await (const data of stream) {
-    yield data.replace(ANSI_CONTROL_SEQUENCE_REGEX, "");
-  }
-}
-
-function onTerminalOutput(
-  callback: (_data: string) => void, withoutAnsi = true) {
-  window.onDidStartTerminalShellExecution(
-    async (event: vscode.TerminalShellExecutionStartEvent) => {
-      let stream = event.execution.read();
-      if (withoutAnsi) {
-        stream = withoutAnsiCodes(stream);
-      }
-
-      for await (const data of stream) {
-        callback(data);
-      }
-    });
-}
+import { onTerminalOutput } from "../src/utils/terminal";
 
 describe("Manim Installation", function () {
-  it("Dummy terminal test", () => {
-    // any Manim Notebook command to trigger the activation
-    commands.executeCommand("manim-notebook.openWalkthrough");
+  it("Dummy read from terminal", async () => {
+    const extension = extensions.getExtension("Manim-Notebook.manim-notebook");
+    if (!extension) {
+      throw new Error("Manim Notebook extension not found");
+    }
+    await extension.activate();
 
-    setTimeout(() => {
-      console.log("🎈 Opening terminal");
-      const terminal = window.createTerminal("Dummy terminal");
-      terminal.show();
-      terminal.sendText("manimgl --version");
-    }, 4000);
+    console.log("🎈 Creating terminal");
+    const terminal = window.createTerminal("Dummy terminal");
+    terminal.show();
 
-    let foundOnce = false;
-
-    return new Promise<void>((resolve) => {
-      onTerminalOutput((data) => {
+    return new Promise((resolve) => {
+      onTerminalOutput(terminal, (data) => {
         console.log(data);
-        if (/v\d+\.\d+\.\d+/.test(data)) {
-          if (!foundOnce) {
-            foundOnce = true;
-          } else {
-            resolve();
-          }
-        }
+        resolve();
       });
+      terminal.sendText("manimgl --version");
     });
   });
 
-  it.only("Detects Manim version", async () => {
+  it("Detects Manim version", async () => {
     const spy = sinon.spy(window, "showInformationMessage");
     await commands.executeCommand("manim-notebook.redetectManimVersion");
     sinon.assert.called(spy);
