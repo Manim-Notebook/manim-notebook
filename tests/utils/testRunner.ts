@@ -14,10 +14,17 @@ import Mocha from "mocha";
 import { globSync } from "glob";
 import "source-map-support/register";
 
+/**
+ * Runs the test suite.
+ *
+ * Note that this function is called from the launch.json test configuration
+ * as well as when you execute "npm test" manually (in the latter case, from
+ * the main() function in main.ts).
+ */
 export function run(): Promise<void> {
   const mocha = new Mocha({
     ui: "tdd",
-    timeout: 40000,
+    timeout: 30000,
   });
 
   return new Promise(async (resolve, reject) => {
@@ -28,10 +35,15 @@ export function run(): Promise<void> {
         { cwd: testsRoot, ignore: ["**/node_modules/**"] });
       files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
-      console.log("Waiting fixed timeout of 5 seconds before running tests...");
-      console.log("(This is to ensure that the extension has properly activated.");
-      console.log("At least locally when your PC is fast enough.)");
-      await new Promise(resolve => setTimeout(resolve, 20000));
+      if (process.env.IS_CALLED_IN_NPM_SCRIPT !== "true") {
+        console.log("💠 Tests executed via debug configuration");
+        console.log("Waiting fixed timeout of 5s before running tests...");
+        console.log("(This is to ensure that the extension has properly activated.)");
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      } else {
+        console.log("💠 Tests executed via npm script");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
 
       console.log("Running tests...");
       mocha.run((failures: any) => {

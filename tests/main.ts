@@ -18,6 +18,11 @@ import * as path from "path";
 
 import { runTests } from "@vscode/test-electron";
 
+/**
+ * Main entry point for tests from the "npm test" script. This is not called
+ * when you run the tests from the debug panel via the custom launch task in
+ * .vscode/launch.json.
+ */
 async function main() {
   try {
     // Folder containing the extension manifest package.json
@@ -28,11 +33,19 @@ async function main() {
     // Passed to --extensionTestsPath
     const extensionTestsPath = path.resolve(__dirname, "./utils/testRunner");
 
+    // Set environment variables (see launch.json)
+    process.env.IS_TESTING = "true";
+    process.env.TEST_BASE_PATH = extensionDevelopmentPath;
+    process.env.IS_CALLED_IN_NPM_SCRIPT = "true";
+
     // Download VS Code, unzip it and run the integration test
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath,
-      launchArgs: ["tests/fixtures", "--disable-extensions"],
+      launchArgs: [
+        "tests/fixtures",
+        "--disable-extensions",
+      ],
     });
   } catch {
     console.error("Failed to run tests");
