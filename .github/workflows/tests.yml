@@ -75,7 +75,11 @@ jobs:
 
       - name: Install Manim (pretest)
         run: |
-          npm run pretest
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            xvfb-run -a npm run pretest
+          else
+            npm run pretest
+          fi
         shell: bash
 
       - name: Install Manim & Run tests
