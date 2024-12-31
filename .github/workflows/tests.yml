@@ -35,6 +35,7 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt install libpango1.0-dev -y
           fi
+        shell: bash
 
       # The xvfb-run command starts an X virtual framebuffer (Xvfb) server,
       # which emulates a display server without requiring a physical display.
