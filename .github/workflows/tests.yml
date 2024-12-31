@@ -38,20 +38,22 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
             # Install Pango
-            sudo apt install libpango1.0-dev -y
+            sudo apt-get install libpango1.0-dev -y
 
             # Install OpenGL Mesa Utils
             # https://idroot.us/install-mesa-drivers-ubuntu-24-04/
             sudo add-apt-repository ppa:kisak/kisak-mesa
-            sudo apt update
-            sudo apt install mesa-utils -y
+            sudo apt-get update
+            sudo apt-get install mesa-utils -y
 
             echo "Testing OpenGL version"
             xvfb-run -a glxinfo | grep "OpenGL version"
 
             # Work around 'NoneType' object has no attribute 'glGetError'
+            # https://github.com/MPI-IS/mesh/issues/23#issuecomment-607784234
+            sudo apt-get install python3-opengl
             # https://github.com/mcfletch/pyopengl/issues/90#issuecomment-1407703352
-            sudo ln -s /usr/lib/x86_64-linux-gnu/libglut.so.3.12 /usr/lib/x86_64-linux-gnu/libglut.so.3
+            # sudo ln -s /usr/lib/x86_64-linux-gnu/libglut.so.3.12 /usr/lib/x86_64-linux-gnu/libglut.so.3
           fi
         shell: bash
 
