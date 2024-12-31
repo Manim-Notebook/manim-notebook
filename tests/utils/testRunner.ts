@@ -51,6 +51,10 @@ export function run(): Promise<void> {
         console.log("(This is to ensure that the extension has properly activated.)");
         await new Promise(resolve => setTimeout(resolve, 5000));
       } else {
+        // set environment variables when called via `npm test`
+        // also see launch.json
+        process.env.IS_TESTING = "true";
+        process.env.TEST_BASE_PATH = process.env.EXTENSION_DEV_PATH;
         console.log("💠 Tests executed via npm script");
         await new Promise(resolve => setTimeout(resolve, 2000));
       }

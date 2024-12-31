@@ -8,7 +8,7 @@ import * as manimNotebook from "@src/extension";
 import { onTerminalOutput } from "../src/utils/terminal";
 
 describe("Manim Installation", function () {
-  it.only("Dummy terminal test", async () => {
+  it("Dummy terminal test", async () => {
     const terminal = window.createTerminal("Dummy terminal");
     terminal.show();
     return new Promise((resolve) => {
@@ -20,7 +20,7 @@ describe("Manim Installation", function () {
     });
   });
 
-  it("Detects Manim version", async () => {
+  it.only("Detects Manim version", async () => {
     const spy = sinon.spy(window, "showInformationMessage");
     await commands.executeCommand("manim-notebook.redetectManimVersion");
     sinon.assert.called(spy);

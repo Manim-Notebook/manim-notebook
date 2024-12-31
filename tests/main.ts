@@ -41,11 +41,10 @@ async function main() {
         "tests/fixtures",
         "--disable-extensions",
       ],
-      // also see launch.json
+      // handled in the testRunner
       extensionTestsEnv: {
-        IS_TESTING: "true",
-        TEST_BASE_PATH: extensionDevelopmentPath,
         IS_CALLED_IN_NPM_SCRIPT: "true",
+        EXTENSION_DEV_PATH: extensionDevelopmentPath,
       },
     });
   } catch {
