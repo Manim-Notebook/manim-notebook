@@ -62,7 +62,8 @@ jobs:
           elif [ "$RUNNER_OS" == "Windows" ]; then
             # Download wglinfo (analogous to glxinfo)
             curl -L -O https://github.com/gkv311/wglinfo/releases/latest/download/wglinfo64.exe
-            wglinfo64.exe | grep "OpenGL version"
+            chmod +x wglinfo64.exe
+            ./wglinfo64.exe | grep "OpenGL version"
           else
             echo "Unknown OS"
             exit 1
