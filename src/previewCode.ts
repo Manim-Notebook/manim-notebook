@@ -45,7 +45,7 @@ function parsePreviewCellArgs(cellCode?: string, startLine?: number) {
 /**
  * Previews all code inside of a Manim cell.
  *
- * A Manim cell starts with `##`.
+ * A Manim cell starts with `##` by default.
  *
  * This can be invoked by either:
  * - clicking the code lens (the button above the cell)
@@ -54,7 +54,7 @@ function parsePreviewCellArgs(cellCode?: string, startLine?: number) {
  *   -> the 1 cell where the cursor is is previewed
  *
  * If Manim isn't running, it will be automatically started
- * (at the start of the cell which will be previewed: on its starting ## line),
+ * (at the start of the cell which will be previewed: e.g., on its starting ## line),
  * and then this cell is previewed.
  */
 export async function previewManimCell(cellCode?: string, startLine?: number) {
