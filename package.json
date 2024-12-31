@@ -256,9 +256,9 @@
     "compile": "tsc --project .config/tsconfig.paths.json",
     "watch": "tsc --project .config/tsconfig.paths.json -watch",
     "lint": "eslint src --config ./.config/eslint.mjs",
-    "pretest": "npm run compile",
-    "test": "node ./out/tests/main.js",
-    "install-manim": "node ./out/tests/utils/installManim.js"
+    "install-manim": "node ./out/tests/utils/installManim.js",
+    "pretest": "npm run compile && npm run install-manim",
+    "test": "node ./out/tests/main.js"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.12.1",
