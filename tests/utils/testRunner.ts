@@ -11,8 +11,11 @@
 
 import * as path from "path";
 import Mocha from "mocha";
+import * as assert from "assert";
 import { globSync } from "glob";
 import "source-map-support/register";
+
+import { workspace } from "vscode";
 
 /**
  * Runs the test suite.
@@ -27,9 +30,16 @@ export function run(): Promise<void> {
     timeout: 20000,
   });
 
+  const workspaceRoot = workspace.workspaceFolders![0].uri.fsPath;
+  console.log(`💠 workspaceRoot: ${workspaceRoot}`);
+  assert.ok(workspaceRoot.endsWith("fixtures"));
+  const files: string[] = globSync("**", { cwd: workspaceRoot });
+  console.log(`💠 files in root: ${files}`);
+
   return new Promise(async (resolve, reject) => {
     try {
       const testsRoot = path.resolve(__dirname, "..");
+      console.log(`💠 testsRoot: ${testsRoot}`);
 
       const files: string[] = globSync("**/**.test.js",
         { cwd: testsRoot, ignore: ["**/node_modules/**"] });
