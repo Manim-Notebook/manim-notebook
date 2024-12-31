@@ -103,6 +103,15 @@ export class ManimInstaller {
   public async installAdditionalDependencies() {
     console.log("🔧 Installing additional dependencies...");
     await this.runWithVenvBin("pip install setuptools");
+
+    if (process.platform === "darwin") {
+      // https://github.com/jiaaro/pydub/issues/815
+      await this.runWithVenvBin("pip install audioop-lts");
+    }
+
+    // TODO: Install OpenGL
+    // await this.runWithVenvBin("pip install PyOpenGL");
+
     console.log("🔧 Additional dependencies successfully installed");
   }
 
