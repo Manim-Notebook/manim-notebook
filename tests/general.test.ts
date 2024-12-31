@@ -36,16 +36,26 @@ describe("Manim Installation", function () {
     // any Manim Notebook command to trigger the activation
     commands.executeCommand("manim-notebook.openWalkthrough");
 
+    setTimeout(() => {
+      console.log("🎈 Opening terminal");
+      const terminal = window.createTerminal("Dummy terminal");
+      terminal.show();
+      terminal.sendText("manimgl --version");
+    }, 4000);
+
+    let foundOnce = false;
+
     return new Promise<void>((resolve) => {
       onTerminalOutput((data) => {
         console.log(data);
-        resolve();
+        if (/v\d+\.\d+\.\d+/.test(data)) {
+          if (!foundOnce) {
+            foundOnce = true;
+          } else {
+            resolve();
+          }
+        }
       });
-      setTimeout(() => {
-        const terminal = window.createTerminal("Dummy terminal");
-        terminal.show();
-        terminal.sendText("manimgl --version");
-      }, 7000);
     });
   });
 
