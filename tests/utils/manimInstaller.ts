@@ -116,10 +116,9 @@ export class ManimInstaller {
     if (process.platform === "darwin") {
       // https://github.com/jiaaro/pydub/issues/815
       await this.runWithVenvBin("pip install audioop-lts");
+    } else {
+      await this.runWithVenvBin("pip install PyOpenGL");
     }
-
-    // TODO: Install OpenGL
-    // await this.runWithVenvBin("pip install PyOpenGL");
 
     console.log("🔧 Additional dependencies successfully installed");
   }
