@@ -78,7 +78,7 @@ export class ManimInstaller {
     console.log("🎁 Downloading Manim... (this might take a while)");
     // 2>&1 redirects stderr to stdout since git writes to stderr for
     // diagnostic messages and we don't want to reject the promise in that case.
-    await run(`git clone https://github.com/3b1b/manim.git ${this.manimPath} 2>&1`,
+    await run(`git clone --depth 1 https://github.com/3b1b/manim.git ${this.manimPath} 2>&1`,
       { cwd: this.manimPath });
   }
 
