@@ -52,7 +52,7 @@ jobs:
           elif [ "$RUNNER_OS" == "macOS" ]; then
             # Install OpenGL Mesa Utils (via homebrew)
             NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            brew install glfw
+            brew install mesa-demos
           fi
         shell: bash
 
