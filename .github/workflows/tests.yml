@@ -49,10 +49,6 @@ jobs:
             # Work around 'NoneType' object has no attribute 'glGetError'
             # https://github.com/MPI-IS/mesh/issues/23#issuecomment-607784234
             sudo apt-get install python3-opengl
-          elif [ "$RUNNER_OS" == "macOS" ]; then
-            # Install OpenGL Mesa Utils (via homebrew)
-            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            brew install mesa-demos
           fi
         shell: bash
 
@@ -61,7 +57,8 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
             xvfb-run -a glxinfo | grep "OpenGL version"
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            glxinfo | grep "OpenGL version"
+            echo "We don't know a way to install the glxinfo command on macOS,"
+            echo "so we can't check the OpenGL version :("
           elif [ "$RUNNER_OS" == "Windows" ]; then
             # Download wglinfo (analogous to glxinfo)
             curl -L -o ${{ runner.temp }}/wglinfo64.exe https://github.com/gkv311/wglinfo/releases/download/22_03/wglinfo64.exe
