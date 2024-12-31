@@ -79,13 +79,13 @@ export class ManimInstaller {
    * Installs Manim as (editable) Python package.
    */
   public async install() {
-    const pipList = await this.runInVenv("pip list | grep manimgl");
+    const pipList = await this.runWithVenvBin("pip list | grep manimgl");
     if (pipList.length > 0) {
       console.log("❇️ Manim already installed via pip");
       return;
     }
     console.log("❇️ Installing Manim...");
-    await this.runInVenv(`pip install -e ${this.manimPath}`);
+    await this.runWithVenvBin(`pip install -e ${this.manimPath}`);
     console.log("❇️ Manim successfully installed");
   }
 
@@ -94,20 +94,24 @@ export class ManimInstaller {
    */
   public async installAdditionalDependencies() {
     console.log("🔧 Installing additional dependencies...");
-    await this.runInVenv("pip install setuptools");
-    console.log("🔧 Additional dependencies installed successfully.");
+    await this.runWithVenvBin("pip install setuptools");
+    console.log("🔧 Additional dependencies successfully installed");
   }
 
   /**
-   * Runs a command in the Python virtual environment by sourcing the
-   * `activate` script beforehand.
+   * Runs a command using the respective binary from the Python virtual
+   * environment.
    *
-   * @param cmd The command to run.
+   * @param binPath The path to the bin folder of the virtual Python
+   * environment. This path will be prefixed to every command, e.g.
+   * `manimgl --version` becomes
+   * `/path/to/venv/bin/manimgl --version`.
    */
-  private runInVenv(cmd: string): Promise<string> {
+  private runWithVenvBin(cmd: string): Promise<string> {
     if (!this.venvPath) {
       throw new Error("Python virtual environment not set up yet.");
     }
-    return run(`. ${path.join(this.venvPath, "bin", "activate")} && ${cmd}`);
+    const binPath = path.join(this.venvPath, "bin");
+    return run(path.join(binPath, cmd));
   }
 }
