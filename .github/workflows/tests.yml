@@ -36,15 +36,13 @@ jobs:
 
       - name: Install other dependencies
         run: |
-          if [ "$RUNNER_OS" == "Linux" ] || [ "$RUNNER_OS" == "macOS" ]; then
+          if [ "$RUNNER_OS" == "Linux" ]; then
             # Install OpenGL Mesa Utils
             # https://idroot.us/install-mesa-drivers-ubuntu-24-04/
             sudo add-apt-repository ppa:kisak/kisak-mesa
             sudo apt-get update
             sudo apt-get install mesa-utils -y
-          fi
 
-          if [ "$RUNNER_OS" == "Linux" ]; then
             # Install Pango
             sudo apt-get install libpango1.0-dev -y
 
