@@ -24,7 +24,7 @@ import "source-map-support/register";
 export function run(): Promise<void> {
   const mocha = new Mocha({
     ui: "tdd",
-    timeout: 200000,
+    timeout: 20000,
   });
 
   return new Promise(async (resolve, reject) => {
@@ -42,7 +42,7 @@ export function run(): Promise<void> {
         await new Promise(resolve => setTimeout(resolve, 5000));
       } else {
         console.log("💠 Tests executed via npm script");
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 20000));
       }
 
       console.log("Running tests...");
