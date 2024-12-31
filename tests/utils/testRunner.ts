@@ -52,7 +52,7 @@ export function run(): Promise<void> {
         await new Promise(resolve => setTimeout(resolve, 5000));
       } else {
         console.log("💠 Tests executed via npm script");
-        await new Promise(resolve => setTimeout(resolve, 20000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
 
       console.log("Running tests...");
