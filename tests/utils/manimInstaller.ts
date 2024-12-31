@@ -119,7 +119,8 @@ export class ManimInstaller {
     if (!this.venvPath) {
       throw new Error("Python virtual environment not set up yet.");
     }
-    const binPath = path.join(this.venvPath, "bin");
+    const binFolderName = process.platform === "win32" ? "Scripts" : "bin";
+    const binPath = path.join(this.venvPath, binFolderName);
     return run(path.join(binPath, cmd));
   }
 }

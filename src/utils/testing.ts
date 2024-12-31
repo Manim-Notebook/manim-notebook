@@ -6,7 +6,8 @@ export function setupTestEnvironment() {
   if (!basePath) {
     throw new Error("TEST_BASE_PATH not set, although in testing environment.");
   }
-  const binPath = path.join(basePath, "tmp", "manimVenv", "bin");
+  const binFolderName = process.platform === "win32" ? "Scripts" : "bin";
+  const binPath = path.join(basePath, "tmp", "manimVenv", binFolderName);
   injectVSCodeTerminalForPythonVenv(binPath);
 }
 
