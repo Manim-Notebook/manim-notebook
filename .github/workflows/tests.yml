@@ -45,7 +45,9 @@ jobs:
             sudo add-apt-repository ppa:kisak/kisak-mesa
             sudo apt update
             sudo apt install mesa-utils -y
-            glxinfo | grep "OpenGL version"
+
+            echo "Testing OpenGL version"
+            xvfb-run -a glxinfo | grep "OpenGL version"
           fi
         shell: bash
 
