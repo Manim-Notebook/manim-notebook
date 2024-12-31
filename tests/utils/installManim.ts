@@ -11,6 +11,7 @@ async function setupManimInstallation() {
   await installer.download();
   await installer.install();
   await installer.installAdditionalDependencies();
+  await installer.verifyInstallation();
 }
 
 (async () => {

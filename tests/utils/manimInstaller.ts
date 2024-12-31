@@ -107,6 +107,14 @@ export class ManimInstaller {
   }
 
   /**
+   * Verifies the Manim installation.
+   */
+  public async verifyInstallation() {
+    console.log("🔍 Verifying Manim installation");
+    await this.runWithVenvBin("manimgl --version");
+  }
+
+  /**
    * Runs a command using the respective binary from the Python virtual
    * environment.
    *
