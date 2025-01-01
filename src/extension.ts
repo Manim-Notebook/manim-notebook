@@ -10,6 +10,7 @@ import { registerWalkthroughCommands } from "./walkthrough/commands";
 import { ExportSceneCodeLens } from "./export";
 import { tryToDetermineManimVersion, LAST_WARNING_NO_VERSION_KEY } from "./manimVersion";
 import { setupTestEnvironment } from "./utils/testing";
+import { EventEmitter } from "events";
 
 export let manimNotebookContext: vscode.ExtensionContext;
 
@@ -135,19 +136,17 @@ export async function activate(context: vscode.ExtensionContext) {
   registerManimCellProviders(context);
 
   if (process.env.IS_TESTING === "true") {
-    console.log("💠 Manim Notebook extension activated");
-    onExtensionActivated();
+    console.log("💠 Extension marked as activated");
+    activatedEmitter.emit("activated");
   }
 }
 
 /**
- * Called when the extension is activated. This is only used for testing
- * purposes, such that we can stub this method (since `activate()` might be
- * called earlier than we can stub it).
+ * A global event emitter that can be used to listen for the extension being
+ * activated. This is only used for testing purposes.
  */
-export function onExtensionActivated() {
-  // no-op
-}
+class GlobalEventEmitter extends EventEmitter {}
+export const activatedEmitter = new GlobalEventEmitter();
 
 export function deactivate() {
   Logger.deactivate();

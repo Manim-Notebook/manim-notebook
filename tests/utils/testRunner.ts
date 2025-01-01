@@ -9,6 +9,9 @@
  * [2] https://github.com/microsoft/vscode-extension-samples/blob/main/helloworld-test-sample/src/test/suite/index.ts
  */
 
+// import as soon as possible
+import { activatedEmitter } from "../../src/extension";
+
 import * as path from "path";
 import Mocha from "mocha";
 import * as assert from "assert";
@@ -16,8 +19,6 @@ import { globSync } from "glob";
 import "source-map-support/register";
 
 import { workspace, Uri } from "vscode";
-import * as manimNotebook from "../../src/extension";
-import * as sinon from "sinon";
 
 const WORKSPACE_ROOT: string = workspace.workspaceFolders![0].uri.fsPath;
 
@@ -37,9 +38,6 @@ export function uriRelative(pathRelativeToWorkspaceRoot: string): Uri {
  * the main() function in main.ts).
  */
 export function run(): Promise<void> {
-  // register spy as early as possible
-  const activationSpy = sinon.spy(manimNotebook, "onExtensionActivated");
-
   const mocha = new Mocha({
     ui: "tdd",
     timeout: 20000,
@@ -62,8 +60,8 @@ export function run(): Promise<void> {
       if (process.env.IS_CALLED_IN_NPM_SCRIPT !== "true") {
         console.log("💠 Tests executed via debug configuration");
         console.log("💠 Waiting for extension activation...");
-        await waitUntilExtensionActivated(activationSpy);
-        console.log("💠 Extension activated");
+        await waitUntilExtensionActivated();
+        console.log("💠 Extension activated detected in tests");
       } else {
         // set environment variables when called via `npm test`
         // also see launch.json
@@ -90,21 +88,12 @@ export function run(): Promise<void> {
 
 /**
  * Waits until the Manim Notebook extension is activated.
- *
- * @param activationSpy The spy that listens for the activation event, e.g.
- * `onExtensionActivated`.
  */
-async function waitUntilExtensionActivated(activationSpy: sinon.SinonSpy): Promise<void> {
+async function waitUntilExtensionActivated(): Promise<void> {
   await new Promise<void>((resolve, reject) => {
-    const interval = setInterval(() => {
-      if (activationSpy.called) {
-        clearInterval(interval);
-        resolve();
-      }
-    }, 500);
+    activatedEmitter.on("activated", () => resolve());
     setTimeout(() => {
-      clearInterval(interval);
       reject(new Error("Extension activation timeout"));
-    }, 20000);
+    }, 15000);
   });
 }
