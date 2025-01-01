@@ -7,8 +7,10 @@ import * as sinon from "sinon";
 import * as manimNotebook from "@src/extension";
 import { onTerminalOutput } from "../src/utils/terminal";
 
+const MANIM_VERSION_STRING_REGEX = /v\d+\.\d+\.\d+/;
+
 describe("Manim Installation", function () {
-  it("Dummy read from terminal", async () => {
+  it("Can read from terminal", async () => {
     const extension = extensions.getExtension("Manim-Notebook.manim-notebook");
     if (!extension) {
       throw new Error("Manim Notebook extension not found");
@@ -22,16 +24,19 @@ describe("Manim Installation", function () {
     return new Promise((resolve) => {
       onTerminalOutput(terminal, (data) => {
         console.log(data);
-        resolve();
+        if (MANIM_VERSION_STRING_REGEX.test(data)) {
+          resolve();
+        }
       });
       terminal.sendText("manimgl --version");
     });
   });
 
   it("Detects Manim version", async () => {
+    // TODO: Test different Manim versions installed
     const spy = sinon.spy(window, "showInformationMessage");
     await commands.executeCommand("manim-notebook.redetectManimVersion");
     sinon.assert.called(spy);
-    sinon.assert.calledWith(spy, sinon.match(/v\d+\.\d+\.\d+/));
+    sinon.assert.calledWith(spy, sinon.match(MANIM_VERSION_STRING_REGEX));
   });
 });
