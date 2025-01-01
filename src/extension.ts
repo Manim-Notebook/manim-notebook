@@ -133,6 +133,20 @@ export async function activate(context: vscode.ExtensionContext) {
     redetectManimVersionCommand,
   );
   registerManimCellProviders(context);
+
+  if (process.env.IS_TESTING === "true") {
+    console.log("💠 Manim Notebook extension activated");
+    onExtensionActivated();
+  }
+}
+
+/**
+ * Called when the extension is activated. This is only used for testing
+ * purposes, such that we can stub this method (since `activate()` might be
+ * called earlier than we can stub it).
+ */
+export function onExtensionActivated() {
+  // no-op
 }
 
 export function deactivate() {

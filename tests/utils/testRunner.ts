@@ -15,7 +15,19 @@ import * as assert from "assert";
 import { globSync } from "glob";
 import "source-map-support/register";
 
-import { workspace } from "vscode";
+import { workspace, Uri } from "vscode";
+import * as manimNotebook from "../../src/extension";
+import * as sinon from "sinon";
+
+const WORKSPACE_ROOT: string = workspace.workspaceFolders![0].uri.fsPath;
+
+/**
+ * Returns a Uri object for a file path relative to the workspace root.
+ */
+export function uriRelative(pathRelativeToWorkspaceRoot: string): Uri {
+  const fullPath = path.join(WORKSPACE_ROOT, pathRelativeToWorkspaceRoot);
+  return Uri.file(fullPath);
+}
 
 /**
  * Runs the test suite.
@@ -25,15 +37,17 @@ import { workspace } from "vscode";
  * the main() function in main.ts).
  */
 export function run(): Promise<void> {
+  // register spy as early as possible
+  const activationSpy = sinon.spy(manimNotebook, "onExtensionActivated");
+
   const mocha = new Mocha({
     ui: "tdd",
     timeout: 20000,
   });
 
-  const workspaceRoot = workspace.workspaceFolders![0].uri.fsPath;
-  console.log(`💠 workspaceRoot: ${workspaceRoot}`);
-  assert.ok(workspaceRoot.endsWith("fixtures"));
-  const files: string[] = globSync("**", { cwd: workspaceRoot });
+  console.log(`💠 workspaceRoot: ${WORKSPACE_ROOT}`);
+  assert.ok(WORKSPACE_ROOT.endsWith("fixtures"));
+  const files: string[] = globSync("**", { cwd: WORKSPACE_ROOT });
   console.log(`💠 files in root: ${files}`);
 
   return new Promise(async (resolve, reject) => {
@@ -47,9 +61,9 @@ export function run(): Promise<void> {
 
       if (process.env.IS_CALLED_IN_NPM_SCRIPT !== "true") {
         console.log("💠 Tests executed via debug configuration");
-        console.log("Waiting fixed timeout of 5s before running tests...");
-        console.log("(This is to ensure that the extension has properly activated.)");
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        console.log("💠 Waiting for extension activation...");
+        await waitUntilExtensionActivated(activationSpy);
+        console.log("💠 Extension activated");
       } else {
         // set environment variables when called via `npm test`
         // also see launch.json
@@ -71,5 +85,26 @@ export function run(): Promise<void> {
       console.error(err);
       reject(err);
     }
+  });
+}
+
+/**
+ * Waits until the Manim Notebook extension is activated.
+ *
+ * @param activationSpy The spy that listens for the activation event, e.g.
+ * `onExtensionActivated`.
+ */
+async function waitUntilExtensionActivated(activationSpy: sinon.SinonSpy): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const interval = setInterval(() => {
+      if (activationSpy.called) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 500);
+    setTimeout(() => {
+      clearInterval(interval);
+      reject(new Error("Extension activation timeout"));
+    }, 20000);
   });
 }
