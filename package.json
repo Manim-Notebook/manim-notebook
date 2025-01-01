@@ -29,7 +29,7 @@
   "activationEvents": [
     "onLanguage:python"
   ],
-  "main": "./out/extension.js",
+  "main": "./out/src/extension.js",
   "contributes": {
     "commands": [
       {
@@ -253,17 +253,18 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc --project .config/tsconfig.src.json",
-    "compile-test": "tsc --project .config/tsconfig.test.json",
-    "watch": "tsc --project .config/tsconfig.src.json -watch",
-    "watch-test": "tsc --project .config/tsconfig.test.json -watch",
-    "pretest": "npm run compile-test",
+    "compile": "tsc --project .config/tsconfig.paths.json",
+    "watch": "tsc --project .config/tsconfig.paths.json -watch",
     "lint": "eslint src --config ./.config/eslint.mjs",
-    "test": "node ./out/test/tests/main.js"
+    "install-manim": "node ./out/tests/utils/installManim.js",
+    "pretest": "npm run compile && npm run install-manim",
+    "test": "node ./out/tests/main.js",
+    "testInGithubActions": "node ./out/tests/main.js"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.12.1",
     "@types/node": "^22.10.2",
+    "@types/sinon": "^17.0.3",
     "@types/vscode": "^1.96.0",
     "@typescript-eslint/parser": "^8.18.2",
     "@vscode/test-cli": "^0.0.10",
@@ -272,6 +273,7 @@
     "glob": "^11.0.0",
     "globals": "^15.14.0",
     "mocha": "^11.0.1",
+    "sinon": "^19.0.2",
     "source-map-support": "^0.5.21",
     "typescript": "^5.7.2"
   },

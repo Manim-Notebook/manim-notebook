@@ -79,12 +79,19 @@
   "cSpell.words": [
     "ansi",
     "Ansi",
+    "audioop",
     "autoplay",
     "autoreload",
     "cmds",
+    "elif",
+    "ensurepip",
     "github",
+    "glxinfo",
     "ipython",
     "Keybord",
+    "kisak",
+    "libglut",
+    "libpango",
     "Logfile",
     "manim",
     "Manim",
@@ -92,11 +99,16 @@
     "manimgl",
     "Millis",
     "nodenext",
+    "opengl",
+    "Pango",
     "prerun",
     "Sanderson",
     "Sanderson's",
+    "setuptools",
     "venv",
     "virtualenvs",
-    "youtube"
+    "wglinfo",
+    "youtube",
+    "ZINK"
   ]
 }

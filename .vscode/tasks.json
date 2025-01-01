@@ -4,7 +4,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Watch src files",
+      "label": "Watch Files",
       "type": "npm",
       "script": "watch",
       "problemMatcher": "$tsc-watch",
@@ -18,20 +18,24 @@
       }
     },
     {
-      // Note that this also compiles the src files into out/test/src
-      // and test files into out/test/tests. This is to have a strict
-      // separation between usual compilation and testing.
-      "label": "Watch test files",
+      "label": "Install Manim",
       "type": "npm",
-      "script": "watch-test",
-      "problemMatcher": "$tsc-watch",
-      "isBackground": true,
+      "script": "install-manim",
+      "cwd": "${workspaceFolder}",
       "presentation": {
-        "reveal": "never"
+        "reveal": "always"
       },
       "group": {
         "kind": "build"
       }
+    },
+    {
+      "label": "Prepare For Tests",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Watch Files",
+        "Install Manim"
+      ]
     }
   ]
 }

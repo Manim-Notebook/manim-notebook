@@ -1,3 +1,5 @@
+tmp/
+*.log
 *.mp4
 .DS_Store
 out
