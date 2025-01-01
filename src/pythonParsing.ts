@@ -5,14 +5,16 @@ export class ManimCellRanges {
   /**
    * Regular expression to match the start of a Manim cell.
    *
-   * The marker is a comment line starting with "##". Since the comment might
+   * By default, the cell marker is a comment line starting with "##". Since the comment might
    * be indented, we allow for any number of leading whitespaces.
    *
    * Manim cells themselves might contain further comments, but no nested
-   * Manim cells, i.e. no further comment starting with "##".
+   * Manim cells, i.e. no further comment starting with the default "##".
    */
-  private static readonly MARKER = /^(\s*##)/;
-
+  private static get MARKER(): RegExp {
+    const cellMarker = vscode.workspace.getConfiguration("manim-notebook").cellMarker;
+    return new RegExp(`^(\\s*${cellMarker})`);
+  } 
   /**
    * Calculates the ranges of Manim cells in the given document.
    *
