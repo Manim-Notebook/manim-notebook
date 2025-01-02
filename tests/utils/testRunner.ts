@@ -58,18 +58,19 @@ export function run(): Promise<void> {
       files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
       if (process.env.IS_CALLED_IN_NPM_SCRIPT !== "true") {
-        console.log("💠 Tests executed via debug configuration");
-        console.log("💠 Waiting for extension activation...");
-        await waitUntilExtensionActivated();
-        console.log("💠 Extension activated detected in tests");
+        console.log("💠 Tests requested via debug configuration");
       } else {
-        // set environment variables when called via `npm test`
-        // also see launch.json
         process.env.IS_TESTING = "true";
         process.env.TEST_BASE_PATH = process.env.EXTENSION_DEV_PATH;
-        console.log("💠 Tests executed via npm script");
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log("💠 Tests requested via npm script");
       }
+
+      // open any python file to trigger extension activation
+      await window.showTextDocument(uriRelative("basic.py"));
+
+      console.log("💠 Waiting for extension activation...");
+      await waitUntilExtensionActivated();
+      console.log("💠 Extension activated detected in tests");
 
       console.log("Running tests...");
       mocha.run((failures: any) => {
