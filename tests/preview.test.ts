@@ -10,9 +10,16 @@ describe("Previewing", function () {
     goToLine(editor, 11);
     await commands.executeCommand("manim-notebook.previewManimCell");
 
+    let resolved = false;
+
     return new Promise((resolve) => {
       onAnyTerminalOutput((data) => {
+        if (resolved) {
+          return;
+        }
+        console.log(`Terminal output: ${data}`);
         if (data.includes("ReplacementTransformCircle")) {
+          resolved = true;
           resolve();
         }
       });
