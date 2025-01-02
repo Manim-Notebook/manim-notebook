@@ -140,55 +140,47 @@ export class ManimInstaller {
   }
 
   /**
-   * Fixes Windows ContextException when creating a new OpenGL window.
-   *
-   * You should only call this method if you are running Manim on Windows.
-   */
-  public fixWindowsContextException() {
-    const baseFolder = process.cwd();
-    const testFolder = path.join(baseFolder, "tests", "fixtures");
-    this.disablePygletShadowWindow(testFolder);
-  }
-
-  /**
-   * Disables Pyglet shadow window creation in all .py files as workaround for
-   * the "Unable to share contexts" error under Windows.
+   * Disables Pyglet shadow window creation in Manim as workaround for
+   * the "Unable to share contexts" error under Windows. This is just a
+   * monkey patch.
    *
    * Also see:
    * - https://github.com/pyglet/pyglet/issues/1047
    * - https://discourse.psychopy.org/t/bugfixes-for-unable-to-share-contexts-and-portaudio-not-initialized/3537
    * - https://pyglet.readthedocs.io/en/latest/programming_guide/options.html#pyglet.Options.shadow_window
    *
-   * @param folderPath Path to the folder containing .py files.
-   *
  */
-  private disablePygletShadowWindow(folderPath: string): void {
-    // Check if the folder exists
-    if (!fs.existsSync(folderPath)) {
-      console.error(`Folder not found: ${folderPath}`);
+  public disablePygletShadowWindow(): void {
+    const manimWindowFile = path.join(this.manimPath, "manimlib", "window.py");
+    if (!fs.existsSync(manimWindowFile)) {
+      console.error(`Manim window.py file not found: ${manimWindowFile}`);
       return;
     }
-    console.log(`Disabling pyglet shadow window creation in ${folderPath}`);
+    console.log(`⛑️ Disabling pyglet shadow window creation in ${manimWindowFile}`);
 
-    const files = fs.readdirSync(folderPath);
-    for (const file of files) {
-      const filePath = path.join(folderPath, file);
-      if (path.extname(file) !== ".py") {
-        continue;
+    try {
+      const fileContent = fs.readFileSync(manimWindowFile, "utf-8");
+
+      // Stop the fix if it's already applied
+      const disableShadowWindow = "pyglet.options['shadow_window']=False";
+      if (fileContent.includes(disableShadowWindow)) {
+        console.log("pyglet shadow window fix already applied");
+        return;
       }
 
-      try {
-        const fileContent = fs.readFileSync(filePath, "utf-8");
+      // Prepend the fix, taking into account that
+      // "from __future__ import annotations" must be the first line
+      const fix = `import pyglet\n${disableShadowWindow}\n`;
+      const futureImport = "from __future__ import annotations\n";
+      const updatedContent = fileContent.startsWith(futureImport)
+        ? `${futureImport}${fix}${fileContent.slice(futureImport.length)}`
+        : `${fix}${fileContent}`;
 
-        // Prepend the fix
-        const fix = "import pyglet\npyglet.options['shadow_window']=False\n";
-        const updatedContent = `${fix}${fileContent}`;
-
-        fs.writeFileSync(filePath, updatedContent, "utf-8");
-        console.log(`Updated: ${filePath}`);
-      } catch (error) {
-        console.error(`Error processing file ${filePath}:`, error);
-      }
+      // Save the updated content
+      fs.writeFileSync(manimWindowFile, updatedContent, "utf-8");
+      console.log(`Updated: ${manimWindowFile}`);
+    } catch (error) {
+      console.error(`Error processing file ${manimWindowFile}:`, error);
     }
   }
 

@@ -11,7 +11,7 @@ async function setupManimInstallation() {
   await installer.download();
 
   if (process.platform === "win32") {
-    installer.fixWindowsContextException();
+    installer.disablePygletShadowWindow();
   }
 
   await installer.install();
