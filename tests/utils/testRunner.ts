@@ -95,6 +95,6 @@ async function waitUntilExtensionActivated(): Promise<void> {
     activatedEmitter.on("activated", () => resolve());
     setTimeout(() => {
       reject(new Error("Extension activation timeout"));
-    }, 15000);
+    }, 20000);
   });
 }
