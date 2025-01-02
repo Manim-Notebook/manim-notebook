@@ -83,7 +83,7 @@ jobs:
           fi
         shell: bash
 
-      - name: Install Manim & Run tests
+      - name: Run tests
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
             # Start an X virtual framebuffer (Xvfb) server, which emulates a
