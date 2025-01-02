@@ -9,7 +9,7 @@ import { onTerminalOutput } from "../src/utils/terminal";
 
 const MANIM_VERSION_STRING_REGEX = /v\d+\.\d+\.\d+/;
 
-describe("Manim Installation", function () {
+describe("Manim Activation", function () {
   it("Can read from terminal", async () => {
     const extension = extensions.getExtension("Manim-Notebook.manim-notebook");
     if (!extension) {
