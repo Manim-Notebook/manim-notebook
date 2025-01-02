@@ -74,6 +74,9 @@ function injectVSCodeTerminalForPythonVenv(binPath: string) {
  * @param command The command to check.
  */
 function isManimCommand(command: string): boolean {
+  if (command.length <= 3) {
+    return false;
+  }
   const manimCommands = ["checkpoint_paste", "reload", "exit", "clear"];
   command = command.trim();
   command = stripAnsiCodes(command);
