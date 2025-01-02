@@ -53,6 +53,9 @@ jobs:
             # Work around 'NoneType' object has no attribute 'glGetError'
             # https://github.com/MPI-IS/mesh/issues/23#issuecomment-607784234
             sudo apt-get install python3-opengl
+
+            # Install copy-paste mechanism to avoid ClipboardUnavailable errors
+            sudo apt-get install xclip -y
           fi
         shell: bash
 
