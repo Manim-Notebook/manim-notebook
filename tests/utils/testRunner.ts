@@ -18,7 +18,7 @@ import * as assert from "assert";
 import { globSync } from "glob";
 import "source-map-support/register";
 
-import { workspace, Uri } from "vscode";
+import { window, workspace, Uri } from "vscode";
 
 const WORKSPACE_ROOT: string = workspace.workspaceFolders![0].uri.fsPath;
 
