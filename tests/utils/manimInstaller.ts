@@ -171,9 +171,10 @@ export class ManimInstaller {
       // Prepend the fix, taking into account that
       // "from __future__ import annotations" must be the first line
       const fix = `import pyglet\n${disableShadowWindow}\n`;
-      const futureImport = "from __future__ import annotations\n";
-      const updatedContent = fileContent.startsWith(futureImport)
-        ? `${futureImport}${fix}${fileContent.slice(futureImport.length)}`
+      const futureImport = "from __future__ import annotations";
+      const lines = fileContent.split("\n");
+      const updatedContent = lines[0].startsWith(futureImport)
+        ? `${futureImport}\n${fix}${lines.slice(1).join("\n")}`
         : `${fix}${fileContent}`;
 
       // Save the updated content
