@@ -70,7 +70,7 @@ export function run(): Promise<void> {
 
       console.log("💠 Waiting for extension activation...");
       await waitUntilExtensionActivated();
-      console.log("💠 Extension activated detected in tests");
+      console.log("💠 Extension activation detected in tests");
 
       console.log("Running tests...");
       mocha.run((failures: any) => {
