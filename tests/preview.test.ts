@@ -5,7 +5,7 @@ import { uriRelative } from "./utils/testRunner";
 import { goToLine } from "./utils/editor";
 
 describe("Previewing", function () {
-  it.only("Can preview the current Manim Cell", async () => {
+  it("Can preview the current Manim Cell", async () => {
     const editor = await window.showTextDocument(uriRelative("basic.py"));
     goToLine(editor, 11);
     await commands.executeCommand("manim-notebook.previewManimCell");
