@@ -10,3 +10,4 @@ _debug_scenes/
 *.vsix
 *.code-workspace
 *.pyc
+**/__pycache__/**/*

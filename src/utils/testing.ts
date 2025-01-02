@@ -1,5 +1,6 @@
 import { window, Terminal, TerminalShellExecution } from "vscode";
 import * as path from "path";
+import { stripAnsiCodes } from "./terminal";
 
 export function setupTestEnvironment() {
   const basePath = process.env.TEST_BASE_PATH;
@@ -32,6 +33,9 @@ function injectVSCodeTerminalForPythonVenv(binPath: string) {
     // Inject sendText()
     const sendTextOrig = terminal.sendText;
     terminal.sendText = (text: string, shouldExecute?: boolean): void => {
+      if (isManimCommand(text)) {
+        return sendTextOrig.call(terminal, text, shouldExecute);
+      }
       return sendTextOrig.call(terminal, path.join(binPath, text), shouldExecute);
     };
 
@@ -46,6 +50,9 @@ function injectVSCodeTerminalForPythonVenv(binPath: string) {
       const executeCommandOrig = shellIntegration.executeCommand as
       (_commandLine: string) => TerminalShellExecution;
       shellIntegration.executeCommand = (commandLine: string): TerminalShellExecution => {
+        if (isManimCommand(commandLine)) {
+          return executeCommandOrig.call(shellIntegration, commandLine);
+        }
         return executeCommandOrig.call(shellIntegration, path.join(binPath, commandLine));
       };
 
@@ -58,4 +65,20 @@ function injectVSCodeTerminalForPythonVenv(binPath: string) {
 
     return terminal;
   };
+}
+
+/**
+ * Returns whether the given command is a Manim command used inside the Manim
+ * interactive terminal (IPython shell).
+ *
+ * @param command The command to check.
+ */
+function isManimCommand(command: string): boolean {
+  if (command.length <= 3) {
+    return false;
+  }
+  const manimCommands = ["checkpoint_paste", "reload", "exit", "clear"];
+  command = command.trim();
+  command = stripAnsiCodes(command);
+  return manimCommands.some(manimCommand => command.startsWith(manimCommand));
 }

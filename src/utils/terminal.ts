@@ -51,8 +51,12 @@ const ANSI_CONTROL_SEQUENCE_REGEX = /(?:\x1B[@-Z\\-_]|[\x80-\x9A\x9C-\x9F]|(?:\x
  */
 export async function* withoutAnsiCodes(stream: AsyncIterable<string>): AsyncIterable<string> {
   for await (const data of stream) {
-    yield data.replace(ANSI_CONTROL_SEQUENCE_REGEX, "");
+    yield stripAnsiCodes(data);
   }
+}
+
+export function stripAnsiCodes(data: string): string {
+  return data.replace(ANSI_CONTROL_SEQUENCE_REGEX, "");
 }
 
 /**
