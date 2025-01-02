@@ -103,6 +103,7 @@
     "opengl",
     "Pango",
     "prerun",
+    "Pyglet",
     "Sanderson",
     "Sanderson's",
     "setuptools",

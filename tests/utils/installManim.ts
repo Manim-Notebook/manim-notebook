@@ -9,6 +9,11 @@ async function setupManimInstallation() {
   const installer = new ManimInstaller();
   await installer.setup(tmpFolder);
   await installer.download();
+
+  if (process.platform === "win32") {
+    installer.fixWindowsContextException();
+  }
+
   await installer.install();
   await installer.installAdditionalDependencies();
   await installer.verifyInstallation();
