@@ -577,6 +577,11 @@ export class ManimShell {
    * @param useShellIntegration Whether to use shell integration if available
    */
   private exec(shell: Terminal, command: string, useShellIntegration = true) {
+    if (!shell) {
+      Window.showErrorMessage("No shell to execute command in. Internal extension error.");
+      return;
+    }
+
     this.detectShellExecutionEnd = false;
     Logger.debug("🔒 Shell execution end detection disabled");
 
