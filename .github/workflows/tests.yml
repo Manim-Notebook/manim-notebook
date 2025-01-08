@@ -65,7 +65,9 @@ jobs:
 
           # Extract (on purpose no space between -o and mesa3d)
           7z x mesa3d.7z -omesa3d
-          .\mesa3d\systemwidedeploy.cmd
+
+          # Install system-wide (option 1: core desktop OpenGL drivers)
+          .\mesa3d\systemwidedeploy.cmd 1
 
       - name: Test OpenGL
         run: |
