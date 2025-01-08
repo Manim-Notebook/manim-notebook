@@ -63,7 +63,8 @@ jobs:
           # Install OpenGL pre-built Mesa binaries (MSVC) from mesa-dist-win
           Invoke-WebRequest -Uri https://github.com/pal1000/mesa-dist-win/releases/download/24.3.2/mesa3d-24.3.2-release-msvc.7z -OutFile mesa3d.7z
 
-          7z x mesa3d.7z
+          # Extract (on purpose no space between -o and mesa3d)
+          7z x mesa3d.7z -omesa3d
           .\mesa3d\systemwidedeploy.cmd
 
       - name: Test OpenGL
