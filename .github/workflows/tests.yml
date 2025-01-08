@@ -38,26 +38,33 @@ jobs:
           # hopefully, this can be cached in the future
           # see: https://github.com/actions/setup-python/issues/991
 
-      - name: Install other dependencies
+      - name: Install Mesa (Linux)
+        if: runner.os == 'Linux'
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            # Install OpenGL Mesa Utils
-            # https://idroot.us/install-mesa-drivers-ubuntu-24-04/
-            sudo add-apt-repository ppa:kisak/kisak-mesa
-            sudo apt-get update
-            sudo apt-get install mesa-utils -y
+          # Install OpenGL Mesa Utils
+          # https://idroot.us/install-mesa-drivers-ubuntu-24-04/
+          sudo add-apt-repository ppa:kisak/kisak-mesa
+          sudo apt-get update
+          sudo apt-get install mesa-utils -y
 
-            # Install Pango
-            sudo apt-get install libpango1.0-dev -y
+          # Install Pango
+          sudo apt-get install libpango1.0-dev -y
 
-            # Work around 'NoneType' object has no attribute 'glGetError'
-            # https://github.com/MPI-IS/mesh/issues/23#issuecomment-607784234
-            sudo apt-get install python3-opengl
+          # Work around 'NoneType' object has no attribute 'glGetError'
+          # https://github.com/MPI-IS/mesh/issues/23#issuecomment-607784234
+          sudo apt-get install python3-opengl
 
-            # Install copy-paste mechanism to avoid ClipboardUnavailable errors
-            sudo apt-get install xclip -y
-          fi
-        shell: bash
+          # Install copy-paste mechanism to avoid ClipboardUnavailable errors
+          sudo apt-get install xclip -y
+
+      - name: Install Mesa (MSVC, Windows)
+        if: runner.os == 'Windows'
+        run: |
+          # Install OpenGL pre-built Mesa binaries (MSVC) from mesa-dist-win
+          Invoke-WebRequest -Uri https://github.com/pal1000/mesa-dist-win/releases/download/24.3.2/mesa3d-24.3.2-release-msvc.7z -OutFile mesa3d.7z
+
+          7z x mesa3d.7z
+          .\mesa3d\systemwidedeploy.cmd
 
       - name: Test OpenGL
         run: |
