@@ -55,6 +55,7 @@ jobs:
           sudo apt-get install python3-opengl
 
           # Install copy-paste mechanism to avoid ClipboardUnavailable errors
+          # (python pyperclip makes use of xclip on Linux)
           sudo apt-get install xclip -y
 
       - name: Install Mesa (MinGW, Windows)
