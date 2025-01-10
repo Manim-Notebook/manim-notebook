@@ -9,11 +9,6 @@ async function setupManimInstallation() {
   const installer = new ManimInstaller();
   await installer.setup(tmpFolder);
   await installer.download();
-
-  // if (process.platform === "win32") {
-  //   installer.disablePygletShadowWindow();
-  // }
-
   await installer.install();
   await installer.installAdditionalDependencies();
   await installer.verifyInstallation();
