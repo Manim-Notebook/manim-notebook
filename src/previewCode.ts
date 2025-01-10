@@ -6,9 +6,7 @@ import { ManimCellRanges } from "./pythonParsing";
 import { Logger, Window } from "./logger";
 import { hasUserMinimalManimVersion } from "./manimVersion";
 
-// \x0C: is Ctrl + L, which clears the terminal screen
-// eslint-disable-next-line @stylistic/max-len
-const PREVIEW_COMMAND = "\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7Fcheckpoint_paste()";
+const PREVIEW_COMMAND = "checkpoint_paste()";
 
 function parsePreviewCellArgs(cellCode?: string, startLine?: number) {
   let startLineParsed: number | undefined = startLine;
