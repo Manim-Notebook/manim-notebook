@@ -229,34 +229,34 @@ export class ManimShell {
   }
 
   /**
-   * Executes the given command. If no active terminal running Manim is found,
-   * a new terminal is spawned, and a new Manim session is started in it
-   * before executing the given command.
+   * Executes the given IPython command. If no active terminal running Manim
+   * is found, a new terminal is spawned, and a new Manim session is started
+   * in it beforehand.
    *
    * This command is locked during startup to prevent multiple new scenes from
    * being started at the same time, see `lockDuringStartup`.
    *
-   * For params explanations, see the docs for `execCommand()`.
+   * For params explanations, see the docs for `execIPythonCommand()`.
    */
-  public async executeCommand(
+  public async executeIPythonCommand(
     command: string, startLine: number, waitUntilFinished = false,
     handler?: CommandExecutionEventHandler,
   ) {
-    await this.execCommand(
+    await this.execIPythonCommand(
       command, waitUntilFinished, false, false, startLine, handler);
   }
 
   /**
-   * Executes the given command, but only if an active ManimGL shell exists.
-   * Otherwise throws a `NoActiveShellError`.
+   * Executes the given IPython command, but only if an active ManimGL shell
+   * exists. Otherwise throws a `NoActiveShellError`.
    *
-   * For params explanations, see the docs for `execCommand()`.
+   * For params explanations, see the docs for `execIPythonCommand()`.
    * @throws NoActiveShellError If no active shell is found.
    */
-  public async executeCommandErrorOnNoActiveSession(
+  public async executeIPythonCommandExpectSession(
     command: string, waitUntilFinished = false, forceExecute = false,
   ) {
-    await this.execCommand(
+    await this.execIPythonCommand(
       command, waitUntilFinished, forceExecute, true, undefined, undefined);
   }
 
@@ -264,7 +264,7 @@ export class ManimShell {
    * Returns whether the command execution is currently locked, i.e. when
    * Manim is starting up or another command is currently running.
    *
-   * @param forceExecute see `execCommand()`
+   * @param forceExecute see `execIPythonCommand()`
    * @returns true if the command execution is locked, false otherwise.
    */
   private async isLocked(forceExecute = false): Promise<boolean> {
@@ -291,7 +291,7 @@ export class ManimShell {
   }
 
   /**
-   * Executes a given command and bundles many different behaviors and options.
+   * Executes a given IPython command.
    *
    * This method is internal and only exposed via other public methods that
    * select a specific behavior.
@@ -318,7 +318,7 @@ export class ManimShell {
    * shell is required for the command execution (when `errorOnNoActiveShell`
    * is set to true).
    */
-  private async execCommand(
+  private async execIPythonCommand(
     command: string,
     waitUntilFinished: boolean,
     forceExecute: boolean,
@@ -326,6 +326,9 @@ export class ManimShell {
     startLine?: number,
     handler?: CommandExecutionEventHandler,
   ) {
+    // append ESC + ENTER to avoid IPython starting a multi-line input (#18)
+    command += "\x1b\x0d";
+
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
       + `, forceExecute=${forceExecute}, errorOnNoActiveShell=${errorOnNoActiveShell}`);
 
