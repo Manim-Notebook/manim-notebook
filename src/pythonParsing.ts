@@ -32,13 +32,26 @@ export class ManimCellRanges {
    */
   public static calculateRanges(document: vscode.TextDocument): vscode.Range[] {
     const ranges: vscode.Range[] = [];
-    const manimClasses = findManimClasses(document);
+    const classes = findClasses(document);
 
-    manimClasses.forEach(({ lineNumber, constructIndent }) => {
+    classes.sort((a, b) => a.lineNumber - b.lineNumber);
+
+    classes.forEach(({ isManimClass, lineNumber, constructIndent }, index) => {
+      // Only consider Manim classes.
+      // Note that we still have to iterate over all classes such that we know
+      // where the next class starts and where we can stop the current cell.
+      if (!isManimClass) {
+        return;
+      }
+
       let start: number | null = null;
       let startIndent: number | null = null;
 
-      for (let i = lineNumber; i < document.lineCount; i++) {
+      const nextClassLine = index < classes.length - 1
+        ? classes[index + 1].lineNumber
+        : document.lineCount;
+
+      for (let i = lineNumber; i < nextClassLine; i++) {
         const line = document.lineAt(i);
         if (line.isEmptyOrWhitespace) {
           continue;
@@ -60,7 +73,7 @@ export class ManimCellRanges {
       }
 
       if (start !== null) {
-        ranges.push(this.getRangeDiscardEmpty(document, start, document.lineCount - 1));
+        ranges.push(this.getRangeDiscardEmpty(document, start, nextClassLine - 1));
       }
     });
 
@@ -99,10 +112,65 @@ export class ManimCellRanges {
 }
 
 interface ClassLine {
+  isManimClass: boolean;
   line: string;
-  lineNumber: number;
+  lineNumber: number; // 0-based
   className: string;
+  classIndent: number;
   constructIndent: number;
+}
+
+/**
+ * Returns the lines that define Python classes.
+ *
+ * @param document The document to search in.
+ */
+function findClasses(document: vscode.TextDocument): ClassLine[] {
+  const lines = document.getText().split("\n");
+
+  const classLines: ClassLine[] = [];
+  let currentManimClassCandidate: ClassLine | null = null;
+
+  for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
+    const line = lines[lineNumber];
+
+    // note that a classMatch and an inheritedClassMatch are mutually exclusive
+    const inheritedClassMatch = line.match(/^\s*class\s+(\w+)\s*\(\w.*\)\s*:/);
+    const classMatch = line.match(/^\s*class\s+(\w+)\s*(\(\s*\))?\s*:/);
+    const constructMatch = line.match(/^\s*def\s+construct\s*\(self\)\s*:/);
+    if (!inheritedClassMatch && !classMatch && !constructMatch) {
+      continue;
+    }
+
+    if (inheritedClassMatch || classMatch) {
+      const newCurrentClass = {
+        isManimClass: false,
+        line, lineNumber,
+        className: "",
+        classIndent: line.search(/\S/), constructIndent: -1,
+      };
+
+      if (inheritedClassMatch) {
+        newCurrentClass.className = inheritedClassMatch[1];
+        currentManimClassCandidate = newCurrentClass;
+      } else if (classMatch) {
+        newCurrentClass.className = classMatch[1];
+        const newClassIndent = line.search(/\S/);
+        if (currentManimClassCandidate
+          && newClassIndent <= currentManimClassCandidate.classIndent) {
+          currentManimClassCandidate = null;
+        }
+      }
+
+      classLines.push(newCurrentClass);
+    } else if (currentManimClassCandidate && constructMatch) {
+      currentManimClassCandidate.constructIndent = line.search(/\S/);
+      currentManimClassCandidate.isManimClass = true;
+      currentManimClassCandidate = null;
+    }
+  }
+
+  return classLines;
 }
 
 /**
@@ -116,28 +184,7 @@ interface ClassLine {
  * @param document The document to search in.
  */
 export function findManimClasses(document: vscode.TextDocument): ClassLine[] {
-  const lines = document.getText().split("\n");
-
-  const classLines: ClassLine[] = [];
-  let currentClass: ClassLine | null = null;
-
-  for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
-    const line = lines[lineNumber];
-    const classMatch = line.match(/^\s*class\s+(.+?)\s*\(.*\)\s*:/);
-    const constructMatch = line.match(/^\s*def\s+construct\s*\(self\)\s*:/);
-
-    if (classMatch) {
-      currentClass = { line, lineNumber, className: classMatch[1], constructIndent: -1 };
-    }
-
-    if (currentClass && constructMatch) {
-      currentClass.constructIndent = line.search(/\S/);
-      classLines.push(currentClass);
-      currentClass = null;
-    }
-  }
-
-  return classLines;
+  return findClasses(document).filter(({ isManimClass }) => isManimClass);
 }
 
 /**
