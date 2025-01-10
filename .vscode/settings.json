@@ -104,6 +104,7 @@
     "opengl",
     "Pango",
     "prerun",
+    "pycache",
     "Pyglet",
     "Sanderson",
     "Sanderson's",
