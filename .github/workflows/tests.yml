@@ -38,23 +38,37 @@ jobs:
           # hopefully, this can be cached in the future
           # see: https://github.com/actions/setup-python/issues/991
 
-      - name: Install other dependencies
+      - name: Install Mesa (Linux)
+        if: runner.os == 'Linux'
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            # Install OpenGL Mesa Utils
-            # https://idroot.us/install-mesa-drivers-ubuntu-24-04/
-            sudo add-apt-repository ppa:kisak/kisak-mesa
-            sudo apt-get update
-            sudo apt-get install mesa-utils -y
+          # Install OpenGL Mesa Utils
+          # https://idroot.us/install-mesa-drivers-ubuntu-24-04/
+          sudo add-apt-repository ppa:kisak/kisak-mesa
+          sudo apt-get update
+          sudo apt-get install mesa-utils -y
 
-            # Install Pango
-            sudo apt-get install libpango1.0-dev -y
+          # Install Pango
+          sudo apt-get install libpango1.0-dev -y
 
-            # Work around 'NoneType' object has no attribute 'glGetError'
-            # https://github.com/MPI-IS/mesh/issues/23#issuecomment-607784234
-            sudo apt-get install python3-opengl
-          fi
-        shell: bash
+          # Work around 'NoneType' object has no attribute 'glGetError'
+          # https://github.com/MPI-IS/mesh/issues/23#issuecomment-607784234
+          sudo apt-get install python3-opengl
+
+          # Install copy-paste mechanism to avoid ClipboardUnavailable errors
+          # (python pyperclip makes use of xclip on Linux)
+          sudo apt-get install xclip -y
+
+      - name: Install Mesa (MinGW, Windows)
+        if: runner.os == 'Windows'
+        run: |
+          # Install OpenGL pre-built Mesa binaries from mesa-dist-win
+          Invoke-WebRequest -Uri https://github.com/pal1000/mesa-dist-win/releases/download/24.3.2/mesa3d-24.3.2-release-mingw.7z -OutFile mesa3d.7z
+
+          # Extract (on purpose no space between -o and mesa3d)
+          7z x mesa3d.7z -omesa3d
+
+          # Install system-wide (option 1: core desktop OpenGL drivers)
+          .\mesa3d\systemwidedeploy.cmd 1
 
       - name: Test OpenGL
         run: |
@@ -83,7 +97,7 @@ jobs:
           fi
         shell: bash
 
-      - name: Install Manim & Run tests
+      - name: Run tests
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
             # Start an X virtual framebuffer (Xvfb) server, which emulates a

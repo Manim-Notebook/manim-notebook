@@ -9,13 +9,26 @@
  * [2] https://github.com/microsoft/vscode-extension-samples/blob/main/helloworld-test-sample/src/test/suite/index.ts
  */
 
+// import as soon as possible
+import { activatedEmitter } from "../../src/extension";
+
 import * as path from "path";
 import Mocha from "mocha";
 import * as assert from "assert";
 import { globSync } from "glob";
 import "source-map-support/register";
 
-import { workspace } from "vscode";
+import { window, workspace, Uri } from "vscode";
+
+const WORKSPACE_ROOT: string = workspace.workspaceFolders![0].uri.fsPath;
+
+/**
+ * Returns a Uri object for a file path relative to the workspace root.
+ */
+export function uriInWorkspace(pathRelativeToWorkspaceRoot: string): Uri {
+  const fullPath = path.join(WORKSPACE_ROOT, pathRelativeToWorkspaceRoot);
+  return Uri.file(fullPath);
+}
 
 /**
  * Runs the test suite.
@@ -27,13 +40,12 @@ import { workspace } from "vscode";
 export function run(): Promise<void> {
   const mocha = new Mocha({
     ui: "tdd",
-    timeout: 20000,
+    timeout: 35000,
   });
 
-  const workspaceRoot = workspace.workspaceFolders![0].uri.fsPath;
-  console.log(`💠 workspaceRoot: ${workspaceRoot}`);
-  assert.ok(workspaceRoot.endsWith("fixtures"));
-  const files: string[] = globSync("**", { cwd: workspaceRoot });
+  console.log(`💠 workspaceRoot: ${WORKSPACE_ROOT}`);
+  assert.ok(WORKSPACE_ROOT.endsWith("fixtures"));
+  const files: string[] = globSync("**", { cwd: WORKSPACE_ROOT });
   console.log(`💠 files in root: ${files}`);
 
   return new Promise(async (resolve, reject) => {
@@ -46,18 +58,19 @@ export function run(): Promise<void> {
       files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
       if (process.env.IS_CALLED_IN_NPM_SCRIPT !== "true") {
-        console.log("💠 Tests executed via debug configuration");
-        console.log("Waiting fixed timeout of 5s before running tests...");
-        console.log("(This is to ensure that the extension has properly activated.)");
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        console.log("💠 Tests requested via debug configuration");
       } else {
-        // set environment variables when called via `npm test`
-        // also see launch.json
         process.env.IS_TESTING = "true";
         process.env.TEST_BASE_PATH = process.env.EXTENSION_DEV_PATH;
-        console.log("💠 Tests executed via npm script");
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log("💠 Tests requested via npm script");
       }
+
+      // open any python file to trigger extension activation
+      await window.showTextDocument(uriInWorkspace("basic.py"));
+
+      console.log("💠 Waiting for extension activation...");
+      await waitUntilExtensionActivated();
+      console.log("💠 Extension activation detected in tests");
 
       console.log("Running tests...");
       mocha.run((failures: any) => {
@@ -71,5 +84,17 @@ export function run(): Promise<void> {
       console.error(err);
       reject(err);
     }
+  });
+}
+
+/**
+ * Waits until the Manim Notebook extension is activated.
+ */
+async function waitUntilExtensionActivated(): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    activatedEmitter.on("activated", () => resolve());
+    setTimeout(() => {
+      reject(new Error("Extension activation timeout"));
+    }, 20000);
   });
 }
