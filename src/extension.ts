@@ -212,7 +212,8 @@ function pythonEnvToManimglPath(envPath: string): string {
   if (envPath.endsWith("python") || envPath.endsWith("python3")) {
     return envPath.replace(/python3?$/, "manimgl");
   } else {
-    return path.join(envPath, "bin", "manimgl");
+    const binFolderName = process.platform === "win32" ? "Scripts" : "bin";
+    return path.join(envPath, binFolderName, "manimgl");
   }
 }
 
