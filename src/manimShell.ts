@@ -591,8 +591,13 @@ export class ManimShell {
     } else {
       Logger.debug(`💨 Sending command to terminal (without shell integration): ${command}`);
       if (command === "checkpoint_paste()") {
-        shell.sendText(command, false);
-        shell.sendText("");
+        console.log("Command is indeed checkpoint_paste()");
+
+        // https://github.com/hoangKnLai/vscode-ipython/blob/c11002a968ca9bffe50ceac69cacca3476bdf699/src/ipython.ts#L381-L383
+        shell.sendText(command, false); // false: don't append `newline`
+        setTimeout(() => {
+          shell.sendText("");
+        }, 1500);
       } else {
         shell.sendText(command);
       }
