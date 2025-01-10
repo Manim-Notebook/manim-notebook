@@ -208,7 +208,7 @@ function findClasses(document: vscode.TextDocument): ClassLine[] {
  * Returns the lines that define Manim classes in the given document.
  *
  * A Manim class is defined as:
- * - Inherits from any object. Not necessarily "Scene" since users might want
+ * - Inherits from any object. Not necessarily "Scene" since users might want to
  *   use inheritance where just the base class inherits from "Scene".
  * - Contains a "def construct(self)" method with exactly this signature.
  *
