@@ -14,3 +14,7 @@ class Syntax(Scene):
 
         ########## # # # # A Manim Cell
         print("Hello, Manim!")
+
+        ## A Manim Cell without any code
+
+        ## Another empty Manim Cell
