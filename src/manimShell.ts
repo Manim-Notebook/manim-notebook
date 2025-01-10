@@ -590,7 +590,8 @@ export class ManimShell {
       shell.shellIntegration.executeCommand(command);
     } else {
       Logger.debug(`💨 Sending command to terminal (without shell integration): ${command}`);
-      shell.sendText(command);
+      shell.sendText(command, false);
+      shell.sendText();
     }
 
     this.detectShellExecutionEnd = true;
