@@ -1,6 +1,6 @@
 import { window, commands, extensions } from "vscode";
 
-import { describe, it } from "mocha";
+import { describe, it, afterEach } from "mocha";
 import * as sinon from "sinon";
 
 // eslint-disable-next-line no-unused-vars
@@ -10,6 +10,10 @@ import { onTerminalOutput } from "../src/utils/terminal";
 const MANIM_VERSION_STRING_REGEX = /v\d+\.\d+\.\d+/;
 
 describe("Manim Activation", function () {
+  afterEach(() => {
+    sinon.restore();
+  });
+
   it("Can read from terminal", async () => {
     const extension = extensions.getExtension("Manim-Notebook.manim-notebook");
     if (!extension) {
