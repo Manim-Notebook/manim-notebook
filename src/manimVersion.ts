@@ -134,11 +134,11 @@ async function fetchLatestManimVersion(): Promise<string | undefined> {
 /**
  * Tries to determine the Manim version with the `manimgl --version` command.
  */
-export async function tryToDetermineManimVersion(isAtStartup = false) {
+export async function tryToDetermineManimVersion(manimglPath: string | undefined = undefined) {
   MANIM_VERSION = undefined;
   let couldDetermineManimVersion = false;
   isCanceledByUser = false;
-  const latestManimVersion = fetchLatestManimVersion();
+  const latestManimVersion = fetchLatestManimVersion(); // no actual execution yet
 
   const terminal = await window.createTerminal(
     {
@@ -160,7 +160,8 @@ export async function tryToDetermineManimVersion(isAtStartup = false) {
         Logger.info("🔒 Locking Manim welcome string detection");
 
         const timeoutPromise = constructTimeoutPromise(8000, progress, token);
-        const versionPromise = lookForManimVersionString(terminal);
+        const cmd = manimglPath ? `${manimglPath} --version` : "manimgl --version";
+        const versionPromise = lookForManimVersionString(terminal, cmd);
         Promise.race([timeoutPromise, versionPromise])
           .then(couldResolveVersion => resolve(couldResolveVersion))
           .catch((err) => {
@@ -180,7 +181,7 @@ export async function tryToDetermineManimVersion(isAtStartup = false) {
     await showPositiveUserVersionFeedback(latestManimVersion);
   } else {
     terminal.show();
-    await showNegativeUserVersionFeedback(isAtStartup);
+    await showNegativeUserVersionFeedback();
   }
 }
 
@@ -200,18 +201,13 @@ async function showPositiveUserVersionFeedback(latestManimVersion: Promise<strin
   }
 }
 
-async function showNegativeUserVersionFeedback(isAtStartup: boolean) {
+async function showNegativeUserVersionFeedback() {
   if (isCanceledByUser) {
     return;
   }
 
   const tryAgainAnswer = "Try again";
-  let errMessage = "Your ManimGL version could not be determined.";
-  if (isAtStartup) {
-    errMessage += " This can happen at startup since"
-    + " a virtual environment might not have been activated yet."
-    + " Please try again...";
-  }
+  const errMessage = "Your ManimGL version could not be determined.";
   const answer = await Window.showErrorMessage(errMessage, tryAgainAnswer);
   if (answer === tryAgainAnswer) {
     await tryToDetermineManimVersion();
@@ -257,10 +253,12 @@ function constructTimeoutPromise(
  * Looks for the ManimGL version string in the terminal output.
  *
  * @param terminaL The terminal to listen TO:
- * @returnS True if the version string could be found and assigned to the
+ * @param command The command to execute in the terminal.
+ * @returns True if the version string could be found and assigned to the
  * `MANIM_VERSION` variable. False otherwise.
  */
-async function lookForManimVersionString(terminal: vscode.Terminal): Promise<boolean> {
+async function lookForManimVersionString(
+  terminal: vscode.Terminal, command: string): Promise<boolean> {
   return new Promise<boolean>(async (resolve, _reject) => {
     onTerminalOutput(terminal, (data: string) => {
       const versionMatch = data.match(/^\s*ManimGL v([0-9]+\.[0-9]+\.[0-9]+)/m);
@@ -284,6 +282,6 @@ async function lookForManimVersionString(terminal: vscode.Terminal): Promise<boo
       }
     });
 
-    terminal.sendText("manimgl --version");
+    terminal.sendText(command);
   });
 }

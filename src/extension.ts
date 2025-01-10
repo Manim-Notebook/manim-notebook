@@ -1,3 +1,4 @@
+import * as path from "path";
 import * as vscode from "vscode";
 import { window } from "vscode";
 import { ManimShell, NoActiveShellError } from "./manimShell";
@@ -13,6 +14,7 @@ import { setupTestEnvironment } from "./utils/testing";
 import { EventEmitter } from "events";
 
 export let manimNotebookContext: vscode.ExtensionContext;
+class WaitingForPythonExtensionCancelled extends Error {}
 
 /**
  * Resets the global state of the extension.
@@ -38,7 +40,19 @@ export async function activate(context: vscode.ExtensionContext) {
   // Trigger the Manim shell to start listening to the terminal
   ManimShell.instance;
 
-  await tryToDetermineManimVersion(true);
+  let manimglPath: string | undefined = undefined;
+  try {
+    manimglPath = await waitForPythonExtension();
+  } catch (err) {
+    if (err instanceof WaitingForPythonExtensionCancelled) {
+      Logger.info("💠 Waiting for Python extension cancelled, cancelling activation");
+      return;
+    }
+  }
+  if (manimglPath) {
+    manimglPath = pythonEnvToManimglPath(manimglPath);
+  }
+  await tryToDetermineManimVersion(manimglPath);
 
   const previewManimCellCommand = vscode.commands.registerCommand(
     "manim-notebook.previewManimCell", (cellCode?: string, startLine?: number) => {
@@ -138,6 +152,66 @@ export async function activate(context: vscode.ExtensionContext) {
   if (process.env.IS_TESTING === "true") {
     console.log("💠 Extension marked as activated");
     activatedEmitter.emit("activated");
+  }
+}
+
+/**
+ * Waits for the Microsoft Python extension to be activated, in case it is
+ * installed.
+ *
+ * @returns The path to the Python environment, if it is available.
+ * @throws {WaitingForPythonExtensionCancelled} If the user cancels the
+ *  waiting process.
+ */
+async function waitForPythonExtension(): Promise<string | undefined> {
+  const pythonExtension = vscode.extensions.getExtension("ms-python.python");
+  if (!pythonExtension) {
+    Logger.info("💠 Python extension not installed, skip waiting for it");
+    return;
+  }
+
+  const progressOptions = {
+    location: vscode.ProgressLocation.Notification,
+    title: "Waiting for Python extension to be fully loaded...",
+    cancellable: true,
+  };
+
+  return await window.withProgress(progressOptions, async (progress, token) => {
+    token.onCancellationRequested(() => {
+      Window.showInformationMessage("Manim Notebook activation cancelled."
+        + " Open any Python file to activate the extension again.");
+      throw new WaitingForPythonExtensionCancelled();
+    });
+
+    const pythonApi = await pythonExtension.activate();
+    Logger.info("💠 Python extension activated");
+
+    const environmentPath = pythonApi.environments.getActiveEnvironmentPath();
+    if (!environmentPath) {
+      return;
+    }
+
+    const environment = await pythonApi.environments.resolveEnvironment(environmentPath);
+    if (!environment) {
+      return;
+    }
+
+    return environment.path;
+  });
+}
+
+/**
+ * Transforms a path to either a environment folder or a Python executable
+ * into a path to the ManimGL binary.
+ *
+ * @param path The path to the Python environment or executable.
+ * @returns The path to the ManimGL binary.
+ */
+function pythonEnvToManimglPath(envPath: string): string {
+  if (envPath.endsWith("python")) {
+    return envPath.replace("python", "manimgl");
+  } else {
+    return path.join(envPath, "bin", "manimgl");
   }
 }
 
