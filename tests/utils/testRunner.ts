@@ -40,7 +40,7 @@ export function uriRelative(pathRelativeToWorkspaceRoot: string): Uri {
 export function run(): Promise<void> {
   const mocha = new Mocha({
     ui: "tdd",
-    timeout: 60000,
+    timeout: 35000,
   });
 
   console.log(`💠 workspaceRoot: ${WORKSPACE_ROOT}`);
