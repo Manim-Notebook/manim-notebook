@@ -1,12 +1,12 @@
 import { window, commands } from "vscode";
 import { describe, it } from "mocha";
 import { onAnyTerminalOutput } from "./utils/terminal";
-import { uriRelative } from "./utils/testRunner";
+import { uriInWorkspace } from "./utils/testRunner";
 import { goToLine } from "./utils/editor";
 
 describe("Previewing", function () {
   it("Can preview the current Manim Cell", async () => {
-    const editor = await window.showTextDocument(uriRelative("basic.py"));
+    const editor = await window.showTextDocument(uriInWorkspace("basic.py"));
     goToLine(editor, 11);
     await commands.executeCommand("manim-notebook.previewManimCell");
 

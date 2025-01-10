@@ -25,7 +25,7 @@ const WORKSPACE_ROOT: string = workspace.workspaceFolders![0].uri.fsPath;
 /**
  * Returns a Uri object for a file path relative to the workspace root.
  */
-export function uriRelative(pathRelativeToWorkspaceRoot: string): Uri {
+export function uriInWorkspace(pathRelativeToWorkspaceRoot: string): Uri {
   const fullPath = path.join(WORKSPACE_ROOT, pathRelativeToWorkspaceRoot);
   return Uri.file(fullPath);
 }
@@ -66,7 +66,7 @@ export function run(): Promise<void> {
       }
 
       // open any python file to trigger extension activation
-      await window.showTextDocument(uriRelative("basic.py"));
+      await window.showTextDocument(uriInWorkspace("basic.py"));
 
       console.log("💠 Waiting for extension activation...");
       await waitUntilExtensionActivated();
