@@ -366,7 +366,11 @@ export class ManimShell {
 
     let currentExecutionCount = this.iPythonCellCount;
 
-    this.exec(shell, command);
+    if (command === "checkpoint_paste()") {
+      this.exec(shell, command, false);
+    } else {
+      this.exec(shell, command);
+    }
     handler?.onCommandIssued?.(this.activeShell !== null);
 
     this.waitUntilCommandFinished(currentExecutionCount, () => {
