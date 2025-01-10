@@ -188,7 +188,7 @@ async function previewSelection() {
  */
 async function clearScene() {
   try {
-    await ManimShell.instance.executeCommandErrorOnNoActiveSession("clear()");
+    await ManimShell.instance.executeIPythonCommandExpectSession("clear()");
   } catch (error) {
     if (error instanceof NoActiveShellError) {
       Window.showWarningMessage("No active Manim session found to remove objects from.");
