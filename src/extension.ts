@@ -202,15 +202,15 @@ async function waitForPythonExtension(): Promise<string | undefined> {
 }
 
 /**
- * Transforms a path to either a environment folder or a Python executable
- * into a path to the ManimGL binary.
+ * Transforms a path pointing to either an environment folder or a
+ * Python executable into a path pointing to the ManimGL binary.
  *
- * @param path The path to the Python environment or executable.
+ * @param path The path to the Python environment or Python executable.
  * @returns The path to the ManimGL binary.
  */
 function pythonEnvToManimglPath(envPath: string): string {
-  if (envPath.endsWith("python")) {
-    return envPath.replace("python", "manimgl");
+  if (envPath.endsWith("python") || envPath.endsWith("python3")) {
+    return envPath.replace(/python3?$/, "manimgl");
   } else {
     return path.join(envPath, "bin", "manimgl");
   }
