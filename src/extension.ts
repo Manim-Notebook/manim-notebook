@@ -45,7 +45,8 @@ export async function activate(context: vscode.ExtensionContext) {
     manimglPath = await waitForPythonExtension();
   } catch (err) {
     if (err instanceof WaitingForPythonExtensionCancelled) {
-      Logger.info("💠 Waiting for Python extension cancelled, cancelling activation");
+      Logger.info("💠 Waiting for Python extension cancelled, therefore"
+        + " we cancel the extension activation");
       return;
     }
   }
@@ -179,23 +180,23 @@ async function waitForPythonExtension(): Promise<string | undefined> {
   return await window.withProgress(progressOptions, async (progress, token) => {
     token.onCancellationRequested(() => {
       Window.showInformationMessage("Manim Notebook activation cancelled."
-        + " Open any Python file to activate the extension again.");
+        + " Open any Python file to again activate the extension.");
       throw new WaitingForPythonExtensionCancelled();
     });
 
+    // Waiting for Python extension
     const pythonApi = await pythonExtension.activate();
     Logger.info("💠 Python extension activated");
 
+    // Path to venv
     const environmentPath = pythonApi.environments.getActiveEnvironmentPath();
     if (!environmentPath) {
       return;
     }
-
     const environment = await pythonApi.environments.resolveEnvironment(environmentPath);
     if (!environment) {
       return;
     }
-
     return environment.path;
   });
 }

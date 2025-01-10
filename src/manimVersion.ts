@@ -133,6 +133,9 @@ async function fetchLatestManimVersion(): Promise<string | undefined> {
 
 /**
  * Tries to determine the Manim version with the `manimgl --version` command.
+ *
+ * @param manimglPath The path to the ManimGL executable, e.g. in a virtual
+ * environment. If undefined, we assume that `manimgl` is in the PATH.
  */
 export async function tryToDetermineManimVersion(manimglPath: string | undefined = undefined) {
   MANIM_VERSION = undefined;
