@@ -12,6 +12,9 @@ async function setupManimInstallation() {
   await installer.install();
   await installer.installAdditionalDependencies();
   await installer.verifyInstallation();
+
+  console.log("💫 If started via debug configuration,"
+    + "go to the VSCode debug console to see the test output.");
 }
 
 (async () => {
