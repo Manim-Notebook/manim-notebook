@@ -590,8 +590,12 @@ export class ManimShell {
       shell.shellIntegration.executeCommand(command);
     } else {
       Logger.debug(`💨 Sending command to terminal (without shell integration): ${command}`);
-      shell.sendText(command, false);
-      shell.sendText("");
+      if (command === "checkpoint_paste()") {
+        shell.sendText(command, false);
+        shell.sendText("");
+      } else {
+        shell.sendText(command);
+      }
     }
 
     this.detectShellExecutionEnd = true;
