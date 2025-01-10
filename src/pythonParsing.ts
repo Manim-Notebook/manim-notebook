@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { TextDocument } from "vscode";
+import { Logger } from "./logger";
 
 export class ManimCellRanges {
   /**
@@ -32,48 +33,38 @@ export class ManimCellRanges {
    */
   public static calculateRanges(document: vscode.TextDocument): vscode.Range[] {
     const ranges: vscode.Range[] = [];
-    const classes = findClasses(document);
+    const manimClasses = findManimClasses(document);
 
-    classes.sort((a, b) => a.lineNumber - b.lineNumber);
-
-    classes.forEach(({ isManimClass, lineNumber, constructIndent }, index) => {
-      // Only consider Manim classes.
-      // Note that we still have to iterate over all classes such that we know
-      // where the next class starts and where we can stop the current cell.
-      if (!isManimClass) {
+    manimClasses.forEach((manimClass) => {
+      if (manimClass.constructLine === undefined || manimClass.constructLastLine === undefined) {
+        Logger.trace(`Manim class without construct() method: ${manimClass.className}`);
         return;
       }
 
-      let start: number | null = null;
-      let startIndent: number | null = null;
+      const startTotal = manimClass.constructLine + 1; // construct() body
+      const endTotal = manimClass.constructLastLine;
 
-      const nextClassLine = index < classes.length - 1
-        ? classes[index + 1].lineNumber
-        : document.lineCount;
+      let start = startTotal;
+      let end = startTotal;
+      let inManimCell = false;
 
-      for (let i = lineNumber; i < nextClassLine; i++) {
-        const line = document.lineAt(i);
-        if (line.isEmptyOrWhitespace) {
-          continue;
-        }
+      // Find the Manim Cell ranges inside the construct() method
+      for (let i = startTotal; i <= endTotal; i++) {
+        const line = document.lineAt(i).text;
 
-        const currentIndent = line.firstNonWhitespaceCharacterIndex;
-
-        if (ManimCellRanges.MARKER.test(line.text) && currentIndent >= constructIndent) {
-          if (start !== null) {
-            ranges.push(this.getRangeDiscardEmpty(document, start, i - 1));
+        if (ManimCellRanges.MARKER.test(line)) {
+          if (inManimCell) {
+            ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, end));
           }
+          inManimCell = true;
           start = i;
-          startIndent = currentIndent;
-        } else if (start !== null && startIndent !== null && startIndent > currentIndent) {
-          ranges.push(this.getRangeDiscardEmpty(document, start, i - 1));
-          start = null;
-          startIndent = null;
+        } else if (inManimCell) {
+          end = i;
         }
       }
 
-      if (start !== null) {
-        ranges.push(this.getRangeDiscardEmpty(document, start, nextClassLine - 1));
+      if (inManimCell) {
+        ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, end));
       }
     });
 
@@ -117,7 +108,8 @@ interface ClassLine {
   lineNumber: number; // 0-based
   className: string;
   classIndent: number;
-  constructIndent: number;
+  constructLine?: number; // 0-based
+  constructLastLine?: number; // 0-based
 }
 
 /**
@@ -147,12 +139,16 @@ function findClasses(document: vscode.TextDocument): ClassLine[] {
         isManimClass: false,
         line, lineNumber,
         className: "",
-        classIndent: line.search(/\S/), constructIndent: -1,
+        classIndent: line.search(/\S/),
+        constructLine: undefined,
+        constructLastLine: undefined,
       };
 
+      // class ManimScene(Scene):
       if (inheritedClassMatch) {
         newCurrentClass.className = inheritedClassMatch[1];
         currentManimClassCandidate = newCurrentClass;
+      // class NormalClass:
       } else if (classMatch) {
         newCurrentClass.className = classMatch[1];
         const newClassIndent = line.search(/\S/);
@@ -164,8 +160,25 @@ function findClasses(document: vscode.TextDocument): ClassLine[] {
 
       classLines.push(newCurrentClass);
     } else if (currentManimClassCandidate && constructMatch) {
-      currentManimClassCandidate.constructIndent = line.search(/\S/);
       currentManimClassCandidate.isManimClass = true;
+      currentManimClassCandidate.constructLine = lineNumber;
+      currentManimClassCandidate.constructLastLine = lineNumber;
+
+      // Find the last line of the construct method by looking for the next
+      // line with a different or lower indentation level.
+      for (let i = lineNumber + 1; i < lines.length; i++) {
+        const nextLine = lines[i];
+        if (!nextLine.trim()) {
+          continue;
+        }
+        const nextIndent = nextLine.search(/\S/);
+        if (nextIndent <= currentManimClassCandidate.classIndent) {
+          break;
+        }
+        currentManimClassCandidate.constructLastLine = i;
+      }
+
+      // it was already pushed beforehand
       currentManimClassCandidate = null;
     }
   }
