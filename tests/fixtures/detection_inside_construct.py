@@ -5,7 +5,7 @@ class SceneDetectionInsideConstruct(Scene):
     def construct(self):
         ## A Manim Cell
         def some_function():
-            ## Not a Manim Cell
+            ## Not a Manim Cell, instead part of the outer one
             print("Not a Manim Cell")
 
         print("With some code")

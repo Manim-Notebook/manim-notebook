@@ -36,12 +36,14 @@ export class ManimCellRanges {
     const manimClasses = findManimClasses(document);
 
     manimClasses.forEach((manimClass) => {
-      if (manimClass.constructLine === undefined || manimClass.constructLastLine === undefined) {
+      if (manimClass.constructLine === undefined || manimClass.constructLastLine === undefined
+        || manimClass.constructBodyIndent === undefined) {
         Logger.trace(`Manim class without construct() method: ${manimClass.className}`);
         return;
       }
 
-      const startTotal = manimClass.constructLine + 1; // construct() body
+      const startTotal = manimClass.constructLine + 1; // construct() body begins
+      const indent = manimClass.constructBodyIndent;
       const endTotal = manimClass.constructLastLine;
 
       let start = startTotal;
@@ -50,21 +52,26 @@ export class ManimCellRanges {
 
       // Find the Manim Cell ranges inside the construct() method
       for (let i = startTotal; i <= endTotal; i++) {
-        const line = document.lineAt(i).text;
+        const line = document.lineAt(i);
+        const currentIndentation = line.firstNonWhitespaceCharacterIndex;
 
-        if (ManimCellRanges.MARKER.test(line)) {
+        if (currentIndentation === indent && ManimCellRanges.MARKER.test(line.text)) {
           if (inManimCell) {
             ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, end));
           }
           inManimCell = true;
           start = i;
-        } else if (inManimCell) {
+          end = i;
+        } else {
+          if (!inManimCell) {
+            start = i;
+          }
           end = i;
         }
       }
 
       if (inManimCell) {
-        ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, end));
+        ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, endTotal));
       }
     });
 
@@ -110,6 +117,7 @@ interface ClassLine {
   classIndent: number;
   constructLine?: number; // 0-based
   constructLastLine?: number; // 0-based
+  constructBodyIndent?: number;
 }
 
 /**
@@ -164,6 +172,16 @@ function findClasses(document: vscode.TextDocument): ClassLine[] {
       currentManimClassCandidate.constructLine = lineNumber;
       currentManimClassCandidate.constructLastLine = lineNumber;
 
+      // Not even next line available
+      if (lineNumber + 1 >= lines.length) {
+        currentManimClassCandidate = null;
+        continue;
+      }
+
+      // Body indentation
+      const constructBodyIndent = lines[lineNumber + 1].search(/\S/);
+      currentManimClassCandidate.constructBodyIndent = constructBodyIndent;
+
       // Find the last line of the construct method by looking for the next
       // line with a different or lower indentation level.
       for (let i = lineNumber + 1; i < lines.length; i++) {
@@ -172,8 +190,8 @@ function findClasses(document: vscode.TextDocument): ClassLine[] {
           continue;
         }
         const nextIndent = nextLine.search(/\S/);
-        if (nextIndent <= currentManimClassCandidate.classIndent) {
-          break;
+        if (nextIndent < constructBodyIndent) {
+          break; // e.g. next class or method
         }
         currentManimClassCandidate.constructLastLine = i;
       }

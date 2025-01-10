@@ -18,3 +18,20 @@ class Syntax(Scene):
         ## A Manim Cell without any code
 
         ## Another empty Manim Cell
+
+
+class SyntaxNotAtStart(Scene):
+    def construct(self):
+        print("test")
+        ## Empty Manim Cell, should start here, not at the line before
+
+
+class WithoutNewLine(Scene):
+    def construct(self):
+        print("test")
+        ## First ManimCell
+        print("yeah")
+        ## Second ManimCell
+        print("yeah2")
+        ## Third ManimCell
+        ## Fourth ManimCell
