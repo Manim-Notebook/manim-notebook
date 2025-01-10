@@ -599,9 +599,7 @@ export class ManimShell {
 
         // https://github.com/hoangKnLai/vscode-ipython/blob/c11002a968ca9bffe50ceac69cacca3476bdf699/src/ipython.ts#L381-L383
         shell.sendText(command, false); // false: don't append `newline`
-        setTimeout(() => {
-          shell.sendText("");
-        }, 1500);
+        shell.sendText("");
       } else {
         shell.sendText(command);
       }
