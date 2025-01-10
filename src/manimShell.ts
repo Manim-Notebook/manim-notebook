@@ -598,8 +598,9 @@ export class ManimShell {
         console.log("Command is indeed checkpoint_paste()");
 
         // https://github.com/hoangKnLai/vscode-ipython/blob/c11002a968ca9bffe50ceac69cacca3476bdf699/src/ipython.ts#L381-L383
-        shell.sendText(command, false); // false: don't append `newline`
-        shell.sendText("");
+        // shell.sendText(command, false); // false: don't append `newline`
+        // shell.sendText("");
+        shell.sendText("checkpoint_paste()\x1b\x0d"); // ESC & ENTER
       } else {
         shell.sendText(command);
       }
