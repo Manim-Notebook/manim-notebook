@@ -1,6 +1,5 @@
 import { exec } from "child_process";
 import { existsSync } from "fs";
-import * as fs from "fs";
 import * as path from "path";
 
 function run(cmd: string, ...args: any): Promise<any> {
