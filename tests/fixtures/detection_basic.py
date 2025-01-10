@@ -15,3 +15,9 @@ class NoManimScene(Scene):
     def constructtttt(self):
         ## Should not be detected as Manim Cell
         print("Hi there")
+
+
+class WithoutAnyManimCells(Scene):
+    def construct(self):
+        print("We have no ManimCell in here")
+        print("And therefore also no ManimCell is detected")
