@@ -3,14 +3,14 @@ from manimlib import *
 
 class Syntax(Scene):
     def construct(self):
-        ## A Manim Scene
+        ## A Manim Cell
         print("Hello, Manim!")
 
-        # Not a Manim Scene, just a regular comment
-        print("Not a Manim Scene")
+        # Not a Manim Cell, just a regular comment
+        print("Not a Manim Cell")
 
-        ### A Manim Scene
+        ### A Manim Cell
         print("Hello, Manim!")
 
-        ########## # # # # A Manim Scene
+        ########## # # # # A Manim Cell
         print("Hello, Manim!")
