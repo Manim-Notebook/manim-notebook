@@ -81,7 +81,7 @@ export async function reloadAndPreviewManimCell(cellCode?: string, startLine?: n
   if (ManimShell.instance.hasActiveShell()) {
     const reloadCmd = `reload(${startLineParsed + 1})`;
     await ManimShell.instance.nextTimeWaitForRestartedIPythonInstance();
-    await ManimShell.instance.executeCommandErrorOnNoActiveSession(reloadCmd, true);
+    await ManimShell.instance.executeIPythonCommandExpectSession(reloadCmd, true);
   }
   await previewManimCell(cellCodeParsed, startLineParsed);
 }
@@ -111,7 +111,7 @@ export async function previewCode(code: string, startLine: number): Promise<void
     const clipboardBuffer = await vscode.env.clipboard.readText();
     await vscode.env.clipboard.writeText(code);
 
-    await ManimShell.instance.executeCommand(
+    await ManimShell.instance.executeIPythonCommand(
       PREVIEW_COMMAND, startLine, true, {
         onCommandIssued: (shellStillExists) => {
           Logger.debug(`📊 Command issued: ${PREVIEW_COMMAND}. Will restore clipboard`);
