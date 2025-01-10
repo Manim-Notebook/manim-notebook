@@ -6,7 +6,8 @@ import { ManimCellRanges } from "./pythonParsing";
 import { Logger, Window } from "./logger";
 import { hasUserMinimalManimVersion } from "./manimVersion";
 
-const PREVIEW_COMMAND = "checkpoint_paste()";
+// \x0C: is Ctrl + L, which clears the terminal screen
+const PREVIEW_COMMAND = "\x0Ccheckpoint_paste()";
 
 function parsePreviewCellArgs(cellCode?: string, startLine?: number) {
   let startLineParsed: number | undefined = startLine;
