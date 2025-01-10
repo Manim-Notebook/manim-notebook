@@ -21,40 +21,48 @@ export class ManimCellRanges {
    * - when the indentation level decreases
    * - at the end of the document
    *
+   * Manim Cells are only recognized inside Manim Classes, see findManimClasses.
+   * They are considered whenever they are defined with the same or an increased
+   * indentation level compared to the definition of the mandatory construct
+   * method.
+   *
    * This method is performance-intensive as it has to go through every single
    * line of the document. Despite this, we call it many times and caching
    * could be beneficial in the future.
    */
   public static calculateRanges(document: vscode.TextDocument): vscode.Range[] {
     const ranges: vscode.Range[] = [];
-    let start: number | null = null;
-    let startIndent: number | null = null;
+    const manimClasses = findManimClasses(document);
 
-    for (let i = 0; i < document.lineCount; i++) {
-      const line = document.lineAt(i);
-      if (line.isEmptyOrWhitespace) {
-        continue;
-      }
+    manimClasses.forEach(({ lineNumber, constructIndent }) => {
+      let start: number | null = null;
+      let startIndent: number | null = null;
 
-      const currentIndent = line.firstNonWhitespaceCharacterIndex;
-
-      if (ManimCellRanges.MARKER.test(line.text)) {
-        if (start !== null) {
-          ranges.push(this.getRangeDiscardEmpty(document, start, i - 1));
+      for (let i = lineNumber; i < document.lineCount; i++) {
+        const line = document.lineAt(i);
+        if (line.isEmptyOrWhitespace) {
+          continue;
         }
-        start = i;
-        startIndent = currentIndent;
-      } else if (start !== null && startIndent !== null && startIndent > currentIndent) {
-        ranges.push(this.getRangeDiscardEmpty(document, start, i - 1));
-        start = null;
-        startIndent = null;
-      }
-    }
 
-    // Range for the last cell when the document ends
-    if (start !== null) {
-      ranges.push(this.getRangeDiscardEmpty(document, start, document.lineCount - 1));
-    }
+        const currentIndent = line.firstNonWhitespaceCharacterIndex;
+
+        if (ManimCellRanges.MARKER.test(line.text) && currentIndent >= constructIndent) {
+          if (start !== null) {
+            ranges.push(this.getRangeDiscardEmpty(document, start, i - 1));
+          }
+          start = i;
+          startIndent = currentIndent;
+        } else if (start !== null && startIndent !== null && startIndent > currentIndent) {
+          ranges.push(this.getRangeDiscardEmpty(document, start, i - 1));
+          start = null;
+          startIndent = null;
+        }
+      }
+
+      if (start !== null) {
+        ranges.push(this.getRangeDiscardEmpty(document, start, document.lineCount - 1));
+      }
+    });
 
     return ranges;
   }
@@ -94,24 +102,38 @@ interface ClassLine {
   line: string;
   lineNumber: number;
   className: string;
+  constructIndent: number;
 }
 
 /**
- * Returns the lines that define Python classes in the given document.
+ * Returns the lines that define Manim classes in the given document.
  *
- * TODO: Only trigger on actual Manim classes, not all Python classes.
+ * A Manim class is defined as:
+ * - Inherits from any object. Not necessarily "Scene" since users might want
+ *   use inheritance where just the base class inherits from "Scene".
+ * - Contains a "def construct(self)" method with exactly this signature.
  *
  * @param document The document to search in.
  */
-export function findClassLines(document: vscode.TextDocument): ClassLine[] {
+export function findManimClasses(document: vscode.TextDocument): ClassLine[] {
   const lines = document.getText().split("\n");
 
   const classLines: ClassLine[] = [];
+  let currentClass: ClassLine | null = null;
+
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
     const line = lines[lineNumber];
-    const match = line.match(/^\s*class\s+(.+?)[(:]/);
-    if (match) {
-      classLines.push({ line, lineNumber, className: match[1] });
+    const classMatch = line.match(/^\s*class\s+(.+?)\s*\(.*\)\s*:/);
+    const constructMatch = line.match(/^\s*def\s+construct\s*\(self\)\s*:/);
+
+    if (classMatch) {
+      currentClass = { line, lineNumber, className: classMatch[1], constructIndent: -1 };
+    }
+
+    if (currentClass && constructMatch) {
+      currentClass.constructIndent = line.search(/\S/);
+      classLines.push(currentClass);
+      currentClass = null;
     }
   }
 
@@ -126,7 +148,7 @@ export function findClassLines(document: vscode.TextDocument): ClassLine[] {
  * @returns The ClassLine associated to the Manim scene, or null if not found.
  */
 export function findManimSceneName(document: TextDocument, cursorLine: number): ClassLine | null {
-  const classLines = findClassLines(document);
+  const classLines = findManimClasses(document);
   const matchingClass = classLines
     .reverse()
     .find(({ lineNumber }) => lineNumber <= cursorLine);

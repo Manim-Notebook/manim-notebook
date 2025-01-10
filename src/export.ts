@@ -3,7 +3,7 @@ import { window, TextDocument, CancellationToken, CodeLens } from "vscode";
 import {
   MultiStepInput, toQuickPickItems, shouldResumeNoOp,
 } from "./utils/multiStepQuickPickUtil";
-import { findClassLines, findManimSceneName } from "./pythonParsing";
+import { findManimClasses, findManimSceneName } from "./pythonParsing";
 import { Logger, Window } from "./logger";
 import { waitNewTerminalDelay } from "./utils/terminal";
 
@@ -228,7 +228,7 @@ export class ExportSceneCodeLens implements vscode.CodeLensProvider {
   public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] {
     const codeLenses: vscode.CodeLens[] = [];
 
-    for (const classLine of findClassLines(document)) {
+    for (const classLine of findManimClasses(document)) {
       const range = new vscode.Range(classLine.lineNumber, 0, classLine.lineNumber, 0);
 
       codeLenses.push(new vscode.CodeLens(range, {
