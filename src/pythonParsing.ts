@@ -154,7 +154,7 @@ export class ManimClass {
   /**
    * Regular expression to match the construct() method definition.
    */
-  private static CONSTRUCT__METHOD_REGEX = /^\s*def\s+construct\s*\(self\)\s*:/;
+  private static CONSTRUCT_METHOD_REGEX = /^\s*def\s+construct\s*\(self\)\s*:/;
 
   line: string;
   lineNumber: number; // 0-based
@@ -203,7 +203,7 @@ export class ManimClass {
         continue;
       }
 
-      if (line.match(this.CONSTRUCT__METHOD_REGEX) && candidate) {
+      if (line.match(this.CONSTRUCT_METHOD_REGEX) && candidate) {
         candidate.constructMethod = this.makeConstructMethodInfo(lines, lineNumber);
         candidate = null;
       }
