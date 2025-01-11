@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Range } from "vscode";
 import { TextDocument } from "vscode";
 import { Logger } from "./logger";
 
@@ -38,26 +39,25 @@ export class ManimCellRanges {
     const manimClasses = ManimClass.findAllIn(document);
 
     manimClasses.forEach((manimClass) => {
-      if (manimClass.constructLine === undefined || manimClass.constructLastLine === undefined
-        || manimClass.constructBodyIndent === undefined) {
+      const construct = manimClass.constructMethod;
+
+      if (construct === null) {
         Logger.trace(`Manim class without construct() method: ${manimClass.className}`);
         return;
       }
 
-      const startTotal = manimClass.constructLine + 1; // construct() body begins
-      const indent = manimClass.constructBodyIndent;
-      const endTotal = manimClass.constructLastLine;
+      const startCell = construct.bodyRange.start;
+      const endCell = construct.bodyRange.end;
+      let start = startCell;
+      let end = startCell;
 
-      let start = startTotal;
-      let end = startTotal;
       let inManimCell = false;
 
-      // Find the Manim Cell ranges inside the construct() method
-      for (let i = startTotal; i <= endTotal; i++) {
+      for (let i = startCell; i <= endCell; i++) {
         const line = document.lineAt(i);
-        const currentIndentation = line.firstNonWhitespaceCharacterIndex;
+        const indentation = line.firstNonWhitespaceCharacterIndex;
 
-        if (currentIndentation === indent && ManimCellRanges.MARKER.test(line.text)) {
+        if (indentation === construct.bodyIndent && ManimCellRanges.MARKER.test(line.text)) {
           if (inManimCell) {
             ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, end));
           }
@@ -73,7 +73,7 @@ export class ManimCellRanges {
       }
 
       if (inManimCell) {
-        ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, endTotal));
+        ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, endCell));
       }
     });
 
@@ -111,6 +111,25 @@ export class ManimCellRanges {
   }
 }
 
+interface LineRange {
+  start: number; // 0-based
+  end: number; // 0-based
+}
+
+interface MethodInfo {
+  bodyRange: LineRange;
+  bodyIndent: number;
+}
+
+/**
+ * A Manim class is defined as:
+ * - Inherits from any object. Not necessarily "Scene" since users might want
+ *   to use inheritance where just the base class inherits from "Scene".
+ * - Contains a "def construct(self)" method with exactly this signature.
+ *
+ * This class provides static methods to work with Manim classes in a Python
+ * document.
+ */
 export class ManimClass {
   /**
    * Regular expression to match a class that inherits from any object.
@@ -141,9 +160,7 @@ export class ManimClass {
   lineNumber: number; // 0-based
   className: string;
   classIndent: number;
-  constructLine?: number; // 0-based
-  constructLastLine?: number; // 0-based
-  constructBodyIndent?: number;
+  constructMethod: MethodInfo | null = null;
 
   constructor(
     line: string, lineNumber: number, className: string, classIndent: number,
@@ -155,12 +172,7 @@ export class ManimClass {
   }
 
   /**
-   * Returns the lines that define Manim classes in the given document.
-   *
-   * A Manim class is defined as:
-   * - Inherits from any object. Not necessarily "Scene" since users might want
-   *   to use inheritance where just the base class inherits from "Scene".
-   * - Contains a "def construct(self)" method with exactly this signature.
+   * Returns all ManimClasses in the given document.
    *
    * @param document The document to search in.
    */
@@ -172,68 +184,68 @@ export class ManimClass {
 
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
       const line = lines[lineNumber];
+
       const inheritedClassMatch = line.match(this.INHERITED_CLASS_REGEX);
-      const classMatch = line.match(this.CLASS_REGEX);
-      const constructMatch = line.match(this.CONSTRUCT__METHOD_REGEX);
-      if (!inheritedClassMatch && !classMatch && !constructMatch) {
+      if (inheritedClassMatch) {
+        candidate = new ManimClass(
+          line, lineNumber,
+          inheritedClassMatch[1], line.search(/\S/),
+        );
+        classes.push(candidate);
         continue;
       }
 
-      if (inheritedClassMatch || classMatch) {
-        // class ManimScene(Scene):
-        if (inheritedClassMatch) {
-          const newCurrentClass = new ManimClass(
-            line, lineNumber,
-            inheritedClassMatch[1],
-            line.search(/\S/),
-          );
-
-          newCurrentClass.className = inheritedClassMatch[1];
-          candidate = newCurrentClass;
-          classes.push(newCurrentClass);
-
-        // class NormalClass:
-        } else if (classMatch) {
-          const newClassIndent = line.search(/\S/);
-          if (candidate
-            && newClassIndent <= candidate.classIndent) {
-            candidate = null;
-          }
-        }
-      } else if (candidate && constructMatch) {
-        candidate.constructLine = lineNumber;
-        candidate.constructLastLine = lineNumber;
-
-        // Not even next line available
-        if (lineNumber + 1 >= lines.length) {
+      if (line.match(this.CLASS_REGEX)) {
+        const newClassIndent = line.search(/\S/);
+        if (candidate && newClassIndent <= candidate.classIndent) {
           candidate = null;
-          continue;
         }
+        continue;
+      }
 
-        // Body indentation
-        const constructBodyIndent = lines[lineNumber + 1].search(/\S/);
-        candidate.constructBodyIndent = constructBodyIndent;
-
-        // Find the last line of the construct method by looking for the next
-        // line with a different or lower indentation level.
-        for (let i = lineNumber + 1; i < lines.length; i++) {
-          const nextLine = lines[i];
-          if (!nextLine.trim()) {
-            continue;
-          }
-          const nextIndent = nextLine.search(/\S/);
-          if (nextIndent < constructBodyIndent) {
-            break; // e.g. next class or method
-          }
-          candidate.constructLastLine = i;
-        }
-
-        // it was already pushed beforehand
+      if (line.match(this.CONSTRUCT__METHOD_REGEX) && candidate) {
+        candidate.constructMethod = this.makeConstructMethodInfo(lines, lineNumber);
         candidate = null;
       }
     }
 
     return classes;
+  }
+
+  /**
+   * Calculates the range of the construct() method of the Manim class and
+   * returns it along with the indentation level of the method body.
+   *
+   * The construct method is said to end when the indentation level of one
+   * of the following lines is lower than the indentation level of the first
+   * line of the method body.
+   *
+   * @param lines The lines of the document.
+   * @param lineNumber The line number where the construct() method is defined.
+   */
+  private static makeConstructMethodInfo(lines: string[], lineNumber: number): MethodInfo {
+    const bodyIndent = lines[lineNumber + 1].search(/\S/);
+    const bodyRange = { start: lineNumber + 1, end: lineNumber + 1 };
+
+    // Safety check: not even next line available
+    if (lineNumber + 1 >= lines.length) {
+      return { bodyRange, bodyIndent };
+    }
+
+    for (let i = bodyRange.start; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) {
+        continue;
+      }
+
+      const indent = line.search(/\S/);
+      if (indent < bodyIndent) {
+        break; // e.g. next class or method found
+      }
+      bodyRange.end = i;
+    }
+
+    return { bodyRange, bodyIndent };
   }
 
   /**
