@@ -40,7 +40,6 @@ export class ManimCellRanges {
 
     manimClasses.forEach((manimClass) => {
       const construct = manimClass.constructMethod;
-
       if (construct === null) {
         Logger.trace(`Manim class without construct() method: ${manimClass.className}`);
         return;
@@ -64,14 +63,16 @@ export class ManimCellRanges {
           inManimCell = true;
           start = i;
           end = i;
-        } else {
-          if (!inManimCell) {
-            start = i;
-          }
-          end = i;
+          continue;
         }
+
+        if (!inManimCell) {
+          start = i;
+        }
+        end = i;
       }
 
+      // last cell
       if (inManimCell) {
         ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, endCell));
       }
