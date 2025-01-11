@@ -2,17 +2,52 @@ import * as vscode from "vscode";
 import { TextDocument } from "vscode";
 import { Logger } from "./logger";
 
+/**
+ * ManimCellRanges calculates the ranges of Manim cells in a given document.
+ * It is used to provide folding ranges, code lenses, and decorations for Manim
+ * Cells in the editor.
+ *
+ * It provides basic Python parsing functionality.
+ */
 export class ManimCellRanges {
   /**
    * Regular expression to match the start of a Manim cell.
    *
-   * The marker is a comment line starting with "##". Since the comment might
-   * be indented, we allow for any number of leading whitespaces.
+   * The marker is a comment line starting with "##". That is, "### # #" is also
+   * considered a valid marker.
+   *
+   * Since the comment might be indented, we allow for any number of
+   * leading whitespaces.
    *
    * Manim cells themselves might contain further comments, but no nested
    * Manim cells, i.e. no further comment starting with "##".
    */
   private static readonly MARKER = /^(\s*##)/;
+
+  /**
+   * Regular expression to match a class that inherits from any object.
+   * The class name is captured in the first group.
+   *
+   * Note that MyClassName() is not considered here since we expect any words
+   * inside the parentheses.
+   */
+  private static INHERITED_CLASS_REGEX = /^\s*class\s+(\w+)\s*\(\w.*\)\s*:/;
+
+  /**
+   * Regular expression to match a class definition.
+   * The class name is captured in the first group.
+   *
+   * This includes the case MyClassName(), but not MyClassName(AnyClass).
+   * The class name is captured in the first group.
+   *
+   * This regex and the inherited class regex are mutually exclusive.
+   */
+  private static CLASS_REGEX = /^\s*class\s+(\w+)\s*(\(\s*\))?\s*:/;
+
+  /**
+   * Regular expression to match the construct() method definition.
+   */
+  private static CONSTRUCT__METHOD_REGEX = /^\s*def\s+construct\s*\(self\)\s*:/;
 
   /**
    * Calculates the ranges of Manim cells in the given document.
@@ -22,14 +57,8 @@ export class ManimCellRanges {
    * - when the indentation level decreases
    * - at the end of the document
    *
-   * Manim Cells are only recognized inside Manim Classes, see findManimClasses.
-   * They are considered whenever they are defined with the same or an increased
-   * indentation level compared to the definition of the mandatory construct
-   * method.
-   *
-   * This method is performance-intensive as it has to go through every single
-   * line of the document. Despite this, we call it many times and caching
-   * could be beneficial in the future.
+   * Manim Cells are only recognized inside the construct() method of a
+   * Manim class (see `findManimClasses`).
    */
   public static calculateRanges(document: vscode.TextDocument): vscode.Range[] {
     const ranges: vscode.Range[] = [];
@@ -133,11 +162,9 @@ function findClasses(document: vscode.TextDocument): ClassLine[] {
 
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
     const line = lines[lineNumber];
-
-    // note that a classMatch and an inheritedClassMatch are mutually exclusive
-    const inheritedClassMatch = line.match(/^\s*class\s+(\w+)\s*\(\w.*\)\s*:/);
-    const classMatch = line.match(/^\s*class\s+(\w+)\s*(\(\s*\))?\s*:/);
-    const constructMatch = line.match(/^\s*def\s+construct\s*\(self\)\s*:/);
+    const inheritedClassMatch = line.match(INHERITED_CLASS_REGEX);
+    const classMatch = line.match(CLASS_REGEX);
+    const constructMatch = line.match(CONSTRUCT__METHOD_REGEX);
     if (!inheritedClassMatch && !classMatch && !constructMatch) {
       continue;
     }
