@@ -1,6 +1,5 @@
 import * as crypto from "crypto";
-import * as vscode from "vscode";
-import { TextDocument } from "vscode";
+import { TextDocument, Range } from "vscode";
 import { Logger } from "./logger";
 
 class Cache<T> {
@@ -30,7 +29,7 @@ class Cache<T> {
   }
 }
 
-const cellRangesCache = new Cache<vscode.Range[]>();
+const cellRangesCache = new Cache<Range[]>();
 const manimClassesCache = new Cache<ManimClass[]>();
 
 /**
@@ -64,13 +63,13 @@ export class ManimCellRanges {
    * Manim Cells are only recognized inside the construct() method of a
    * Manim class (see `ManimClass`).
    */
-  public static calculateRanges(document: vscode.TextDocument): vscode.Range[] {
+  public static calculateRanges(document: TextDocument): Range[] {
     const cachedRanges = cellRangesCache.get(document);
     if (cachedRanges) {
       return cachedRanges;
     }
 
-    const ranges: vscode.Range[] = [];
+    const ranges: Range[] = [];
     const manimClasses = ManimClass.findAllIn(document);
 
     manimClasses.forEach((manimClass) => {
@@ -123,7 +122,7 @@ export class ManimCellRanges {
    * Returns null if no cell range contains the line, e.g. if the cursor is
    * outside of a Manim cell.
    */
-  public static getCellRangeAtLine(document: TextDocument, line: number): vscode.Range | null {
+  public static getCellRangeAtLine(document: TextDocument, line: number): Range | null {
     const ranges = ManimCellRanges.calculateRanges(document);
     for (const range of ranges) {
       if (range.start.line <= line && line <= range.end.line) {
@@ -137,14 +136,12 @@ export class ManimCellRanges {
    * Constructs a new cell range from the given start and end line numbers.
    * Discards all trailing empty lines at the end of the range.
    */
-  private static constructRange(
-    document: vscode.TextDocument, start: number, end: number,
-  ): vscode.Range {
+  private static constructRange(document: TextDocument, start: number, end: number): Range {
     let endNew = end;
     while (endNew > start && document.lineAt(endNew).isEmptyOrWhitespace) {
       endNew--;
     }
-    return new vscode.Range(start, 0, endNew, document.lineAt(endNew).text.length);
+    return new Range(start, 0, endNew, document.lineAt(endNew).text.length);
   }
 }
 
@@ -213,7 +210,7 @@ export class ManimClass {
    *
    * @param document The document to search in.
    */
-  public static findAllIn(document: vscode.TextDocument): ManimClass[] {
+  public static findAllIn(document: TextDocument): ManimClass[] {
     const cachedClasses = manimClassesCache.get(document);
     if (cachedClasses) {
       return cachedClasses;
