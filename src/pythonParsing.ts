@@ -224,12 +224,9 @@ export class ManimClass {
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
       const line = lines[lineNumber];
 
-      const inheritedClassMatch = line.match(this.INHERITED_CLASS_REGEX);
-      if (inheritedClassMatch) {
-        candidate = new ManimClass(
-          line, lineNumber,
-          inheritedClassMatch[1], line.search(/\S/),
-        );
+      const match = line.match(this.INHERITED_CLASS_REGEX);
+      if (match) {
+        candidate = new ManimClass(line, lineNumber, match[1], line.search(/\S/));
         classes.push(candidate);
         continue;
       }
