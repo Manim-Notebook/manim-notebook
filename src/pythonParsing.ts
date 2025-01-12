@@ -6,6 +6,7 @@ import { Logger } from "./logger";
 class Cache {
   public cellRanges: Map<string, vscode.Range[]> = new Map();
   public manimClasses: Map<string, ManimClass[]> = new Map();
+  private static readonly MAX_CACHE_SIZE = 5;
 
   private hash(document: vscode.TextDocument): string {
     const text = document.getText();
@@ -23,6 +24,15 @@ class Cache {
   }
 
   public addCellRanges(document: vscode.TextDocument, ranges: vscode.Range[]): void {
+    if (this.cellRanges.size >= Cache.MAX_CACHE_SIZE) {
+      const keys = this.cellRanges.keys();
+      const firstKey = keys.next().value;
+      if (firstKey) {
+        console.log("Cache DEL: Cell Ranges");
+        this.cellRanges.delete(firstKey);
+      }
+    }
+
     this.cellRanges.set(this.hash(document), ranges);
   }
 
@@ -36,6 +46,15 @@ class Cache {
   }
 
   public addManimClasses(document: vscode.TextDocument, classes: ManimClass[]): void {
+    if (this.manimClasses.size >= Cache.MAX_CACHE_SIZE) {
+      const keys = this.manimClasses.keys();
+      const firstKey = keys.next().value;
+      if (firstKey) {
+        console.log("Cache DEL: Manim Classes");
+        this.manimClasses.delete(firstKey);
+      }
+    }
+
     this.manimClasses.set(this.hash(document), classes);
   }
 }
