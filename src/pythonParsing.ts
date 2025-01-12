@@ -80,10 +80,6 @@ export class ManimCellRanges {
 
     manimClasses.forEach((manimClass) => {
       const construct = manimClass.constructMethod;
-      if (!construct) {
-        return;
-      }
-
       const startCell = construct.bodyRange.start;
       const endCell = construct.bodyRange.end;
       let start = startCell;
@@ -102,13 +98,12 @@ export class ManimCellRanges {
           inManimCell = true;
           start = i;
           end = i;
-          continue;
+        } else {
+          if (!inManimCell) {
+            start = i;
+          }
+          end = i;
         }
-
-        if (!inManimCell) {
-          start = i;
-        }
-        end = i;
       }
 
       // last cell
@@ -173,12 +168,16 @@ interface MethodInfo {
 
 /**
  * A Manim class is defined as:
- * - Inherits from any object. Not necessarily "Scene" since users might want
- *   to use inheritance where just the base class inherits from "Scene".
+ *
+ * - Inherits from any object. This constraint is necessary since in the chain
+ *   of class inheritance, the base class must inherit from "Scene", otherwise
+ *   Manim itself won't recognize the class as a scene. We don't enforce the
+ *   name "Scene" here since subclasses might also inherit from other classes.
+ *
  * - Contains a "def construct(self)" method with exactly this signature.
  *
- * This class provides static methods to work with Manim classes in a Python
- * document.
+ * This class provides static methods to work with Manim classes in a
+ * Python document.
  */
 export class ManimClass {
   /**
@@ -227,12 +226,13 @@ export class ManimClass {
   /**
    * Information about the construct() method of the Manim Class.
    */
-  constructMethod: MethodInfo | null = null;
+  constructMethod: MethodInfo;
 
   constructor(lineNumber: number, className: string, classIndent: number) {
     this.lineNumber = lineNumber;
     this.className = className;
     this.classIndent = classIndent;
+    this.constructMethod = { bodyRange: { start: -1, end: -1 }, bodyIndent: -1 };
   }
 
   /**
@@ -274,8 +274,9 @@ export class ManimClass {
       }
     }
 
-    manimClassesCache.add(document, classes);
-    return classes;
+    const filtered = classes.filter(c => c.constructMethod.bodyRange.start !== -1);
+    manimClassesCache.add(document, filtered);
+    return filtered;
   }
 
   /**
