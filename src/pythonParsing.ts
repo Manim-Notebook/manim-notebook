@@ -10,7 +10,7 @@ import { TextDocument, Range } from "vscode";
  */
 class Cache<T> {
   private cache: Map<string, T> = new Map();
-  private static readonly MAX_CACHE_SIZE = 5;
+  private static readonly MAX_CACHE_SIZE = 100;
 
   private hash(document: TextDocument): string {
     const text = document.getText();
