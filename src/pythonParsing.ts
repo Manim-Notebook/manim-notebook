@@ -203,9 +203,7 @@ export class ManimClass {
   classIndent: number;
   constructMethod: MethodInfo | null = null;
 
-  constructor(
-    line: string, lineNumber: number, className: string, classIndent: number,
-  ) {
+  constructor(line: string, lineNumber: number, className: string, classIndent: number) {
     this.line = line;
     this.lineNumber = lineNumber;
     this.className = className;
