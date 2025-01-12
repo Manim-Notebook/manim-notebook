@@ -1,6 +1,46 @@
+import * as crypto from "crypto";
 import * as vscode from "vscode";
 import { TextDocument } from "vscode";
 import { Logger } from "./logger";
+
+class Cache {
+  public cellRanges: Map<string, vscode.Range[]> = new Map();
+  public manimClasses: Map<string, ManimClass[]> = new Map();
+
+  private hash(document: vscode.TextDocument): string {
+    const text = document.getText();
+    const hash = crypto.createHash("md5").update(text);
+    return hash.digest("hex");
+  }
+
+  public getCellRanges(document: vscode.TextDocument): vscode.Range[] | undefined {
+    const key = this.hash(document);
+    if (this.cellRanges.has(key)) {
+      console.log("Cache hit: Cell Ranges");
+      return this.cellRanges.get(key);
+    }
+    return undefined;
+  }
+
+  public addCellRanges(document: vscode.TextDocument, ranges: vscode.Range[]): void {
+    this.cellRanges.set(this.hash(document), ranges);
+  }
+
+  public getManimClasses(document: vscode.TextDocument): ManimClass[] | undefined {
+    const key = this.hash(document);
+    if (this.manimClasses.has(key)) {
+      console.log("Cache hit: Manim Classes");
+      return this.manimClasses.get(key);
+    }
+    return undefined;
+  }
+
+  public addManimClasses(document: vscode.TextDocument, classes: ManimClass[]): void {
+    this.manimClasses.set(this.hash(document), classes);
+  }
+}
+
+const cache = new Cache();
 
 /**
  * ManimCellRanges calculates the ranges of Manim cells in a given document.
@@ -34,6 +74,11 @@ export class ManimCellRanges {
    * Manim class (see `ManimClass`).
    */
   public static calculateRanges(document: vscode.TextDocument): vscode.Range[] {
+    const cachedRanges = cache.getCellRanges(document);
+    if (cachedRanges) {
+      return cachedRanges;
+    }
+
     const ranges: vscode.Range[] = [];
     const manimClasses = ManimClass.findAllIn(document);
 
@@ -77,6 +122,7 @@ export class ManimCellRanges {
       }
     });
 
+    cache.addCellRanges(document, ranges);
     return ranges;
   }
 
@@ -177,6 +223,11 @@ export class ManimClass {
    * @param document The document to search in.
    */
   public static findAllIn(document: vscode.TextDocument): ManimClass[] {
+    const cachedClasses = cache.getManimClasses(document);
+    if (cachedClasses) {
+      return cachedClasses;
+    }
+
     const lines = document.getText().split("\n");
 
     const classes: ManimClass[] = [];
@@ -209,6 +260,7 @@ export class ManimClass {
       }
     }
 
+    cache.addManimClasses(document, classes);
     return classes;
   }
 
