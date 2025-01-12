@@ -3,63 +3,35 @@ import * as vscode from "vscode";
 import { TextDocument } from "vscode";
 import { Logger } from "./logger";
 
-class Cache {
-  public cellRanges: Map<string, vscode.Range[]> = new Map();
-  public manimClasses: Map<string, ManimClass[]> = new Map();
+class Cache<T> {
+  private cache: Map<string, T> = new Map();
   private static readonly MAX_CACHE_SIZE = 5;
 
-  private hash(document: vscode.TextDocument): string {
+  private hash(document: TextDocument): string {
     const text = document.getText();
     const hash = crypto.createHash("md5").update(text);
     return hash.digest("hex");
   }
 
-  public getCellRanges(document: vscode.TextDocument): vscode.Range[] | undefined {
+  public get(document: TextDocument): T | undefined {
     const key = this.hash(document);
-    if (this.cellRanges.has(key)) {
-      console.log("Cache hit: Cell Ranges");
-      return this.cellRanges.get(key);
-    }
-    return undefined;
+    return this.cache.get(key);
   }
 
-  public addCellRanges(document: vscode.TextDocument, ranges: vscode.Range[]): void {
-    if (this.cellRanges.size >= Cache.MAX_CACHE_SIZE) {
-      const keys = this.cellRanges.keys();
+  public add(document: TextDocument, value: T): void {
+    if (this.cache.size >= Cache.MAX_CACHE_SIZE) {
+      const keys = this.cache.keys();
       const firstKey = keys.next().value;
       if (firstKey) {
-        console.log("Cache DEL: Cell Ranges");
-        this.cellRanges.delete(firstKey);
+        this.cache.delete(firstKey);
       }
     }
-
-    this.cellRanges.set(this.hash(document), ranges);
-  }
-
-  public getManimClasses(document: vscode.TextDocument): ManimClass[] | undefined {
-    const key = this.hash(document);
-    if (this.manimClasses.has(key)) {
-      console.log("Cache hit: Manim Classes");
-      return this.manimClasses.get(key);
-    }
-    return undefined;
-  }
-
-  public addManimClasses(document: vscode.TextDocument, classes: ManimClass[]): void {
-    if (this.manimClasses.size >= Cache.MAX_CACHE_SIZE) {
-      const keys = this.manimClasses.keys();
-      const firstKey = keys.next().value;
-      if (firstKey) {
-        console.log("Cache DEL: Manim Classes");
-        this.manimClasses.delete(firstKey);
-      }
-    }
-
-    this.manimClasses.set(this.hash(document), classes);
+    this.cache.set(this.hash(document), value);
   }
 }
 
-const cache = new Cache();
+const cellRangesCache = new Cache<vscode.Range[]>();
+const manimClassesCache = new Cache<ManimClass[]>();
 
 /**
  * ManimCellRanges calculates the ranges of Manim cells in a given document.
@@ -93,7 +65,7 @@ export class ManimCellRanges {
    * Manim class (see `ManimClass`).
    */
   public static calculateRanges(document: vscode.TextDocument): vscode.Range[] {
-    const cachedRanges = cache.getCellRanges(document);
+    const cachedRanges = cellRangesCache.get(document);
     if (cachedRanges) {
       return cachedRanges;
     }
@@ -141,7 +113,7 @@ export class ManimCellRanges {
       }
     });
 
-    cache.addCellRanges(document, ranges);
+    cellRangesCache.add(document, ranges);
     return ranges;
   }
 
@@ -242,7 +214,7 @@ export class ManimClass {
    * @param document The document to search in.
    */
   public static findAllIn(document: vscode.TextDocument): ManimClass[] {
-    const cachedClasses = cache.getManimClasses(document);
+    const cachedClasses = manimClassesCache.get(document);
     if (cachedClasses) {
       return cachedClasses;
     }
@@ -279,7 +251,7 @@ export class ManimClass {
       }
     }
 
-    cache.addManimClasses(document, classes);
+    manimClassesCache.add(document, classes);
     return classes;
   }
 
