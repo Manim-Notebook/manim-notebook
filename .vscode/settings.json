@@ -51,6 +51,10 @@
   //////////////////////////////////////
   "editor.indentSize": 2,
   "editor.tabSize": 2,
+  "[python]": {
+    "editor.indentSize": 4,
+    "editor.tabSize": 4
+  },
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
   "editor.renderFinalNewline": "on",

@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { ManimShell, NoActiveShellError } from "./manimShell";
 import { window, workspace } from "vscode";
 import { Logger, Window } from "./logger";
-import { findManimSceneName } from "./pythonParsing";
+import { ManimClass } from "./pythonParsing";
 import { isAtLeastManimVersion } from "./manimVersion";
 
 /**
@@ -43,7 +43,7 @@ export async function startScene(lineStart?: number) {
 
   const lines = editor.document.getText().split("\n");
   let cursorLine = lineStart || editor.selection.start.line;
-  const sceneClassLine = findManimSceneName(editor.document, cursorLine);
+  const sceneClassLine = ManimClass.getManimClassAtCursor(editor.document, cursorLine);
   if (!sceneClassLine) {
     Window.showErrorMessage("Place your cursor in Manim code inside a class.");
     return;
