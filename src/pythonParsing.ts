@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { Range } from "vscode";
 import { TextDocument } from "vscode";
 import { Logger } from "./logger";
 
@@ -56,9 +55,9 @@ export class ManimCellRanges {
         const line = document.lineAt(i);
         const indentation = line.firstNonWhitespaceCharacterIndex;
 
-        if (indentation === construct.bodyIndent && ManimCellRanges.MARKER.test(line.text)) {
+        if (indentation === construct.bodyIndent && this.MARKER.test(line.text)) {
           if (inManimCell) {
-            ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, end));
+            ranges.push(this.constructRange(document, start, end));
           }
           inManimCell = true;
           start = i;
@@ -74,7 +73,7 @@ export class ManimCellRanges {
 
       // last cell
       if (inManimCell) {
-        ranges.push(ManimCellRanges.getRangeDiscardEmpty(document, start, endCell));
+        ranges.push(this.constructRange(document, start, endCell));
       }
     });
 
@@ -101,7 +100,7 @@ export class ManimCellRanges {
    * Constructs a new cell range from the given start and end line numbers.
    * Discards all trailing empty lines at the end of the range.
    */
-  private static getRangeDiscardEmpty(
+  private static constructRange(
     document: vscode.TextDocument, start: number, end: number,
   ): vscode.Range {
     let endNew = end;
