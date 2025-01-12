@@ -2,6 +2,13 @@ import * as crypto from "crypto";
 import { TextDocument, Range } from "vscode";
 import { Logger } from "./logger";
 
+/**
+ * Cache is a simple key-value store that keeps a maximum number of entries.
+ * The key is a VSCode TextDocument, and the value is of the generic type T.
+ *
+ * The cache is used to store the results of expensive calculations, e.g. the
+ * Manim cell ranges in a document.
+ */
 class Cache<T> {
   private cache: Map<string, T> = new Map();
   private static readonly MAX_CACHE_SIZE = 5;
