@@ -59,7 +59,7 @@ export async function exportScene(sceneName?: string) {
     }
 
     const sceneClassLine = ManimClass
-      .findManimSceneName(editor.document, editor.selection.start.line);
+      .getManimClassAtCursor(editor.document, editor.selection.start.line);
     if (!sceneClassLine) {
       return Window.showErrorMessage("Place your cursor in a Manim scene.");
     }

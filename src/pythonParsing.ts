@@ -81,8 +81,7 @@ export class ManimCellRanges {
 
     manimClasses.forEach((manimClass) => {
       const construct = manimClass.constructMethod;
-      if (construct === null) {
-        Logger.trace(`Manim class without construct() method: ${manimClass.className}`);
+      if (!construct) {
         return;
       }
 
@@ -124,13 +123,13 @@ export class ManimCellRanges {
   }
 
   /**
-   * Returns the cell range that contains the given line number.
+   * Returns the cell range of the Manim Cell at the given line number.
    *
    * Returns null if no cell range contains the line, e.g. if the cursor is
    * outside of a Manim cell.
    */
   public static getCellRangeAtLine(document: TextDocument, line: number): Range | null {
-    const ranges = ManimCellRanges.calculateRanges(document);
+    const ranges = this.calculateRanges(document);
     for (const range of ranges) {
       if (range.start.line <= line && line <= range.end.line) {
         return range;
@@ -142,6 +141,8 @@ export class ManimCellRanges {
   /**
    * Constructs a new cell range from the given start and end line numbers.
    * Discards all trailing empty lines at the end of the range.
+   *
+   * The column is set to 0 for `start` and to the end of the line for `end`.
    */
   private static constructRange(document: TextDocument, start: number, end: number): Range {
     let endNew = end;
@@ -152,11 +153,20 @@ export class ManimCellRanges {
   }
 }
 
+/**
+ * A range of lines in a document. Both start and end are inclusive and 0-based.
+ */
 interface LineRange {
-  start: number; // 0-based
-  end: number; // 0-based
+  start: number;
+  end: number;
 }
 
+/**
+ * Information for a method, including the range of the method body and the
+ * indentation level of the body.
+ *
+ * This is used to gather infos about the construct() method of a Manim class.
+ */
 interface MethodInfo {
   bodyRange: LineRange;
   bodyIndent: number;
@@ -176,8 +186,10 @@ export class ManimClass {
    * Regular expression to match a class that inherits from any object.
    * The class name is captured in the first group.
    *
-   * Note that MyClassName() is not considered here since we expect any words
-   * inside the parentheses.
+   * Note that this regex doesn't trigger on MyClassName() since we expect
+   * some words inside the parentheses, e.g. MyClassName(MyBaseClass).
+   *
+   * This regex and the class regex should not trigger both on the same input.
    */
   private static INHERITED_CLASS_REGEX = /^\s*class\s+(\w+)\s*\(\w.*\)\s*:/;
 
@@ -188,7 +200,8 @@ export class ManimClass {
    * This includes the case MyClassName(), but not MyClassName(AnyClass).
    * The class name is captured in the first group.
    *
-   * This regex and the inherited class regex are mutually exclusive.
+   * This regex and the inherited class regex should not trigger both
+   * on the same input.
    */
   private static CLASS_REGEX = /^\s*class\s+(\w+)\s*(\(\s*\))?\s*:/;
 
@@ -197,14 +210,27 @@ export class ManimClass {
    */
   private static CONSTRUCT_METHOD_REGEX = /^\s*def\s+construct\s*\(self\)\s*:/;
 
-  line: string;
-  lineNumber: number; // 0-based
+  /**
+   * The 0-based line number where the Manim Class is defined.
+   */
+  lineNumber: number;
+
+  /**
+   * The name of the Manim Class.
+   */
   className: string;
+
+  /**
+   * The indentation level of the class definition.
+   */
   classIndent: number;
+
+  /**
+   * Information about the construct() method of the Manim Class.
+   */
   constructMethod: MethodInfo | null = null;
 
-  constructor(line: string, lineNumber: number, className: string, classIndent: number) {
-    this.line = line;
+  constructor(lineNumber: number, className: string, classIndent: number) {
     this.lineNumber = lineNumber;
     this.className = className;
     this.classIndent = classIndent;
@@ -222,31 +248,30 @@ export class ManimClass {
     }
 
     const lines = document.getText().split("\n");
-
     const classes: ManimClass[] = [];
-    let candidate: ManimClass | null = null; // a class that might be a Manim class
+    let manimClass: ManimClass | null = null;
 
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
       const line = lines[lineNumber];
 
       const match = line.match(this.INHERITED_CLASS_REGEX);
       if (match) {
-        candidate = new ManimClass(line, lineNumber, match[1], line.search(/\S/));
-        classes.push(candidate);
+        manimClass = new ManimClass(lineNumber, match[1], line.search(/\S/));
+        classes.push(manimClass);
         continue;
       }
 
       if (line.match(this.CLASS_REGEX)) {
-        const newClassIndent = line.search(/\S/);
-        if (candidate && newClassIndent <= candidate.classIndent) {
-          candidate = null;
+        // only trigger when not a nested class
+        if (manimClass && line.search(/\S/) <= manimClass.classIndent) {
+          manimClass = null;
         }
         continue;
       }
 
-      if (line.match(this.CONSTRUCT_METHOD_REGEX) && candidate) {
-        candidate.constructMethod = this.makeConstructMethodInfo(lines, lineNumber);
-        candidate = null;
+      if (manimClass && line.match(this.CONSTRUCT_METHOD_REGEX)) {
+        manimClass.constructMethod = this.makeConstructMethodInfo(lines, lineNumber);
+        manimClass = null;
       }
     }
 
@@ -269,15 +294,15 @@ export class ManimClass {
     const bodyIndent = lines[lineNumber + 1].search(/\S/);
     const bodyRange = { start: lineNumber + 1, end: lineNumber + 1 };
 
-    // Safety check: not even next line available
-    if (lineNumber + 1 >= lines.length) {
+    // Safety check: not even start line of body range accessible
+    if (bodyRange.start >= lines.length) {
       return { bodyRange, bodyIndent };
     }
 
     for (let i = bodyRange.start; i < lines.length; i++) {
       const line = lines[i];
       if (!line.trim()) {
-        continue;
+        continue; // skip empty lines
       }
 
       const indent = line.search(/\S/);
@@ -291,22 +316,15 @@ export class ManimClass {
   }
 
   /**
-   * Finds the name of the Manim scene at the given cursor position.
+   * Returns the ManimClass at the given cursor position (if any).
    *
    * @param document The document to search in.
    * @param cursorLine The line number of the cursor.
-   * @returns The ClassLine associated to the Manim scene, or null if not found.
+   * @returns The ManimClass at the cursor position, or undefined if not found.
    */
-  public static findManimSceneName(document: TextDocument, cursorLine: number): ManimClass | null {
-    const classLines = this.findAllIn(document);
-    const matchingClass = classLines
-      .reverse()
-      .find(({ lineNumber }) => lineNumber <= cursorLine);
-
-    if (!matchingClass) {
-      return null;
-    }
-
-    return matchingClass;
+  public static getManimClassAtCursor(document: TextDocument, cursorLine: number):
+  ManimClass | undefined {
+    const manimClasses = this.findAllIn(document);
+    return manimClasses.reverse().find(({ lineNumber }) => lineNumber <= cursorLine);
   }
 }

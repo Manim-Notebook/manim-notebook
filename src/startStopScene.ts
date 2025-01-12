@@ -43,7 +43,7 @@ export async function startScene(lineStart?: number) {
 
   const lines = editor.document.getText().split("\n");
   let cursorLine = lineStart || editor.selection.start.line;
-  const sceneClassLine = ManimClass.findManimSceneName(editor.document, cursorLine);
+  const sceneClassLine = ManimClass.getManimClassAtCursor(editor.document, cursorLine);
   if (!sceneClassLine) {
     Window.showErrorMessage("Place your cursor in Manim code inside a class.");
     return;
