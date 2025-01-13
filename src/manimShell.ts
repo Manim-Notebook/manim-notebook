@@ -20,15 +20,6 @@ const IPYTHON_CELL_START_REGEX = /^\s*In \[\d+\]:/gm;
 const LOG_INFO_MESSAGE_REGEX = /^\s*\[.*\] INFO/m;
 
 /**
- * Regular expression to match IPython multiline input "...:"
- * Sometimes IPython does not execute code when entering a newline, but enters a
- * multiline input mode, where it expects another line of code. We detect that
- * this happens and send an extra newline to run the code
- * See: https://github.com/Manim-Notebook/manim-notebook/issues/18
- */
-const IPYTHON_MULTILINE_START_REGEX = /^\s*\.{3}:\s+$/m;
-
-/**
  * Regular expression to match a KeyboardInterrupt.
  */
 const KEYBOARD_INTERRUPT_REGEX = /^\s*KeyboardInterrupt/m;
@@ -577,9 +568,8 @@ export class ManimShell {
    *
    * @param shell The shell to execute the command in.
    * @param command The command to execute in the shell.
-   * @param useShellIntegration Whether to use shell integration if available
    */
-  private exec(shell: Terminal, command: string, useShellIntegration = true) {
+  private exec(shell: Terminal, command: string) {
     if (!shell) {
       Window.showErrorMessage("No shell to execute command in. Internal extension error.");
       return;
@@ -588,7 +578,7 @@ export class ManimShell {
     this.detectShellExecutionEnd = false;
     Logger.debug("🔒 Shell execution end detection disabled");
 
-    if (useShellIntegration && shell.shellIntegration) {
+    if (shell.shellIntegration) {
       Logger.debug(`💨 Sending command to terminal (with shell integration): ${command}`);
       shell.shellIntegration.executeCommand(command);
     } else {
@@ -773,14 +763,6 @@ export class ManimShell {
               Logger.debug(`📦 IPython cell ${cellNumber} detected`);
               this.eventEmitter.emit(ManimShellEvent.IPYTHON_CELL_FINISHED);
             }
-          }
-
-          if (this.isExecutingCommand && data.match(IPYTHON_MULTILINE_START_REGEX)) {
-            Logger.debug("💨 IPython multiline detected, sending extra newline");
-            // do not use shell integration here, as it might send a CTRL-C
-            // while the prompt is not finished yet
-            // \x7F deletes the extra line ("...:") from IPython
-            this.exec(this.activeShell, "\x7F", false);
           }
 
           if (data.match(ERROR_REGEX)) {
