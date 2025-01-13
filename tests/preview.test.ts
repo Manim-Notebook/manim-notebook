@@ -21,7 +21,7 @@ describe("Previewing", function () {
     });
   });
 
-  it.only("Can preview laggy scene", async () => {
+  it("Can preview laggy scene", async () => {
     const editor = await window.showTextDocument(uriInWorkspace("laggy.py"));
     goToLine(editor, 8);
     await commands.executeCommand("manim-notebook.previewManimCell");
