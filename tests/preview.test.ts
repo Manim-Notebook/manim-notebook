@@ -11,10 +11,27 @@ describe("Previewing", function () {
     await commands.executeCommand("manim-notebook.previewManimCell");
 
     return new Promise((resolve) => {
-      onAnyTerminalOutput((data, stopListening) => {
+      onAnyTerminalOutput(async (data, stopListening) => {
         if (data.includes("ReplacementTransformCircle")) {
           stopListening();
-          resolve();
+          await commands.executeCommand("manim-notebook.exitScene");
+          setTimeout(resolve, 1500);
+        }
+      });
+    });
+  });
+
+  it.only("Can preview laggy scene", async () => {
+    const editor = await window.showTextDocument(uriInWorkspace("laggy.py"));
+    goToLine(editor, 8);
+    await commands.executeCommand("manim-notebook.previewManimCell");
+
+    return new Promise((resolve) => {
+      onAnyTerminalOutput(async (data, stopListening) => {
+        if (data.includes("ShowCreationVGroup")) {
+          stopListening();
+          await commands.executeCommand("manim-notebook.exitScene");
+          setTimeout(resolve, 1500);
         }
       });
     });
