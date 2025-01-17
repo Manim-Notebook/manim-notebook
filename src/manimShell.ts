@@ -29,6 +29,12 @@ const LOG_INFO_MESSAGE_REGEX = /^\s*\[.*\] INFO/m;
 const IPYTHON_MULTILINE_START_REGEX = /^\s*\.{3}:\s+$/m;
 
 /**
+ * ANSI codes for ESC + ENTER to avoid IPython starting a multi-line input
+ * (see #110).
+ */
+const ESC_ENTER_COMMAND = "\x1b\x0d";
+
+/**
  * Regular expression to match a KeyboardInterrupt.
  */
 const KEYBOARD_INTERRUPT_REGEX = /^\s*KeyboardInterrupt/m;
@@ -326,8 +332,7 @@ export class ManimShell {
     startLine?: number,
     handler?: CommandExecutionEventHandler,
   ) {
-    // append ESC + ENTER to avoid IPython starting a multi-line input (#18)
-    command += "\x1b\x0d";
+    command += ESC_ENTER_COMMAND;
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
       + `, forceExecute=${forceExecute}, errorOnNoActiveShell=${errorOnNoActiveShell}`);
@@ -779,8 +784,7 @@ export class ManimShell {
             Logger.debug("💨 IPython multiline detected, sending extra newline");
             // do not use shell integration here, as it might send a CTRL-C
             // while the prompt is not finished yet
-            // \x7F deletes the extra line ("...:") from IPython
-            this.exec(this.activeShell, "\x7F", false);
+            this.exec(this.activeShell, ESC_ENTER_COMMAND, false);
           }
 
           if (data.match(ERROR_REGEX)) {
