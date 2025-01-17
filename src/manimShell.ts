@@ -332,7 +332,9 @@ export class ManimShell {
     // \x1b\x0d is the ANSI code for ESC + ENTER to avoid IPython starting a
     // multi-line input
     if (process.platform === "win32") {
-      command = `${command}\x1b[27;2;13~`;
+      // https://github.com/ipython/ipython/pull/10489
+      // https://github.com/microsoft/vscode-python/issues/169#issuecomment-376622730
+      command = `${command}\r\n\r\n`;
     }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
@@ -599,7 +601,7 @@ export class ManimShell {
       shell.shellIntegration.executeCommand(command);
     } else {
       Logger.debug(`💨 Sending command to terminal (without shell integration): ${command}`);
-      shell.sendText(command);
+      shell.sendText(command, false);
     }
 
     this.detectShellExecutionEnd = true;
