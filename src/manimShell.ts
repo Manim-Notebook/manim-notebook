@@ -29,12 +29,6 @@ const LOG_INFO_MESSAGE_REGEX = /^\s*\[.*\] INFO/m;
 const IPYTHON_MULTILINE_START_REGEX = /^\s*\.{3}:\s+$/m;
 
 /**
- * ANSI codes for ESC + ENTER to avoid IPython starting a multi-line input
- * (see #110).
- */
-const ESC_ENTER_COMMAND = process.platform === "win32" ? "\x1b\r" : "\x1b\x0d";
-
-/**
  * Regular expression to match a KeyboardInterrupt.
  */
 const KEYBOARD_INTERRUPT_REGEX = /^\s*KeyboardInterrupt/m;
@@ -332,7 +326,14 @@ export class ManimShell {
     startLine?: number,
     handler?: CommandExecutionEventHandler,
   ) {
-    command += ESC_ENTER_COMMAND;
+    // Work around Windows bug, where the cell is not executed (see #110)
+    // see https://github.com/ipython/ipython/issues/13054
+    // and https://github.com/microsoft/vscode-python/issues/17172#issuecomment-1348263378
+    // \x1b\x0d is the ANSI code for ESC + ENTER to avoid IPython starting a
+    // multi-line input
+    if (process.platform === "win32") {
+      command = `\u000F${command}$\x1b\x0d`;
+    }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
       + `, forceExecute=${forceExecute}, errorOnNoActiveShell=${errorOnNoActiveShell}`);
@@ -780,12 +781,12 @@ export class ManimShell {
             }
           }
 
-          if (this.isExecutingCommand && data.match(IPYTHON_MULTILINE_START_REGEX)) {
-            Logger.debug("💨 IPython multiline detected, sending extra newline");
-            // do not use shell integration here, as it might send a CTRL-C
-            // while the prompt is not finished yet
-            this.exec(this.activeShell, ESC_ENTER_COMMAND, false);
-          }
+          // if (this.isExecutingCommand && data.match(IPYTHON_MULTILINE_START_REGEX)) {
+          //   Logger.debug("💨 IPython multiline detected, sending extra newline");
+          //   // do not use shell integration here, as it might send a CTRL-C
+          //   // while the prompt is not finished yet
+          //   this.exec(this.activeShell, ESC_ENTER_COMMAND, false);
+          // }
 
           if (data.match(ERROR_REGEX)) {
             Logger.debug("🚨 Error in IPython cell detected");
