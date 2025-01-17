@@ -332,7 +332,7 @@ export class ManimShell {
     // \x1b\x0d is the ANSI code for ESC + ENTER to avoid IPython starting a
     // multi-line input
     if (process.platform === "win32") {
-      command = `${command}\x1B\r`;
+      command = `${command}\x1b\r\r`;
     }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
