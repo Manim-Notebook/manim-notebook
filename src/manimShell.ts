@@ -32,7 +32,7 @@ const IPYTHON_MULTILINE_START_REGEX = /^\s*\.{3}:\s+$/m;
  * ANSI codes for ESC + ENTER to avoid IPython starting a multi-line input
  * (see #110).
  */
-const ESC_ENTER_COMMAND = "\x1b\x0d";
+const ESC_ENTER_COMMAND = process.platform === "win32" ? "\x1b\r" : "\x1b\x0d";
 
 /**
  * Regular expression to match a KeyboardInterrupt.
