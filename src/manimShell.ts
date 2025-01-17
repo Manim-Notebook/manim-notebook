@@ -334,7 +334,7 @@ export class ManimShell {
     if (process.platform === "win32") {
       // https://github.com/ipython/ipython/pull/10489
       // https://github.com/microsoft/vscode-python/issues/169#issuecomment-376622730
-      command = `${command}\x1b\r\n`;
+      command = `${command}\r\n`;
     }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
