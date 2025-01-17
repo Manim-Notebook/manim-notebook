@@ -20,15 +20,6 @@ const IPYTHON_CELL_START_REGEX = /^\s*In \[\d+\]:/gm;
 const LOG_INFO_MESSAGE_REGEX = /^\s*\[.*\] INFO/m;
 
 /**
- * Regular expression to match IPython multiline input "...:"
- * Sometimes IPython does not execute code when entering a newline, but enters a
- * multiline input mode, where it expects another line of code. We detect that
- * this happens and send an extra newline to run the code
- * See: https://github.com/Manim-Notebook/manim-notebook/issues/18
- */
-const IPYTHON_MULTILINE_START_REGEX = /^\s*\.{3}:\s+$/m;
-
-/**
  * Regular expression to match a KeyboardInterrupt.
  */
 const KEYBOARD_INTERRUPT_REGEX = /^\s*KeyboardInterrupt/m;
@@ -326,15 +317,12 @@ export class ManimShell {
     startLine?: number,
     handler?: CommandExecutionEventHandler,
   ) {
-    // Work around Windows bug, where the cell is not executed (see #110)
-    // see https://github.com/ipython/ipython/issues/13054
-    // and https://github.com/microsoft/vscode-python/issues/17172#issuecomment-1348263378
-    // \x1b\x0d is the ANSI code for ESC + ENTER to avoid IPython starting a
-    // multi-line input
+    // Work around bug, where the cell is not executed in Windows (see #110)
+    // see https://github.com/ipython/ipython/issues/13054#issuecomment-2599354847
+    // This prevents IPython from starting a multi-line input instead of
+    // executing the command.
     if (process.platform === "win32") {
-      // https://github.com/ipython/ipython/pull/10489
-      // https://github.com/microsoft/vscode-python/issues/169#issuecomment-376622730
-      command = `${command}\r\n\r\n`;
+      command += "\x1b\r\n\r\n"; // ANSI for ESC + ENTER + ENTER
     }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
@@ -783,13 +771,6 @@ export class ManimShell {
               this.eventEmitter.emit(ManimShellEvent.IPYTHON_CELL_FINISHED);
             }
           }
-
-          // if (this.isExecutingCommand && data.match(IPYTHON_MULTILINE_START_REGEX)) {
-          //   Logger.debug("💨 IPython multiline detected, sending extra newline");
-          //   // do not use shell integration here, as it might send a CTRL-C
-          //   // while the prompt is not finished yet
-          //   this.exec(this.activeShell, ESC_ENTER_COMMAND, false);
-          // }
 
           if (data.match(ERROR_REGEX)) {
             Logger.debug("🚨 Error in IPython cell detected");
