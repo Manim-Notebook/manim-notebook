@@ -1,0 +1,6 @@
+{
+  "default": true,
+  "MD033": false, // Inline HTML
+  "MD041": false, // first line header
+  "MD013": false // line length
+}
