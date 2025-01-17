@@ -29,7 +29,7 @@ describe("Previewing", function () {
     });
   });
 
-  it.only("Can preview laggy scene", async () => {
+  it.only("Can preview laggy scene", async function () {
     this.timeout(2.5 * 60 * 1000);
 
     const editor = await window.showTextDocument(uriInWorkspace("laggy.py"));
