@@ -31,7 +31,7 @@ describe("Previewing", function () {
 
   it.only("Can preview laggy scene", async () => {
     const editor = await window.showTextDocument(uriInWorkspace("laggy.py"));
-    const queue: { line: number; waitForString: string; resolve: () => void }[] = [];
+    const queue: { line: number; waitForStrings: string[]; resolve: () => void }[] = [];
     let wantToStopListening = false;
 
     onAnyTerminalOutput(async (data, stopListening) => {
@@ -39,24 +39,33 @@ describe("Previewing", function () {
         stopListening();
         return;
       }
+      if (queue.length === 0) {
+        throw new Error("Listening to terminal output, but nothing in queue to check against");
+      }
 
-      if (queue.length > 0 && data.includes(queue[0].waitForString)) {
+      const { waitForStrings } = queue[0];
+      for (const str of waitForStrings) {
+        if (data.includes(str)) {
+          waitForStrings.splice(waitForStrings.indexOf(str), 1);
+        }
+      }
+      if (waitForStrings.length === 0) {
         queue.shift()?.resolve();
       }
     });
 
-    async function testPreviewAtLine(line: number, waitForString: string) {
+    async function testPreviewAtLine(line: number, waitForStrings: string[]) {
       goToLine(editor, line);
       await commands.executeCommand("manim-notebook.previewManimCell");
       await new Promise<void>((resolve) => {
-        queue.push({ line, waitForString, resolve });
+        queue.push({ line, waitForStrings, resolve });
       });
     }
 
-    await testPreviewAtLine(8, "In [2]:");
-    await testPreviewAtLine(14, "In [3]:");
-    await testPreviewAtLine(21, "In [4]:");
-    await testPreviewAtLine(14, "In [5]:");
+    await testPreviewAtLine(8, ["ShowCreationVGroup", "In [2]:"]);
+    await testPreviewAtLine(14, ["_MethodAnimationValueTracker", "In [3]:"]);
+    await testPreviewAtLine(21, ["_MethodAnimationValueTracker", "In [4]:"]);
+    await testPreviewAtLine(14, ["_MethodAnimationValueTracker", "In [5]:"]);
 
     wantToStopListening = true;
     expect(queue.length).to.equal(0);
