@@ -46,7 +46,7 @@ describe("Previewing", function () {
       const { waitForStrings } = queue[0];
       for (const str of waitForStrings) {
         if (data.includes(str)) {
-          waitForStrings.splice(waitForStrings.indexOf(str), 1);
+          waitForStrings.removeByValue(str);
         }
       }
       if (waitForStrings.length === 0) {
@@ -67,7 +67,7 @@ describe("Previewing", function () {
     await testPreviewAtLine(21, ["_MethodAnimationValueTracker", "In [4]:"]);
     await testPreviewAtLine(14, ["_MethodAnimationValueTracker", "In [5]:"]);
 
-    wantToStopListening = true;
+    wantToStopListening = true; // cleanup for subsequent tests
     expect(queue.length).to.equal(0);
 
     await commands.executeCommand("manim-notebook.exitScene");
