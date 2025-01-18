@@ -324,7 +324,7 @@ export class ManimShell {
     if (process.platform === "win32") {
       // \u000F: Ctrl+o (Shift In) to enter multi-line mode
       // then: \x1b\r\: ESC + ENTER + ENTER to exit multi-line mode
-      command = `${command}\u000F\x1b\r\r`;
+      command = `\r${command}\u000F\x1b\r\r`;
     }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
@@ -578,6 +578,8 @@ export class ManimShell {
    * @param useShellIntegration Whether to use shell integration if available
    */
   private exec(shell: Terminal, command: string, useShellIntegration = true) {
+    console.log(f`🥝 in exec() for command: ${command}`);
+
     if (!shell) {
       Window.showErrorMessage("No shell to execute command in. Internal extension error.");
       return;
