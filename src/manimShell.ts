@@ -370,8 +370,7 @@ export class ManimShell {
     if (process.platform === "win32") {
       this.detectShellExecutionEnd = false;
       shell.sendText(command, false);
-      shell.sendText("\n", false);
-      shell.sendText("\x1b", false);
+      await vscode.commands.executeCommand("workbench.action.terminal.sendSequence", "\u000D");
       this.detectShellExecutionEnd = true;
     } else {
       this.exec(shell, command);
