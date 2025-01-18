@@ -322,7 +322,9 @@ export class ManimShell {
     // This prevents IPython from starting a multi-line input instead of
     // executing the command.
     if (process.platform === "win32") {
-      command = `${command}\x1b\r\r`; // ANSI for ESC + ENTER + ENTER
+      // \u000F: Ctrl+o (Shift In) to enter multi-line mode
+      // then: \x1b\r\: ESC + ENTER + ENTER to exit multi-line mode
+      command = `\u000F${command}\x1b\r\r`;
     }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
