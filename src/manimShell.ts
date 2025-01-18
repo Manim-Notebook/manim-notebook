@@ -370,7 +370,7 @@ export class ManimShell {
     if (process.platform === "win32") {
       this.detectShellExecutionEnd = false;
       shell.sendText(command, false);
-      shell.sendText("\n", false);
+      shell.sendText("\n\x1b", false);
       this.detectShellExecutionEnd = true;
     } else {
       this.exec(shell, command);
