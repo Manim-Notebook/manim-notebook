@@ -324,7 +324,7 @@ export class ManimShell {
     if (process.platform === "win32") {
       // \u000F: Ctrl+o (Shift In) to enter multi-line mode
       // then: \x1b\r\: ESC + ENTER + ENTER to exit multi-line mode
-      command = `\r\u000F${command}\x1b\r\r`;
+      command = `\u000F${command}\u000F\x1b\r\r`;
     }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
