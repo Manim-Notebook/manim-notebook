@@ -322,9 +322,6 @@ export class ManimShell {
     // This prevents IPython from starting a multi-line input instead of
     // executing the command.
     if (process.platform === "win32") {
-      // \u000F: Ctrl+o (Shift In) to enter multi-line mode
-      // then: \x1b\r\: ESC + ENTER + ENTER to exit multi-line mode
-      // command = `${command}`;
       command += "\x1b\r\r\x7f";
     }
 
@@ -367,17 +364,6 @@ export class ManimShell {
     this.eventEmitter.on(ManimShellEvent.DATA, dataListener);
 
     let currentExecutionCount = this.iPythonCellCount;
-
-    /* if (process.platform === "win32") {
-      this.detectShellExecutionEnd = false;
-      // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Bracketed-Paste-Mode
-      // shell.sendText(
-      // `\x1b[201~\x1b[?2004l\u000F${command}\x1b\r\n\r\n`, false);
-      shell.sendText(`${command}\x1b\r\r\x7F`, false);
-      this.detectShellExecutionEnd = true;
-    } else {
-      this.exec(shell, command);
-    } */
 
     this.exec(shell, command);
     handler?.onCommandIssued?.(this.activeShell !== null);
@@ -605,7 +591,8 @@ export class ManimShell {
       shell.shellIntegration.executeCommand(command);
     } else {
       Logger.debug(`💨 Sending command to terminal (without shell integration): ${command}`);
-      shell.sendText(command, true);
+      const shouldExecute = !(command.includes("\n") || command.includes("\r"));
+      shell.sendText(command, shouldExecute);
     }
 
     this.detectShellExecutionEnd = true;
