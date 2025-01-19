@@ -27,6 +27,9 @@ Unfortunately, installing 3Blue1Brown's Manim is not a trivial task due to its d
 
 ## 💨 Dependency installation guidance & quirks
 
+- Note that we don't install ffmpeg in these steps. ManimGL will work without it as well if you just want to preview animations (it will just show a warning, that's it). To finally render your animations to an `.mp4` file, you will need ffmpeg, though.
+- We also don't install LaTeX in these steps. If you want to use LaTeX in your animations, you will need to install LaTeX separately.
+
 **Python `3.13` (any OS)**
 
 ```py
@@ -54,7 +57,7 @@ xvfb-run -a glxinfo | grep "OpenGL version"
 sudo apt-get install libpango1.0-dev -y
 ```
 
-Only apply those if you encounter the respective errors:
+Only apply those fixes in case you encounter the respective errors:
 
 ```py
 # Work around 'NoneType' object has no attribute 'glGetError'
