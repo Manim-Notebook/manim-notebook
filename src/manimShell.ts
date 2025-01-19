@@ -372,7 +372,7 @@ export class ManimShell {
       // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Bracketed-Paste-Mode
       // shell.sendText(
       // `\x1b[201~\x1b[?2004l\u000F${command}\x1b\r\n\r\n`, false);
-      shell.sendText(`${command}\x1b\r\r`, false);
+      shell.sendText(`${command}\x1b\r\r\x7F`, false);
       this.detectShellExecutionEnd = true;
     } else {
       this.exec(shell, command);
