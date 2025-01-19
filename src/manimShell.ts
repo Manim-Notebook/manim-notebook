@@ -367,14 +367,15 @@ export class ManimShell {
 
     let currentExecutionCount = this.iPythonCellCount;
 
-    if (process.platform === "win32") {
+    /*  if (process.platform === "win32") {
       this.detectShellExecutionEnd = false;
       // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Bracketed-Paste-Mode
       shell.sendText(`\x1b[201~\x1b[?2004l\u000F${command}\x1b\r\n\r\n`, false);
       this.detectShellExecutionEnd = true;
     } else {
       this.exec(shell, command);
-    }
+    } */
+    this.exec(shell, command);
 
     handler?.onCommandIssued?.(this.activeShell !== null);
 

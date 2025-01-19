@@ -30,7 +30,7 @@ describe("Previewing", function () {
   });
 
   it.only("Can preview laggy scene", async () => {
-    const editor = await window.showTextDocument(uriInWorkspace("laggy.py"));
+    const editor = await window.showTextDocument(uriInWorkspace("laggy-patched.py"));
     const queue: { line: number; waitForStrings: string[]; resolve: () => void }[] = [];
     let wantToStopListening = false;
 
@@ -62,10 +62,10 @@ describe("Previewing", function () {
       });
     }
 
-    await testPreviewAtLine(8, ["ShowCreationVGroup", "In [2]:"]);
-    await testPreviewAtLine(14, ["_MethodAnimationValueTracker", "In [3]:"]);
-    await testPreviewAtLine(21, ["_MethodAnimationValueTracker", "In [4]:"]);
-    await testPreviewAtLine(14, ["_MethodAnimationValueTracker", "In [5]:"]);
+    await testPreviewAtLine(40, ["ShowCreationVGroup", "In [2]:"]);
+    await testPreviewAtLine(46, ["_MethodAnimationValueTracker", "In [3]:"]);
+    await testPreviewAtLine(55, ["_MethodAnimationValueTracker", "In [4]:"]);
+    await testPreviewAtLine(46, ["_MethodAnimationValueTracker", "In [5]:"]);
 
     wantToStopListening = true; // cleanup for subsequent tests
     expect(queue.length).to.equal(0);
