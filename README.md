@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=bhoov.vscode-manim">
-    <img src="./assets/logo.png" width="130px" alt="Manim Notebook Logo"/>
+    <img src="./assets/manim-notebook-logo.png" width="130px" alt="Manim Notebook Logo showing a physical notebook with an 'M' letter on its title page"/>
   </a>
 
   <div align="center">
@@ -17,7 +17,7 @@
 </div>
 
 > [!note]
-> December 2024: Hey there👋 We are currently working to ship the first release of Manim Notebook. The version already available on the VSCode Marketplace is outdated. If you are interested in the current state of the extension, just clone this repo and follow the [Developing guide](https://github.com/Manim-Notebook/manim-notebook/wiki/Developing).
+> December 2024 / January 2025: Hey there👋 We are currently working to ship the first release of Manim Notebook. The version already available on the VSCode Marketplace is outdated. If you are interested in the current state of the extension, just clone this repo and follow the [Developing guide](https://github.com/Manim-Notebook/manim-notebook/wiki/Developing).
 
 > [!warning]
 > This VSCode extension is specifically for [3b1b's original manim library](https://github.com/3b1b/manim)<br>
