@@ -370,7 +370,7 @@ export class ManimShell {
     if (process.platform === "win32") {
       this.detectShellExecutionEnd = false;
       // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Bracketed-Paste-Mode
-      shell.sendText(`\x1b[201~\u000F${command}\r\n\r\n`, false);
+      shell.sendText(`\x1b[201~\u000F${command}\x1b\r\n\r\n`, false);
       this.detectShellExecutionEnd = true;
     } else {
       this.exec(shell, command);
