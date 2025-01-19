@@ -325,7 +325,7 @@ export class ManimShell {
       // \u000F: Ctrl+o (Shift In) to enter multi-line mode
       // then: \x1b\r\: ESC + ENTER + ENTER to exit multi-line mode
       // command = `${command}`;
-      command += "\x7f";
+      command += "\r\x7f";
     }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
@@ -605,8 +605,7 @@ export class ManimShell {
       shell.shellIntegration.executeCommand(command);
     } else {
       Logger.debug(`💨 Sending command to terminal (without shell integration): ${command}`);
-      const shouldExecute = !(command.includes("\n") || command.includes("\r"));
-      shell.sendText(command, shouldExecute);
+      shell.sendText(command, true);
     }
 
     this.detectShellExecutionEnd = true;
