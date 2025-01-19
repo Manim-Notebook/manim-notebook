@@ -1,9 +1,1 @@
-# Change Log
-
-All notable changes to the "Manim Notebook" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+Our [Releases section](https://github.com/Manim-Notebook/manim-notebook/releases) documents all changes made to the Manim Notebook extension. This includes new features, bug fixes, and other improvements.
