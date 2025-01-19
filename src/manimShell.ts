@@ -321,11 +321,12 @@ export class ManimShell {
     // see https://github.com/ipython/ipython/issues/13054#issuecomment-2599354847
     // This prevents IPython from starting a multi-line input instead of
     // executing the command.
-    // if (process.platform === "win32") {
-    //   // \u000F: Ctrl+o (Shift In) to enter multi-line mode
-    //   // then: \x1b\r\: ESC + ENTER + ENTER to exit multi-line mode
-    //   command = `${command}`;
-    // }
+    if (process.platform === "win32") {
+      // \u000F: Ctrl+o (Shift In) to enter multi-line mode
+      // then: \x1b\r\: ESC + ENTER + ENTER to exit multi-line mode
+      // command = `${command}`;
+      command += "\x7f";
+    }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
       + `, forceExecute=${forceExecute}, errorOnNoActiveShell=${errorOnNoActiveShell}`);
@@ -367,7 +368,7 @@ export class ManimShell {
 
     let currentExecutionCount = this.iPythonCellCount;
 
-    if (process.platform === "win32") {
+    /* if (process.platform === "win32") {
       this.detectShellExecutionEnd = false;
       // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Bracketed-Paste-Mode
       // shell.sendText(
@@ -376,8 +377,9 @@ export class ManimShell {
       this.detectShellExecutionEnd = true;
     } else {
       this.exec(shell, command);
-    }
+    } */
 
+    this.exec(shell, command);
     handler?.onCommandIssued?.(this.activeShell !== null);
 
     this.waitUntilCommandFinished(currentExecutionCount, () => {
