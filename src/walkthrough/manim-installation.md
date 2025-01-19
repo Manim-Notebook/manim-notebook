@@ -1,3 +1,21 @@
+<div align="center">
+  <img src="../../assets/manim-notebook-logo.png"
+        width="150px"
+        alt="Manim Notebook Logo showing a physical notebook with an 'M' letter on its title page"/>
+
+  <div align="center">
+    <h3 align="center">
+      <strong>Welcome to Manim Notebook</strong>
+    </h3>
+    <p>
+      Your extension to interactively preview Manim animations</strong>
+      | <a href="https://github.com/Manim-Notebook/manim-notebook/">GitHub</a>
+    </p>
+  </div>
+</div>
+
+<br>
+
 # 🎈 Manim Installation
 
 > **Manim Notebook only works with ManimGL by 3Blue1Brown,<br>NOT with the community edition of Manim (Manim CE)**.

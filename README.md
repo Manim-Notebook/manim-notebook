@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=bhoov.vscode-manim">
-    <img src="./assets/logo.png" width="130px" alt="Manim Notebook Logo"/>
+    <img src="./assets/manim-notebook-logo.png" width="130px" alt="Manim Notebook Logo showing a physical notebook with an 'M' letter on its title page"/>
   </a>
 
   <div align="center">
