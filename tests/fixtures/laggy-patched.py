@@ -1,3 +1,5 @@
+from manimlib import *
+
 import sys
 
 
@@ -29,8 +31,6 @@ def monkey_patch_win32_console_input_reader():
 
 
 monkey_patch_win32_console_input_reader()
-
-from manimlib import *
 
 
 # from https://github.com/Manim-Notebook/manim-notebook/issues/18#issuecomment-2431224967
