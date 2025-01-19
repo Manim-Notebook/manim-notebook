@@ -325,7 +325,7 @@ export class ManimShell {
       // \u000F: Ctrl+o (Shift In) to enter multi-line mode
       // then: \x1b\r\: ESC + ENTER + ENTER to exit multi-line mode
       // command = `${command}`;
-      command += "\x1b\x7f";
+      command += "\x1b\r\x7f";
     }
 
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
