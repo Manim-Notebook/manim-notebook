@@ -317,9 +317,6 @@ export class ManimShell {
     startLine?: number,
     handler?: CommandExecutionEventHandler,
   ) {
-    // append ESC + ENTER to avoid IPython starting a multi-line input (#18)
-    command += "\x1b\x0d";
-
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
       + `, forceExecute=${forceExecute}, errorOnNoActiveShell=${errorOnNoActiveShell}`);
 
