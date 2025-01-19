@@ -40,6 +40,18 @@ export async function activate(context: vscode.ExtensionContext) {
   // Trigger the Manim shell to start listening to the terminal
   ManimShell.instance;
 
+  // Register the open walkthrough command earlier, so that it can be used
+  // even while the Python extension is loading and the ManimGL version is
+  // being detected.
+  const openWalkthroughCommand = vscode.commands.registerCommand(
+    "manim-notebook.openWalkthrough", async () => {
+      Logger.info("💠 Command requested: Open Walkthrough");
+      await vscode.commands.executeCommand("workbench.action.openWalkthrough",
+        `${context.extension.id}#manim-notebook-walkthrough`, false);
+    });
+
+  context.subscriptions.push(openWalkthroughCommand);
+
   let manimglPath: string | undefined = undefined;
   try {
     manimglPath = await waitForPythonExtension();
@@ -113,13 +125,6 @@ export async function activate(context: vscode.ExtensionContext) {
       { language: "python" }, new ExportSceneCodeLens()),
   );
 
-  const openWalkthroughCommand = vscode.commands.registerCommand(
-    "manim-notebook.openWalkthrough", async () => {
-      Logger.info("💠 Command requested: Open Walkthrough");
-      await vscode.commands.executeCommand("workbench.action.openWalkthrough",
-        `${context.extension.id}#manim-notebook-walkthrough`, false);
-    });
-
   // internal command
   const finishRecordingLogFileCommand = vscode.commands.registerCommand(
     "manim-notebook.finishRecordingLogFile", async () => {
@@ -143,7 +148,6 @@ export async function activate(context: vscode.ExtensionContext) {
     exitSceneCommand,
     clearSceneCommand,
     recordLogFileCommand,
-    openWalkthroughCommand,
     exportSceneCommand,
     finishRecordingLogFileCommand,
     redetectManimVersionCommand,
