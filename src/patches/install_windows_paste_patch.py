@@ -73,7 +73,6 @@ def install_patch():
     # Find path to the site-packages directory
     # https://stackoverflow.com/a/52638888/
     site_packages_path = sysconfig.get_path("purelib")
-    print(f"🐒 Installing patch in {site_packages_path}")
 
     # Copy the patch file to the site-packages directory
     patch_file_path = os.path.join(site_packages_path, f"{PATCH_FILE_NAME}.py")
@@ -89,3 +88,7 @@ def install_patch():
 
 
 install_patch()
+print("🐒 Manim Notebook: Windows paste patch applied")
+print(
+    "For more information, see https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch"
+)
