@@ -18,6 +18,7 @@ export async function applyWindowsRecognizePastePatch(
   patch = patch.replace(/"/g, '\\"');
   patch = patch.replace(/'/g, "\\'");
   patch = patch.replace(/\n/g, "\\n");
+  patch = patch.replace(/\r/g, "\\r");
 
   const python3 = python3Path || "python3";
   const patchCommand = `${python3} -c "exec('''${patch}''')"`;
