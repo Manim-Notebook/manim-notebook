@@ -9,6 +9,16 @@ import { ExtensionContext, window, ThemeIcon, Terminal } from "vscode";
 
 const PATCH_INFO_URL = "https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch";
 
+/**
+ * Applies the Windows paste patch to the user's Python environment such that
+ * cell execution works in IPython works correctly on Windows.
+ *
+ * More information:
+ * https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch
+ *
+ * @param context The extension context.
+ * @param python3Binary The path to the Python 3 binary.
+ */
 export async function applyWindowsRecognizePastePatch(
   context: ExtensionContext, python3Binary: string,
 ) {
