@@ -6,7 +6,7 @@ class Laggy(Scene):
 
     def construct(self):
         ## Create some boxes
-        grid = Square().get_grid(25, 25, buff=0)
+        grid = Square().get_grid(50, 50, buff=0)
         grid.set_height(5)
         grid.set_stroke(WHITE)
         self.play(ShowCreation(grid))
