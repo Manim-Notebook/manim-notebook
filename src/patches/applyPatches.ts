@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import path from "path";
+
 import { onTerminalOutput } from "../utils/terminal";
 import { Logger, Window } from "../logger";
 
@@ -9,19 +10,16 @@ import { ExtensionContext, window, ThemeIcon, Terminal } from "vscode";
 const PATCH_INFO_URL = "https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch";
 
 export async function applyWindowsRecognizePastePatch(
-  context: ExtensionContext, python3Path: string | undefined,
+  context: ExtensionContext, python3Binary: string,
 ) {
   const pathToPatch = path.join(context.extensionPath,
     "src", "patches", "install_windows_paste_patch.py");
   let patch = fs.readFileSync(pathToPatch, "utf-8");
-
   patch = patch.replace(/"/g, '\\"');
   patch = patch.replace(/'/g, "\\'");
   patch = patch.replace(/\n/g, "\\n");
   patch = patch.replace(/\r/g, "\\r");
-
-  const python3 = python3Path || "python3";
-  const patchCommand = `${python3} -c "exec('''${patch}''')"`;
+  const patchCommand = `${python3Binary} -c "exec('''${patch}''')"`;
 
   const terminal = await window.createTerminal({
     name: "Win Patch",

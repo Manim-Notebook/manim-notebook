@@ -50,7 +50,6 @@ export async function activate(context: vscode.ExtensionContext) {
       await vscode.commands.executeCommand("workbench.action.openWalkthrough",
         `${context.extension.id}#manim-notebook-walkthrough`, false);
     });
-
   context.subscriptions.push(openWalkthroughCommand);
 
   let pythonEnvPath: string | undefined = undefined;
@@ -65,19 +64,17 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   if (process.platform === "win32") {
-    let python3Path: string | undefined = undefined;
-    if (pythonEnvPath) {
-      python3Path = getBinaryPathInPythonEnv(pythonEnvPath, "python3");
-    }
+    const python3Path = pythonEnvPath
+      ? getBinaryPathInPythonEnv(pythonEnvPath, "python3")
+      : "python3";
     // not necessary to await here, can run in background
     applyWindowsRecognizePastePatch(context, python3Path);
   }
 
-  let manimglPath: string | undefined = undefined;
-  if (pythonEnvPath) {
-    manimglPath = getBinaryPathInPythonEnv(pythonEnvPath, "manimgl");
-  }
-  await tryToDetermineManimVersion(manimglPath);
+  const manimglBinary = pythonEnvPath
+    ? getBinaryPathInPythonEnv(pythonEnvPath, "manimgl")
+    : "manimgl";
+  await tryToDetermineManimVersion(manimglBinary);
 
   const previewManimCellCommand = vscode.commands.registerCommand(
     "manim-notebook.previewManimCell", (cellCode?: string, startLine?: number) => {
@@ -147,7 +144,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const redetectManimVersionCommand = vscode.commands.registerCommand(
     "manim-notebook.redetectManimVersion", async () => {
       Logger.info("💠 Command requested: Redetect Manim Version");
-      await tryToDetermineManimVersion();
+      await tryToDetermineManimVersion("manimgl");
     });
 
   registerWalkthroughCommands(context);
