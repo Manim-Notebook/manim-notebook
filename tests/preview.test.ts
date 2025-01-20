@@ -60,10 +60,10 @@ describe("Previewing", function () {
       });
     }
 
-    await testPreviewAtLine(44, ["ShowCreationVGroup", "In [2]:"]);
-    await testPreviewAtLine(50, ["_MethodAnimationValueTracker", "In [3]:"]);
-    await testPreviewAtLine(57, ["_MethodAnimationValueTracker", "In [4]:"]);
-    await testPreviewAtLine(50, ["_MethodAnimationValueTracker", "In [5]:"]);
+    await testPreviewAtLine(8, ["ShowCreationVGroup", "In [2]:"]);
+    await testPreviewAtLine(14, ["_MethodAnimationValueTracker", "In [3]:"]);
+    await testPreviewAtLine(21, ["_MethodAnimationValueTracker", "In [4]:"]);
+    await testPreviewAtLine(14, ["_MethodAnimationValueTracker", "In [5]:"]);
 
     wantToStopListening = true; // cleanup for subsequent tests
     expect(queue.length).to.equal(0);
