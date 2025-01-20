@@ -65,6 +65,16 @@ export async function applyWindowsRecognizePastePatch(
     });
 }
 
+/**
+ * Executes the given command in the terminal and looks for the message that
+ * indicates that the Windows paste patch was successfully applied.
+ *
+ * @param terminal The terminal to execute the command in.
+ * @param command The command to execute.
+ * @returns A promise that resolves to true if the patch was successfully
+ * applied, and false otherwise. Might never resolve, so the caller should
+ * let this promise race with a timeout promise.
+ */
 async function lookForPatchSuccessfullyAppliedMessage(
   terminal: Terminal, command: string): Promise<boolean> {
   return new Promise<boolean>(async (resolve, _reject) => {
