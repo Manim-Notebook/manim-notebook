@@ -12,6 +12,7 @@ import { ExportSceneCodeLens } from "./export";
 import { tryToDetermineManimVersion, LAST_WARNING_NO_VERSION_KEY } from "./manimVersion";
 import { setupTestEnvironment } from "./utils/testing";
 import { EventEmitter } from "events";
+import { applyWindowsRecognizePastePatch } from "./patches/applyPatches";
 
 export let manimNotebookContext: vscode.ExtensionContext;
 class WaitingForPythonExtensionCancelled extends Error {}
@@ -52,9 +53,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(openWalkthroughCommand);
 
-  let manimglPath: string | undefined = undefined;
+  let pythonEnvPath: string | undefined = undefined;
   try {
-    manimglPath = await waitForPythonExtension();
+    pythonEnvPath = await waitForPythonExtension();
   } catch (err) {
     if (err instanceof WaitingForPythonExtensionCancelled) {
       Logger.info("💠 Waiting for Python extension cancelled, therefore"
@@ -62,8 +63,19 @@ export async function activate(context: vscode.ExtensionContext) {
       return;
     }
   }
-  if (manimglPath) {
-    manimglPath = pythonEnvToManimglPath(manimglPath);
+
+  // if (process.platform === "win32") {
+  let python3Path: string | undefined = undefined;
+  if (pythonEnvPath) {
+    python3Path = getBinaryPathInPythonEnv(pythonEnvPath, "python3");
+  }
+  // not necessary to await here, can run in background
+  applyWindowsRecognizePastePatch(context, python3Path);
+  // }
+
+  let manimglPath: string | undefined = undefined;
+  if (pythonEnvPath) {
+    manimglPath = getBinaryPathInPythonEnv(pythonEnvPath, "manimgl");
   }
   await tryToDetermineManimVersion(manimglPath);
 
@@ -207,18 +219,19 @@ async function waitForPythonExtension(): Promise<string | undefined> {
 
 /**
  * Transforms a path pointing to either an environment folder or a
- * Python executable into a path pointing to the ManimGL binary.
+ * Python executable into a path pointing to the respective binary.
  *
- * @param path The path to the Python environment or Python executable.
- * @returns The path to the ManimGL binary.
+ * @param envPath The path to the Python environment or Python executable.
+ * @param binary The binary to be called, e.g. "manimgl".
+ * @returns The path to the binary inside the environment.
  */
-function pythonEnvToManimglPath(envPath: string): string {
+function getBinaryPathInPythonEnv(envPath: string, binary: string): string {
   if (envPath.endsWith("python") || envPath.endsWith("python3")) {
-    return envPath.replace(/python3?$/, "manimgl");
-  } else {
-    const binFolderName = process.platform === "win32" ? "Scripts" : "bin";
-    return path.join(envPath, binFolderName, "manimgl");
+    return envPath.replace(/python3?$/, binary);
   }
+
+  const binFolderName = process.platform === "win32" ? "Scripts" : "bin";
+  return path.join(envPath, binFolderName, binary);
 }
 
 /**
