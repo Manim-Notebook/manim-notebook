@@ -64,14 +64,14 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   }
 
-  // if (process.platform === "win32") {
-  let python3Path: string | undefined = undefined;
-  if (pythonEnvPath) {
-    python3Path = getBinaryPathInPythonEnv(pythonEnvPath, "python3");
+  if (process.platform === "win32") {
+    let python3Path: string | undefined = undefined;
+    if (pythonEnvPath) {
+      python3Path = getBinaryPathInPythonEnv(pythonEnvPath, "python3");
+    }
+    // not necessary to await here, can run in background
+    applyWindowsRecognizePastePatch(context, python3Path);
   }
-  // not necessary to await here, can run in background
-  applyWindowsRecognizePastePatch(context, python3Path);
-  // }
 
   let manimglPath: string | undefined = undefined;
   if (pythonEnvPath) {
