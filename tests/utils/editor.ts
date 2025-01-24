@@ -1,7 +1,10 @@
 import { TextEditor, Selection } from "vscode";
 
 /**
- * Moves the cursor to the specified line number in the given editor.
+ * Moves the cursor to the specified line number.
+ *
+ * @param editor The editor to move the cursor in.
+ * @param lineNumber The line number to move the cursor to (1-indexed).
  *
  * Adapted from:
  * https://github.com/microsoft/vscode/issues/6695#issuecomment-221146568
