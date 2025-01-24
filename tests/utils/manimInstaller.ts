@@ -1,5 +1,5 @@
 import { exec } from "child_process";
-import { existsSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 import * as path from "path";
 
 function run(cmd: string, ...args: any): Promise<any> {
@@ -65,7 +65,10 @@ export class ManimInstaller {
 
     // Manim installation path
     this.manimPath = path.join(tmpFolder, "manim");
-    await run(`mkdir -p ${this.manimPath}`);
+    if (!existsSync(this.manimPath)) {
+      mkdirSync(this.manimPath, { recursive: true });
+    }
+
     console.log(`🍭 Manim installation path: ${this.manimPath}`);
 
     // Python virtual environment path
