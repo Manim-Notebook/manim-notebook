@@ -14,6 +14,8 @@ before(async () => {
 
 describe("Previewing", function () {
   it("Can preview the current Manim Cell", async () => {
+    const editor = await window.showTextDocument(uriInWorkspace("basic.py"));
+    goToLine(editor, 11);
     await commands.executeCommand("manim-notebook.previewManimCell");
 
     return new Promise((resolve) => {
