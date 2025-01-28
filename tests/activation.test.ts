@@ -3,6 +3,8 @@ import { window, commands, extensions } from "vscode";
 import { describe, it, afterEach } from "mocha";
 import * as sinon from "sinon";
 
+import { Logger } from "../logger";
+
 // eslint-disable-next-line no-unused-vars
 import * as manimNotebook from "@src/extension";
 import { onTerminalOutput } from "../src/utils/terminal";
@@ -42,5 +44,19 @@ describe("Manim Activation", function () {
     await commands.executeCommand("manim-notebook.redetectManimVersion");
     sinon.assert.called(spy);
     sinon.assert.calledWith(spy, sinon.match(MANIM_VERSION_STRING_REGEX));
+  });
+
+  it("Applies Windows paste patch", async function () {
+    if (process.platform !== "win32") {
+      this.skip();
+    }
+    const extension = extensions.getExtension("Manim-Notebook.manim-notebook");
+    if (!extension) {
+      throw new Error("Manim Notebook extension not found");
+    }
+
+    const spy = sinon.spy(Logger, "info");
+    await extension.activate();
+    sinon.assert.calledWith(spy, "Windows paste patch successfully applied");
   });
 });
