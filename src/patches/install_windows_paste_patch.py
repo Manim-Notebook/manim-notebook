@@ -88,7 +88,11 @@ def install_patch():
 
 
 install_patch()
+# Construct a string that we check against, without the string being present
+# in the source code itself.
+SUCCESS_SIGNATURE = "42" + "0" * 4 + "43" + "Manim" + "Notebook" + "31415"
 print("🐒 Manim Notebook: Windows paste patch applied")
+print(SUCCESS_SIGNATURE)
 print(
-    "For more information, see https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch"
+    "Fore more information, see https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch"
 )

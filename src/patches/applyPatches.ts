@@ -79,7 +79,7 @@ async function lookForPatchSuccessfullyAppliedMessage(
   terminal: Terminal, command: string): Promise<boolean> {
   return new Promise<boolean>(async (resolve, _reject) => {
     onTerminalOutput(terminal, (data: string) => {
-      const success = data.includes("Manim Notebook: Windows paste patch applied");
+      const success = data.includes("42000043ManimNotebook31415");
       if (!success) {
         return;
       }
