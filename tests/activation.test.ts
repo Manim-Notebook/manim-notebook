@@ -56,7 +56,12 @@ describe("Manim Activation", function () {
     }
 
     const spy = sinon.spy(Logger, "info");
+    const spyError = sinon.spy(Logger, "error");
+
     await extension.activate();
-    sinon.assert.calledWith(spy, "Windows paste patch successfully applied");
+
+    sinon.assert.notCalled(spyError);
+    sinon.assert.called(spy);
+    sinon.assert.calledWith(spy, sinon.match("Windows paste patch successfully applied"));
   });
 });
