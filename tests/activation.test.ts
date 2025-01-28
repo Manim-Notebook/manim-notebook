@@ -59,6 +59,8 @@ describe("Manim Activation", function () {
     const spyError = sinon.spy(Logger, "error");
 
     await extension.activate();
+    // add another manual delay to ensure patch is applied
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     sinon.assert.notCalled(spyError);
     sinon.assert.called(spy);
