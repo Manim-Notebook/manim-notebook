@@ -1,11 +1,11 @@
 import * as fs from "fs";
 import path from "path";
+import { exec } from "child_process";
 
-import { onTerminalOutput } from "../utils/terminal";
 import { Logger, Window } from "../logger";
 
 import * as vscode from "vscode";
-import { ExtensionContext, window, ThemeIcon, Terminal } from "vscode";
+import { ExtensionContext } from "vscode";
 
 const PATCH_INFO_URL = "https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch";
 
@@ -17,10 +17,10 @@ const PATCH_INFO_URL = "https://github.com/Manim-Notebook/manim-notebook/wiki/%F
  * https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch
  *
  * @param context The extension context.
- * @param python3Binary The path to the Python 3 binary.
+ * @param pythonBinary The path to the Python binary.
  */
 export async function applyWindowsRecognizePastePatch(
-  context: ExtensionContext, python3Binary: string,
+  context: ExtensionContext, pythonBinary: string,
 ) {
   const pathToPatch = path.join(context.extensionPath,
     "src", "patches", "install_windows_paste_patch.py");
@@ -29,12 +29,7 @@ export async function applyWindowsRecognizePastePatch(
   patch = patch.replace(/'/g, "\\'");
   patch = patch.replace(/\n/g, "\\n");
   patch = patch.replace(/\r/g, "\\r");
-  const patchCommand = `${python3Binary} -c "exec('''${patch}''')"`;
-
-  const terminal = await window.createTerminal({
-    name: "Win Patch",
-    iconPath: new ThemeIcon("symbol-property"),
-  });
+  const patchCommand = `${pythonBinary} -c "exec('''${patch}''')"`;
 
   const timeoutPromise = new Promise<boolean>((resolve, _reject) => {
     setTimeout(() => {
@@ -44,7 +39,7 @@ export async function applyWindowsRecognizePastePatch(
   });
 
   await Promise
-    .race([lookForPatchSuccessfullyAppliedMessage(terminal, patchCommand), timeoutPromise])
+    .race([execAndCheckForSuccess(patchCommand), timeoutPromise])
     .then(async (patchApplied) => {
       if (patchApplied) {
         Logger.info("Windows paste patch successfully applied");
@@ -53,8 +48,9 @@ export async function applyWindowsRecognizePastePatch(
 
       const action = "Learn more";
       const selected = await Window.showErrorMessage(
-        "Could not apply Windows paste patch. "
-        + "Please check the wiki for more information.",
+        "Windows paste patch could not be applied. "
+        + "Manim Notebook will likely not function correctly for you. "
+        + "Please check the wiki for more information and report the issue.",
         action);
       if (selected === action) {
         vscode.env.openExternal(vscode.Uri.parse(PATCH_INFO_URL));
@@ -66,37 +62,32 @@ export async function applyWindowsRecognizePastePatch(
 }
 
 /**
- * Executes the given command in the terminal and looks for the message that
- * indicates that the Windows paste patch was successfully applied.
+ * Executes the given command as child process. We listen to the output and
+ * look for the message that indicates that the Windows paste patch was
+ * successfully applied.
  *
- * @param terminal The terminal to execute the command in.
- * @param command The command to execute.
+ * @param command The command to execute in the shell (via Node.js `exec`).
  * @returns A promise that resolves to true if the patch was successfully
  * applied, and false otherwise. Might never resolve, so the caller should
  * let this promise race with a timeout promise.
  */
-async function lookForPatchSuccessfullyAppliedMessage(
-  terminal: Terminal, command: string): Promise<boolean> {
+async function execAndCheckForSuccess(command: string): Promise<boolean> {
   return new Promise<boolean>(async (resolve, _reject) => {
-    onTerminalOutput(terminal, (data: string) => {
-      const success = data.includes("42000043ManimNotebook31415");
-      if (!success) {
-        return;
-      }
-      terminal.dispose();
-      resolve(true);
-    });
-
-    window.onDidEndTerminalShellExecution((event) => {
-      if (event.terminal !== terminal) {
-        return;
-      }
-      if (event.exitCode !== 0) {
-        Logger.error("Windows Paste Patch Terminal: shell exited with error code");
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        Logger.error(`Windows Paste Patch Exec. error: ${error.message}`);
         resolve(false);
+        return;
       }
-    });
+      if (stderr) {
+        Logger.error(`Windows Paste Patch Exec. stderr: ${stderr}`);
+        resolve(false);
+        return;
+      }
 
-    terminal.sendText(command);
+      Logger.trace(`Windows Paste Patch Exec. stdout: ${stdout}`);
+      const isSuccess = stdout.includes("42000043ManimNotebook31415");
+      resolve(isSuccess);
+    });
   });
 }
