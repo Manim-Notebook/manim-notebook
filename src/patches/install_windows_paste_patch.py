@@ -23,8 +23,6 @@ def monkey_patch_win32_recognize_paste():
     if sys.platform != "win32":
         return
 
-    print("🐒 will try to patch...")
-
     try:
         import prompt_toolkit.input.win32
 
@@ -35,7 +33,6 @@ def monkey_patch_win32_recognize_paste():
         def patched_init(self, stdin=None, *args, **kwargs):
             original_init(self, stdin, *args, **kwargs)
             if hasattr(self, "console_input_reader"):
-                print("🐒 recognize_paste set to False")
                 self.console_input_reader.recognize_paste = False
 
         original_class.__init__ = patched_init
