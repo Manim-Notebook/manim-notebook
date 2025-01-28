@@ -27,7 +27,7 @@ describe("Previewing", function () {
     });
   });
 
-  it.only("Can preview laggy scene", async () => {
+  it("Can preview laggy scene", async () => {
     const editor = await window.showTextDocument(uriInWorkspace("laggy.py"));
     const queue: { line: number; waitForStrings: string[]; resolve: () => void }[] = [];
     let wantToStopListening = false;
