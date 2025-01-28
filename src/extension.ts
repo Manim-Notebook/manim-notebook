@@ -64,11 +64,13 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   if (process.platform === "win32") {
-    const python3Path = pythonEnvPath
-      ? getBinaryPathInPythonEnv(pythonEnvPath, "python3")
-      : "python3";
+    // Note that we shouldn't call `python3` on Windows,
+    // see https://github.com/Manim-Notebook/manim-notebook/pull/117#discussion_r1932764875
+    const pythonPath = pythonEnvPath
+      ? getBinaryPathInPythonEnv(pythonEnvPath, "python")
+      : "python";
     // not necessary to await here, can run in background
-    applyWindowsRecognizePastePatch(context, python3Path);
+    applyWindowsRecognizePastePatch(context, pythonPath);
   }
 
   const manimglBinary = pythonEnvPath
