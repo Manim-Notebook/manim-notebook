@@ -3,7 +3,7 @@ import { window, commands, extensions } from "vscode";
 import { describe, it, afterEach } from "mocha";
 import * as sinon from "sinon";
 
-import { Logger } from "../logger";
+import { Logger } from "../src/logger";
 
 // eslint-disable-next-line no-unused-vars
 import * as manimNotebook from "@src/extension";
