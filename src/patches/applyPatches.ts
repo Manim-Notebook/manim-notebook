@@ -75,8 +75,11 @@ async function execAndCheckForSuccess(command: string): Promise<boolean> {
   return new Promise<boolean>(async (resolve, _reject) => {
     exec(command, (error, stdout, stderr) => {
       console.log("💨 Windows Paste Patch Exec.");
+      console.log("--- error:");
       console.log(error);
+      console.log("--- stdout:");
       console.log(stdout);
+      console.log("--- stderr:");
       console.log(stderr);
       console.log("💨 -----");
 
