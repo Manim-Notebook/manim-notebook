@@ -19,7 +19,7 @@ const PATCH_INFO_URL = "https://github.com/Manim-Notebook/manim-notebook/wiki/%F
  * @param context The extension context.
  * @param pythonBinary The path to the Python binary.
  */
-export async function applyWindowsRecognizePastePatch(
+export async function applyWindowsPastePatch(
   context: ExtensionContext, pythonBinary: string,
 ) {
   const pathToPatch = path.join(context.extensionPath,

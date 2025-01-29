@@ -11,7 +11,7 @@ import { ExportSceneCodeLens } from "./export";
 import { tryToDetermineManimVersion, LAST_WARNING_NO_VERSION_KEY } from "./manimVersion";
 import { setupTestEnvironment } from "./utils/testing";
 import { EventEmitter } from "events";
-import { applyWindowsRecognizePastePatch } from "./patches/applyPatches";
+import { applyWindowsPastePatch } from "./patches/applyPatches";
 import { getBinaryPathInPythonEnv } from "./utils/venv";
 
 export let manimNotebookContext: vscode.ExtensionContext;
@@ -70,7 +70,7 @@ export async function activate(context: vscode.ExtensionContext) {
       ? getBinaryPathInPythonEnv(pythonEnvPath, "python")
       : "python";
     // not necessary to await here, can run in background
-    applyWindowsRecognizePastePatch(context, pythonPath);
+    applyWindowsPastePatch(context, pythonPath);
   }
 
   const manimglBinary = pythonEnvPath

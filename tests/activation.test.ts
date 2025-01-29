@@ -5,7 +5,7 @@ import * as sinon from "sinon";
 let expect: Chai.ExpectStatic;
 
 import { Logger } from "../src/logger";
-import { applyWindowsRecognizePastePatch } from "../src/patches/applyPatches";
+import { applyWindowsPastePatch } from "../src/patches/applyPatches";
 import { manimNotebookContext } from "../src/extension";
 
 // eslint-disable-next-line no-unused-vars
@@ -60,7 +60,7 @@ describe("Manim Activation", function () {
     const spyInfo = sinon.spy(Logger, "info");
     const spyError = sinon.spy(Logger, "error");
 
-    applyWindowsRecognizePastePatch(manimNotebookContext, "python");
+    applyWindowsPastePatch(manimNotebookContext, "python");
 
     await new Promise<void>((resolve) => {
       const checkSpy = () => {
