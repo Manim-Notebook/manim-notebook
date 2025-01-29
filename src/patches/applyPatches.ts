@@ -28,9 +28,6 @@ export async function applyWindowsPastePatch(
   const encodedPatch = Buffer.from(patch, "utf-8").toString("base64");
   const patchCommand = `${pythonBinary} -c "import base64;`
     + ` exec(base64.b64decode('${encodedPatch}').decode('utf-8'))"`;
-  console.log("💫 PATCH COMMAND");
-  console.log(patchCommand);
-  console.log("----------------");
 
   const timeoutPromise = new Promise<boolean>((resolve, _reject) => {
     setTimeout(() => {
@@ -75,15 +72,6 @@ export async function applyWindowsPastePatch(
 async function execAndCheckForSuccess(command: string): Promise<boolean> {
   return new Promise<boolean>(async (resolve, _reject) => {
     exec(command, (error, stdout, stderr) => {
-      console.log("💨 Windows Paste Patch Exec.");
-      console.log("--- error:");
-      console.log(error);
-      console.log("--- stdout:");
-      console.log(stdout);
-      console.log("--- stderr:");
-      console.log(stderr);
-      console.log("💨 -----");
-
       if (error) {
         Logger.error(`Windows Paste Patch Exec. error: ${error.message}`);
         resolve(false);

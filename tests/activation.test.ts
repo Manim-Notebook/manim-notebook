@@ -50,7 +50,7 @@ describe("Manim Activation", function () {
     sinon.assert.calledWith(spy, sinon.match(MANIM_VERSION_STRING_REGEX));
   });
 
-  it.only("Applies Windows paste patch", async function () {
+  it("Applies Windows paste patch", async function () {
     if (process.platform !== "win32") {
       this.skip();
     }
