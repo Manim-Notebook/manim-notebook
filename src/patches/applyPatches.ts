@@ -30,6 +30,9 @@ export async function applyWindowsPastePatch(
   patch = patch.replace(/\n/g, "\\n");
   patch = patch.replace(/\r/g, "\\r");
   const patchCommand = `${pythonBinary} -c "exec('''${patch}''')"`;
+  console.log("💫 PATCH COMMAND");
+  console.log(patchCommand);
+  console.log("----------------");
 
   const timeoutPromise = new Promise<boolean>((resolve, _reject) => {
     setTimeout(() => {
