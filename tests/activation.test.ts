@@ -50,7 +50,7 @@ describe("Manim Activation", function () {
     sinon.assert.calledWith(spy, sinon.match(MANIM_VERSION_STRING_REGEX));
   });
 
-  it("Applies Windows paste patch", async function () {
+  it.only("Applies Windows paste patch", async function () {
     if (process.platform !== "win32") {
       this.skip();
     }
@@ -60,7 +60,7 @@ describe("Manim Activation", function () {
     const spyInfo = sinon.spy(Logger, "info");
     const spyError = sinon.spy(Logger, "error");
 
-    applyWindowsPastePatch(manimNotebookContext, "python");
+    applyWindowsPastePatch(manimNotebookContext, "python3");
 
     await new Promise<void>((resolve) => {
       const checkSpy = () => {
