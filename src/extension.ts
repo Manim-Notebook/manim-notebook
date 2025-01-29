@@ -67,7 +67,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Note that we shouldn't call `python3` on Windows,
     // see https://github.com/Manim-Notebook/manim-notebook/pull/117#discussion_r1932764875
     const pythonPath = pythonEnvPath
-      ? getBinaryPathInPythonEnv(pythonEnvPath, "python")
+      ? getBinaryPathInPythonEnv(pythonEnvPath, "python.exe")
       : "python";
     // not necessary to await here, can run in background
     applyWindowsPastePatch(context, pythonPath);
