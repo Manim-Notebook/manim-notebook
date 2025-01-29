@@ -58,9 +58,18 @@ describe("Manim Activation", function () {
     const spy = sinon.spy(Logger, "info");
     const spyError = sinon.spy(Logger, "error");
 
+    sinon.stub(Logger, "info").callsFake((...args) => {
+      console.log("Logger.info called with:", ...args);
+      spy(...args);
+    });
+    sinon.stub(Logger, "trace").callsFake((...args) => {
+      console.log("Logger.trace called with:", ...args);
+    });
+
     await extension.activate();
     // add another manual delay to ensure patch is applied
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // (since patch is applied in the background asynchronously)
+    await new Promise(resolve => setTimeout(resolve, 3500));
 
     sinon.assert.notCalled(spyError);
     sinon.assert.called(spy);
