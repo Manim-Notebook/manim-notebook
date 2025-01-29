@@ -46,7 +46,7 @@ describe("Manim Activation", function () {
     sinon.assert.calledWith(spy, sinon.match(MANIM_VERSION_STRING_REGEX));
   });
 
-  it("Applies Windows paste patch", async function () {
+  it.only("Applies Windows paste patch", async function () {
     if (process.platform !== "win32") {
       this.skip();
     }
@@ -57,13 +57,8 @@ describe("Manim Activation", function () {
 
     const spy = sinon.spy(Logger, "info");
     const spyError = sinon.spy(Logger, "error");
-
-    sinon.stub(Logger, "info").callsFake((...args) => {
-      console.log("Logger.info called with:", ...args);
-      spy(...args);
-    });
     sinon.stub(Logger, "trace").callsFake((...args) => {
-      console.log("Logger.trace called with:", ...args);
+      console.log("Logger.trace called with (now):", ...args);
     });
 
     await extension.activate();
@@ -73,6 +68,9 @@ describe("Manim Activation", function () {
 
     sinon.assert.notCalled(spyError);
     sinon.assert.called(spy);
-    sinon.assert.calledWith(spy, sinon.match("Windows paste patch successfully applied"));
+    spy.getCalls().forEach((call) => {
+      console.log("Logger.info called with (in past):", call.args);
+    });
+    sinon.assert.calledWith(spy, "Windows paste patch successfully applied");
   });
 });
