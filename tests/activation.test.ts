@@ -55,12 +55,12 @@ describe("Manim Activation", function () {
       this.skip();
     }
     expect(manimNotebookContext).to.not.be.undefined;
-    this.timeout(10000);
+    this.timeout(5000);
 
     const spyInfo = sinon.spy(Logger, "info");
     const spyError = sinon.spy(Logger, "error");
 
-    applyWindowsPastePatch(manimNotebookContext, "python3");
+    applyWindowsPastePatch(manimNotebookContext, "python");
 
     await new Promise<void>((resolve) => {
       const checkSpy = () => {

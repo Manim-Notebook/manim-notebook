@@ -9,7 +9,8 @@ export function setupTestEnvironment() {
   }
   const binFolderName = process.platform === "win32" ? "Scripts" : "bin";
   const binPath = path.join(basePath, "tmp", "manimVenv", binFolderName);
-  injectVSCodeTerminalForPythonVenv(binPath);
+  injectPythonVenvIntoTerminals(binPath);
+  injectPythonVenvIntoNodeExec(binPath);
 }
 
 /**
@@ -25,7 +26,7 @@ export function setupTestEnvironment() {
  * `manimgl --version` becomes
  * `/path/to/venv/bin/manimgl --version`.
  */
-function injectVSCodeTerminalForPythonVenv(binPath: string) {
+function injectPythonVenvIntoTerminals(binPath: string) {
   const createTerminalOrig = window.createTerminal;
   window.createTerminal = (args: any): Terminal => {
     const terminal = createTerminalOrig(args);
@@ -64,6 +65,22 @@ function injectVSCodeTerminalForPythonVenv(binPath: string) {
     });
 
     return terminal;
+  };
+}
+
+/**
+ * Injects the Node.js child_process.exec() function such that every command
+ * sent to it is prefixed with a given path.
+ *
+ * @param binPath The path to the bin folder of the virtual Python environment.
+ * This path will be prefixed to every command sent to the terminal, e.g.
+ * `manimgl --version` becomes `/path/to/venv/bin/manimgl --version`.
+ */
+function injectPythonVenvIntoNodeExec(binPath: string) {
+  const execOrig = require("child_process").exec;
+
+  require("child_process").exec = (command: string, options: any, callback: any) => {
+    return execOrig(path.join(binPath, command), options, callback);
   };
 }
 
