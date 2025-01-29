@@ -27,7 +27,7 @@ describe("Manim Activation", function () {
   });
 
   it("Can read from terminal", async () => {
-    console.log("🎈 Creating terminal");
+    console.log("Creating terminal");
     const terminal = window.createTerminal("Dummy terminal");
     terminal.show();
 

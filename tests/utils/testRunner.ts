@@ -42,6 +42,7 @@ export function run(): Promise<void> {
   const mocha = new Mocha({
     ui: "tdd",
     timeout: 45000,
+    color: true,
   });
 
   console.log(`💠 workspaceRoot: ${WORKSPACE_ROOT}`);
