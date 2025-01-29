@@ -25,10 +25,11 @@ export async function applyWindowsPastePatch(
   const pathToPatch = path.join(context.extensionPath,
     "src", "patches", "install_windows_paste_patch.py");
   let patch = fs.readFileSync(pathToPatch, "utf-8");
-  patch = patch.replace(/"/g, '\\"');
-  patch = patch.replace(/'/g, "\\'");
-  patch = patch.replace(/\n/g, "\\n");
-  patch = patch.replace(/\r/g, "\\r");
+  patch = patch
+    .replace(/\r/g, "")
+    .replace(/\n/g, "\\n")
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "\\'");
   const patchCommand = `${pythonBinary} -c "exec('''${patch}''')"`;
   console.log("💫 PATCH COMMAND");
   console.log(patchCommand);
