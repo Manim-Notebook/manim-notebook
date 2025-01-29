@@ -91,5 +91,5 @@ SUCCESS_SIGNATURE = "42" + "0" * 4 + "43" + "Manim" + "Notebook" + "31415"
 print("Manim Notebook: Windows paste patch applied")
 print(SUCCESS_SIGNATURE)
 print(
-    "Fore more information, see https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch"
+    "For more information, see https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch"
 )
