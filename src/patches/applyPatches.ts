@@ -42,7 +42,7 @@ export async function applyWindowsRecognizePastePatch(
     .race([execAndCheckForSuccess(patchCommand), timeoutPromise])
     .then(async (patchApplied) => {
       if (patchApplied) {
-        Logger.info("Windows paste patch successfully applied");
+        Logger.info("Windows paste patch successfully applied (in applyPatches.ts)");
         return;
       }
 
