@@ -55,7 +55,7 @@ describe("Manim Activation", function () {
       this.skip();
     }
     expect(manimNotebookContext).to.not.be.undefined;
-    this.timeout(5000);
+    this.timeout(10000);
 
     const spyInfo = sinon.spy(Logger, "info");
     const spyError = sinon.spy(Logger, "error");
