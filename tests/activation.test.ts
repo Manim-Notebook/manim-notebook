@@ -60,7 +60,7 @@ describe("Manim Activation", function () {
     const spyInfo = sinon.spy(Logger, "info");
     const spyError = sinon.spy(Logger, "error");
 
-    applyWindowsPastePatch(manimNotebookContext, "python");
+    applyWindowsPastePatch(manimNotebookContext, "python.exe");
 
     await new Promise<void>((resolve) => {
       const checkSpy = () => {
