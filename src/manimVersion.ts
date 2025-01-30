@@ -171,10 +171,10 @@ export async function determineManimVersion(pythonBinary: string | undefined) {
 
   if (couldDetermineManimVersion) {
     Logger.info(`👋 ManimGL version found: ${MANIM_VERSION}`);
-    showPositiveUserVersionFeedback();
+    await showPositiveUserVersionFeedback();
   } else {
     Logger.info("👋 ManimGL version could not be determined");
-    showNegativeUserVersionFeedback();
+    await showNegativeUserVersionFeedback();
   }
 }
 

@@ -26,7 +26,7 @@ describe("Manim Activation", function () {
     sinon.restore();
   });
 
-  it("Can read from terminal", async () => {
+  it("Reads `manimgl --version` from terminal", async () => {
     console.log("Creating terminal");
     const terminal = window.createTerminal("Dummy terminal");
     terminal.show();
@@ -42,8 +42,8 @@ describe("Manim Activation", function () {
     });
   });
 
-  it("Detects Manim version", async () => {
-    // TODO: Test different Manim versions installed
+  it("Redetects Manim version", async () => {
+  // TODO: Test different Manim versions installed
     const spy = sinon.spy(window, "showInformationMessage");
     await commands.executeCommand("manim-notebook.redetectManimVersion");
     sinon.assert.called(spy);

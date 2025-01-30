@@ -40,6 +40,7 @@ export async function activate(context: vscode.ExtensionContext) {
     });
   context.subscriptions.push(openWalkthroughCommand);
 
+  let pythonBinary: string;
   try {
     waitForPythonExtension().then((pythonEnvPath: string | undefined) => {
       // (These tasks here can be performed in the background)
@@ -47,7 +48,7 @@ export async function activate(context: vscode.ExtensionContext) {
       // also see https://github.com/Manim-Notebook/manim-notebook/pull/117#discussion_r1932764875
       const pythonBinInVenv = process.platform === "win32" ? "python.exe" : "python3";
       const pythonBinOutsideVenv = process.platform === "win32" ? "python" : "python3";
-      const pythonBinary = pythonEnvPath
+      pythonBinary = pythonEnvPath
         ? getBinaryPathInPythonEnv(pythonEnvPath, pythonBinInVenv)
         : pythonBinOutsideVenv;
 
@@ -128,9 +129,13 @@ export async function activate(context: vscode.ExtensionContext) {
     });
 
   const redetectManimVersionCommand = vscode.commands.registerCommand(
-    "manim-notebook.redetectManimVersion", () => {
+    "manim-notebook.redetectManimVersion", async () => {
       Logger.info("💠 Command requested: Redetect Manim Version");
-      determineManimVersion("manimgl");
+      if (!pythonBinary) {
+        Window.showWarningMessage("Please wait for Manim Notebook to have finished activating.");
+        return;
+      }
+      await determineManimVersion(pythonBinary);
     });
 
   registerWalkthroughCommands(context);
