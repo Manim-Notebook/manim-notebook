@@ -94,8 +94,8 @@ function isManimCommand(command: string): boolean {
   if (command.length <= 3) {
     return false;
   }
-  const manimCommands = ["checkpoint_paste(", "reload(", "exit(", "clear("];
+  const manimCommands = ["checkpoint_paste", "reload", "exit", "clear"];
   command = command.trim();
   command = stripAnsiCodes(command);
-  return manimCommands.some(manimCommand => command.includes(manimCommand));
+  return manimCommands.some(manimCommand => command.includes(`${manimCommand}(`));
 }

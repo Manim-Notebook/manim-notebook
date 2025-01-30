@@ -85,8 +85,10 @@ def install_patch():
 
 
 install_patch()
-# Construct a string that we check against, without the string being present
-# in the source code itself.
+# Construct a string that we check against to verify that the patch was applied
+# successfully. The actual string should not be present in the source code since
+# it could be included in the output of the command itself when this whole file
+# is sent to the Python interpreter.
 SUCCESS_SIGNATURE = "42" + "0" * 4 + "43" + "Manim" + "Notebook" + "31415"
 print("Manim Notebook: Windows paste patch applied")
 print(SUCCESS_SIGNATURE)

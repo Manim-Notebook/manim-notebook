@@ -11,9 +11,9 @@ const PATCH_INFO_URL = "https://github.com/Manim-Notebook/manim-notebook/wiki/%F
 
 /**
  * Applies the Windows paste patch to the user's Python environment such that
- * cell execution works in IPython works correctly on Windows.
+ * cell execution in IPython works correctly on Windows.
  *
- * More information:
+ * More information in the troubleshooting wiki:
  * https://github.com/Manim-Notebook/manim-notebook/wiki/%F0%9F%A4%A2-Troubleshooting#windows-paste-patch
  *
  * @param context The extension context.
@@ -24,7 +24,8 @@ export async function applyWindowsPastePatch(
 ) {
   const pathToPatch = path.join(context.extensionPath,
     "src", "patches", "install_windows_paste_patch.py");
-  let patch = fs.readFileSync(pathToPatch, "utf-8");
+  const patch = fs.readFileSync(pathToPatch, "utf-8");
+  // we encode/decode as base64 to avoid nasty errors when escaping manually
   const encodedPatch = Buffer.from(patch, "utf-8").toString("base64");
   const patchCommand = `${pythonBinary} -c "import base64;`
     + ` exec(base64.b64decode('${encodedPatch}').decode('utf-8'))"`;
@@ -36,27 +37,27 @@ export async function applyWindowsPastePatch(
     }, 4000);
   });
 
-  await Promise
-    .race([execAndCheckForSuccess(patchCommand), timeoutPromise])
-    .then(async (patchApplied) => {
-      if (patchApplied) {
-        Logger.info("Windows paste patch successfully applied (in applyPatches.ts)");
-        return;
-      }
+  try {
+    const patchApplied = await Promise.race(
+      [execPatchAndCheckForSuccess(patchCommand), timeoutPromise],
+    );
+    if (patchApplied) {
+      Logger.info("Windows paste patch successfully applied (in applyPatches.ts)");
+      return;
+    }
 
-      const action = "Learn more";
-      const selected = await Window.showErrorMessage(
-        "Windows paste patch could not be applied. "
-        + "Manim Notebook will likely not function correctly for you. "
-        + "Please check the wiki for more information and report the issue.",
-        action);
-      if (selected === action) {
-        vscode.env.openExternal(vscode.Uri.parse(PATCH_INFO_URL));
-      }
-    }).catch((err) => {
-      Logger.error(
-        `Abnormal termination while applying windows paste patch: ${err}`);
-    });
+    const action = "Learn more";
+    const selected = await Window.showErrorMessage(
+      "Windows paste patch could not be applied. "
+      + "Manim Notebook will likely not function correctly for you. "
+      + "Please check the wiki for more information and report the issue.",
+      action);
+    if (selected === action) {
+      vscode.env.openExternal(vscode.Uri.parse(PATCH_INFO_URL));
+    }
+  } catch (err) {
+    Logger.error(`Abnormal termination while applying windows paste patch: ${err}`);
+  }
 }
 
 /**
@@ -69,7 +70,7 @@ export async function applyWindowsPastePatch(
  * applied, and false otherwise. Might never resolve, so the caller should
  * let this promise race with a timeout promise.
  */
-async function execAndCheckForSuccess(command: string): Promise<boolean> {
+async function execPatchAndCheckForSuccess(command: string): Promise<boolean> {
   return new Promise<boolean>(async (resolve, _reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) {

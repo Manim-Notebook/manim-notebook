@@ -17,7 +17,7 @@ import Mocha from "mocha";
 import * as assert from "assert";
 import { globSync } from "glob";
 import "source-map-support/register";
-import "./prototype"; // to extend some built-in classes
+import "./prototype";
 
 import { window, workspace, Uri } from "vscode";
 
