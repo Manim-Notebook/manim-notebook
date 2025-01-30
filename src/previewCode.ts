@@ -4,7 +4,7 @@ import { ManimShell } from "./manimShell";
 import { EventEmitter } from "events";
 import { ManimCellRanges } from "./pythonParsing";
 import { Logger, Window } from "./logger";
-import { hasUserMinimalManimVersion } from "./manimVersion";
+import { hasUserMinimalManimVersionAndWarn } from "./manimVersion";
 
 // \x0C: is Ctrl + L, which clears the terminal screen
 const PREVIEW_COMMAND = "\x0Ccheckpoint_paste()";
@@ -68,7 +68,7 @@ export async function previewManimCell(cellCode?: string, startLine?: number) {
 }
 
 export async function reloadAndPreviewManimCell(cellCode?: string, startLine?: number) {
-  if (!await hasUserMinimalManimVersion("1.7.2")) {
+  if (!await hasUserMinimalManimVersionAndWarn("1.7.2")) {
     return;
   }
 
