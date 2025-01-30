@@ -180,40 +180,37 @@ export async function determineManimVersion(pythonBinary: string | undefined) {
 
 async function showPositiveUserVersionFeedback() {
   const latestVersion = await fetchLatestManimVersion();
-  if (latestVersion) {
-    if (latestVersion === MANIM_VERSION) {
-      Window.showInformationMessage(
-        `You're using the latest ManimGL version: v${MANIM_VERSION}`);
-      return;
-    }
-
-    const showReleasesOption = "Show Manim releases";
-    Window.showInformationMessage(
-      `You're using ManimGL version v${MANIM_VERSION}.`
-      + ` The latest version is v${latestVersion}.`, showReleasesOption)
-      .then((selected) => {
-        if (selected === showReleasesOption) {
-          vscode.env.openExternal(vscode.Uri.parse(MANIM_RELEASES_URL));
-        }
-      });
-    return;
-  } else {
+  if (!latestVersion) {
     Window.showInformationMessage(`You're using ManimGL version: v${MANIM_VERSION}`);
+    return;
+  }
+
+  if (latestVersion === MANIM_VERSION) {
+    Window.showInformationMessage(
+      `You're using the latest ManimGL version: v${MANIM_VERSION}`);
+    return;
+  }
+
+  const showReleasesOption = "Show Manim releases";
+  const selected = await Window.showInformationMessage(
+    `You're using ManimGL version v${MANIM_VERSION}.`
+    + ` The latest version is v${latestVersion}.`, showReleasesOption);
+  if (selected === showReleasesOption) {
+    vscode.env.openExternal(vscode.Uri.parse(MANIM_RELEASES_URL));
   }
 }
 
-function showNegativeUserVersionFeedback() {
+async function showNegativeUserVersionFeedback() {
   const tryAgainOption = "Try again";
   const openWalkthroughOption = "Open Walkthrough";
   const warningMessage = "Your ManimGL version could not be determined.";
-  Window.showWarningMessage(warningMessage, tryAgainOption, openWalkthroughOption)
-    .then((selected) => {
-      if (selected === tryAgainOption) {
-        determineManimVersion(lastPythonBinary);
-      } else if (selected === openWalkthroughOption) {
-        vscode.commands.executeCommand("manim-notebook.openWalkthrough");
-      }
-    });
+  const selected = await Window.showWarningMessage(
+    warningMessage, tryAgainOption, openWalkthroughOption);
+  if (selected === tryAgainOption) {
+    await determineManimVersion(lastPythonBinary);
+  } else if (selected === openWalkthroughOption) {
+    await vscode.commands.executeCommand("manim-notebook.openWalkthrough");
+  }
 }
 
 /**
@@ -242,6 +239,7 @@ async function execVersionCommandAndCheckForSuccess(command: string): Promise<bo
       Logger.trace(`Manim Version Check. stdout: ${stdout}`);
       const versionMatch = stdout.match(/^\s*([0-9]+\.[0-9]+\.[0-9]+)/m);
       if (!versionMatch) {
+        Logger.debug("Manim Version Check. Found stdout, but no version match");
         resolve(false);
         return;
       }
