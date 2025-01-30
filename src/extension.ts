@@ -153,6 +153,38 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   registerManimCellProviders(context);
 
+  context.subscriptions.push(
+    vscode.debug.registerDebugAdapterTrackerFactory("debugpy", {
+      createDebugAdapterTracker(session: vscode.DebugSession) {
+        return {
+          onDidSendMessage: (message) => {
+            // Log message structure for debugging
+            console.log("Debug Event:", message);
+
+            // Check if the event is a "stopped" event
+            if (message.event === "stopped") {
+              // Handle breakpoint or step events
+              if (message.body && message.body.threadId) {
+                session.customRequest("stackTrace", { threadId: message.body.threadId })
+                  .then((response) => {
+                    const stackFrames = response.stackFrames;
+                    if (stackFrames && stackFrames.length > 0) {
+                      const topFrame = stackFrames[0];
+                      const file = topFrame.source?.path || "unknown";
+                      const line = topFrame.line;
+
+                      // Display execution info in status bar
+                      vscode.window.setStatusBarMessage(`Executing line ${line} in ${file}`, 1000);
+                      console.log(`Debugger stopped at line ${line} in ${file}`);
+                    }
+                  });
+              }
+            }
+          },
+        };
+      },
+    }),
+  );
   if (process.env.IS_TESTING === "true") {
     console.log("💠 Extension marked as activated");
     activatedEmitter.emit("activated");
