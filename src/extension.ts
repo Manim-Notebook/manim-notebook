@@ -154,19 +154,24 @@ export async function activate(context: vscode.ExtensionContext) {
   registerManimCellProviders(context);
 
   function interceptPythonDebugger(session: vscode.DebugSession): vscode.DebugAdapterTracker {
-    let isSteppingOverLine = false;
+    let gotoThreadId: number | undefined;
 
     return {
       onDidSendMessage: (message) => {
         console.log("Debug Event:", message);
 
-        if (message.event === "stopped") {
-          isSteppingOverLine = false;
-          if (!message.body || !message.body.threadId) {
-            return;
-          }
-          const threadId = message.body.threadId;
+        if (message.command === "gotoTargets") {
+          const target = message.body.targets[0];
+          console.log("🎯 Target", target);
+          session.customRequest("goto", { threadId: gotoThreadId, targetId: target.id });
+        }
 
+        if (!message.body || !message.body.threadId) {
+          return;
+        }
+        const threadId = message.body.threadId;
+
+        if (message.event === "stopped") {
           // Request stack trace to get execution details
           session.customRequest("stackTrace", { threadId })
             .then((response) => {
@@ -180,28 +185,27 @@ export async function activate(context: vscode.ExtensionContext) {
               }
             });
         }
+
+        // if (message.event === "continued" && message.body.threadId) {
+        //   console.log("💨 Will pause debugger (onDidSendMessage", message);
+        //   session.customRequest("pause", { threadId: message.body.threadId });
+        // }
       },
 
       // Intercept step commands (Step Over, Step Into, Step Out)
       onWillReceiveMessage: (message) => {
-        if (message.command !== "next" || !message.arguments.threadId) {
-          if (message.command === "next") {
-            console.log("Message not accepted:", message);
-          }
-          return;
-        }
-        if (!isSteppingOverLine) {
-          isSteppingOverLine = true;
-          const threadId = message.arguments.threadId;
-          setTimeout(() => {
-            console.log("🔺 goto line 25");
-            session.customRequest("goto", { threadId, targetId: 25 })
-              .then(() => {
-                console.log("🎈 goto done");
-              });
-          }, 1500); // simulate a delay
-          console.log("🌟 pause");
-          session.customRequest("pause", { threadId });
+        console.log("✅ Message", message);
+
+        if (message.command === "continue" && message.arguments.threadId) {
+          console.log("💨 Will pause debugger", message);
+          gotoThreadId = message.arguments.threadId;
+          session.customRequest("gotoTargets", {
+            source: {
+              path: "/your/path/to/file.py",
+              sourceReference: 0,
+            },
+            line: 23,
+          });
         }
       },
     };
