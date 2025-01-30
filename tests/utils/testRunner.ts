@@ -19,7 +19,7 @@ import { globSync } from "glob";
 import "source-map-support/register";
 import "./prototype";
 
-import { window, workspace, Uri } from "vscode";
+import { window, workspace, Uri, extensions } from "vscode";
 
 const WORKSPACE_ROOT: string = workspace.workspaceFolders![0].uri.fsPath;
 
@@ -70,9 +70,14 @@ export function run(): Promise<void> {
       // open any python file to trigger extension activation
       await window.showTextDocument(uriInWorkspace("basic.py"));
 
-      console.log("💠 Waiting for extension activation...");
-      await waitUntilExtensionActivated();
-      console.log("💠 Extension activation detected in tests");
+      const extension = await extensions.getExtension("manim-notebook.manim-notebook");
+      if (extension?.isActive) {
+        console.log("💠 Extension is detected as *activated*");
+      } else {
+        console.log("💠 Waiting for extension activation...");
+        await waitUntilExtensionActivated();
+        console.log("💠 Extension activation detected in tests");
+      }
 
       console.log("Running tests...");
       mocha.run((failures: any) => {
