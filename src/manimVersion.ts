@@ -171,10 +171,10 @@ export async function determineManimVersion(pythonBinary: string | undefined) {
 
   if (couldDetermineManimVersion) {
     Logger.info(`👋 ManimGL version found: ${MANIM_VERSION}`);
-    await showPositiveUserVersionFeedback();
+    showPositiveUserVersionFeedback();
   } else {
     Logger.info("👋 ManimGL version could not be determined");
-    await showNegativeUserVersionFeedback();
+    showNegativeUserVersionFeedback();
   }
 }
 
@@ -202,13 +202,18 @@ async function showPositiveUserVersionFeedback() {
   }
 }
 
-async function showNegativeUserVersionFeedback() {
-  const tryAgainAnswer = "Try again";
+function showNegativeUserVersionFeedback() {
+  const tryAgainOption = "Try again";
+  const openWalkthroughOption = "Open Walkthrough";
   const warningMessage = "Your ManimGL version could not be determined.";
-  const answer = await Window.showWarningMessage(warningMessage, tryAgainAnswer);
-  if (answer === tryAgainAnswer) {
-    await determineManimVersion(lastPythonBinary);
-  }
+  Window.showWarningMessage(warningMessage, tryAgainOption, openWalkthroughOption)
+    .then((selected) => {
+      if (selected === tryAgainOption) {
+        determineManimVersion(lastPythonBinary);
+      } else if (selected === openWalkthroughOption) {
+        vscode.commands.executeCommand("manim-notebook.openWalkthrough");
+      }
+    });
 }
 
 /**
