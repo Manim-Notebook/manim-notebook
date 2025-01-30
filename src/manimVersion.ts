@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 
 import { Window, Logger } from "./logger";
+import * as vscode from "vscode";
 
 /**
  * Manim version that the user has installed without the 'v' prefix,
@@ -9,6 +10,9 @@ import { Window, Logger } from "./logger";
 let MANIM_VERSION: string | undefined;
 
 let lastPythonBinary: string | undefined;
+
+const MANIM_RELEASES_URL = "https://github.com/3b1b/manim/releases";
+const MANIM_LATEST_RELEASE_API_URL = "https://api.github.com/repos/3b1b/manim/releases/latest";
 
 /**
  * Checks if the given version is at least the required version.
@@ -90,12 +94,11 @@ export async function hasUserMinimalManimVersionAndWarn(versionRequired: string)
  * reachable. This tag name won't include the 'v' prefix, e.g. '1.2.3'.
  */
 async function fetchLatestManimVersion(): Promise<string | undefined> {
-  const url = "https://api.github.com/repos/3b1b/manim/releases/latest";
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    const response = await fetch(url, {
+    const response = await fetch(MANIM_LATEST_RELEASE_API_URL, {
       headers: {
         Accept: "application/vnd.github+json",
       },
@@ -168,11 +171,19 @@ async function showPositiveUserVersionFeedback() {
     if (latestVersion === MANIM_VERSION) {
       Window.showInformationMessage(
         `You're using the latest ManimGL version: v${MANIM_VERSION}`);
-    } else {
-      Window.showInformationMessage(
-        `You're using ManimGL version v${MANIM_VERSION}.`
-        + ` The latest version is v${latestVersion}.`);
+      return;
     }
+
+    const showReleasesOption = "Show Manim releases";
+    Window.showInformationMessage(
+      `You're using ManimGL version v${MANIM_VERSION}.`
+      + ` The latest version is v${latestVersion}.`, showReleasesOption)
+      .then((selected) => {
+        if (selected === showReleasesOption) {
+          vscode.env.openExternal(vscode.Uri.parse(MANIM_RELEASES_URL));
+        }
+      });
+    return;
   } else {
     Window.showInformationMessage(`You're using ManimGL version: v${MANIM_VERSION}`);
   }
