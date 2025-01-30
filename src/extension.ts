@@ -153,38 +153,59 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   registerManimCellProviders(context);
 
-  context.subscriptions.push(
-    vscode.debug.registerDebugAdapterTrackerFactory("debugpy", {
-      createDebugAdapterTracker(session: vscode.DebugSession) {
-        return {
-          onDidSendMessage: (message) => {
-            // Log message structure for debugging
-            console.log("Debug Event:", message);
+  function interceptPythonDebugger(session: vscode.DebugSession): vscode.DebugAdapterTracker {
+    return {
+      onDidSendMessage: (message) => {
+        // Log all debugger messages for analysis
+        console.log("Debug Event:", message);
 
-            // Check if the event is a "stopped" event
-            if (message.event === "stopped") {
-              // Handle breakpoint or step events
-              if (message.body && message.body.threadId) {
-                session.customRequest("stackTrace", { threadId: message.body.threadId })
-                  .then((response) => {
-                    const stackFrames = response.stackFrames;
-                    if (stackFrames && stackFrames.length > 0) {
-                      const topFrame = stackFrames[0];
-                      const file = topFrame.source?.path || "unknown";
-                      const line = topFrame.line;
+        // If the debugger stops at a line (step, breakpoint, etc.)
+        if (message.event === "stopped") {
+          if (message.body && message.body.threadId) {
+            const threadId = message.body.threadId;
 
-                      // Display execution info in status bar
-                      vscode.window.setStatusBarMessage(`Executing line ${line} in ${file}`, 1000);
-                      console.log(`Debugger stopped at line ${line} in ${file}`);
-                    }
-                  });
-              }
-            }
-          },
-        };
+            // Request stack trace to get execution details
+            session.customRequest("stackTrace", { threadId })
+              .then((response) => {
+                const stackFrames = response.stackFrames;
+                if (stackFrames && stackFrames.length > 0) {
+                  const topFrame = stackFrames[0];
+                  const file = topFrame.source?.path || "unknown";
+                  const line = topFrame.line;
+
+                  console.log(`Pausing execution at line ${line} in ${file}`);
+                }
+              });
+          }
+        }
       },
-    }),
-  );
+
+      // Intercept step commands (Step Over, Step Into, Step Out)
+      onWillReceiveMessage: (message) => {
+        if (message.command === "next" || message.command === "stepIn"
+          || message.command === "stepOut") {
+          console.log(`Intercepted step command: ${message.command}`);
+
+          // Block execution temporarily
+          return new Promise<void>((resolve) => {
+            setTimeout(() => {
+              console.log(`Resuming step command: ${message.command}`);
+              resolve();
+            }, 5000); // Delay stepping by 5 seconds
+          });
+        }
+      },
+    };
+  }
+
+  const debugInterception = vscode.debug.registerDebugAdapterTrackerFactory("debugpy", {
+    createDebugAdapterTracker(session: vscode.DebugSession) {
+      return interceptPythonDebugger(session);
+    },
+  });
+
+  context.subscriptions.push(debugInterception);
+
   if (process.env.IS_TESTING === "true") {
     console.log("💠 Extension marked as activated");
     activatedEmitter.emit("activated");
