@@ -46,11 +46,10 @@ export async function activate(context: vscode.ExtensionContext) {
       // (These tasks here can be performed in the background)
 
       // also see https://github.com/Manim-Notebook/manim-notebook/pull/117#discussion_r1932764875
-      const pythonBinInVenv = process.platform === "win32" ? "python.exe" : "python3";
-      const pythonBinOutsideVenv = process.platform === "win32" ? "python" : "python3";
+      const pythonBin = process.platform === "win32" ? "python" : "python3";
       pythonBinary = pythonEnvPath
-        ? getBinaryPathInPythonEnv(pythonEnvPath, pythonBinInVenv)
-        : pythonBinOutsideVenv;
+        ? getBinaryPathInPythonEnv(pythonEnvPath, pythonBin)
+        : pythonBin;
 
       if (process.platform === "win32") {
         applyWindowsPastePatch(context, pythonBinary);
