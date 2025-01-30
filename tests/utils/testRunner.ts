@@ -17,6 +17,7 @@ import Mocha from "mocha";
 import * as assert from "assert";
 import { globSync } from "glob";
 import "source-map-support/register";
+import "./prototype";
 
 import { window, workspace, Uri } from "vscode";
 
@@ -40,7 +41,8 @@ export function uriInWorkspace(pathRelativeToWorkspaceRoot: string): Uri {
 export function run(): Promise<void> {
   const mocha = new Mocha({
     ui: "tdd",
-    timeout: 35000,
+    timeout: 45000,
+    color: true,
   });
 
   console.log(`💠 workspaceRoot: ${WORKSPACE_ROOT}`);

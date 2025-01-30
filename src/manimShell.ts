@@ -20,15 +20,6 @@ const IPYTHON_CELL_START_REGEX = /^\s*In \[\d+\]:/gm;
 const LOG_INFO_MESSAGE_REGEX = /^\s*\[.*\] INFO/m;
 
 /**
- * Regular expression to match IPython multiline input "...:"
- * Sometimes IPython does not execute code when entering a newline, but enters a
- * multiline input mode, where it expects another line of code. We detect that
- * this happens and send an extra newline to run the code
- * See: https://github.com/Manim-Notebook/manim-notebook/issues/18
- */
-const IPYTHON_MULTILINE_START_REGEX = /^\s*\.{3}:\s+$/m;
-
-/**
  * Regular expression to match a KeyboardInterrupt.
  */
 const KEYBOARD_INTERRUPT_REGEX = /^\s*KeyboardInterrupt/m;
@@ -326,9 +317,6 @@ export class ManimShell {
     startLine?: number,
     handler?: CommandExecutionEventHandler,
   ) {
-    // append ESC + ENTER to avoid IPython starting a multi-line input (#18)
-    command += "\x1b\x0d";
-
     Logger.debug(`🚀 Exec command: ${command}, waitUntilFinished=${waitUntilFinished}`
       + `, forceExecute=${forceExecute}, errorOnNoActiveShell=${errorOnNoActiveShell}`);
 
@@ -773,14 +761,6 @@ export class ManimShell {
               Logger.debug(`📦 IPython cell ${cellNumber} detected`);
               this.eventEmitter.emit(ManimShellEvent.IPYTHON_CELL_FINISHED);
             }
-          }
-
-          if (this.isExecutingCommand && data.match(IPYTHON_MULTILINE_START_REGEX)) {
-            Logger.debug("💨 IPython multiline detected, sending extra newline");
-            // do not use shell integration here, as it might send a CTRL-C
-            // while the prompt is not finished yet
-            // \x7F deletes the extra line ("...:") from IPython
-            this.exec(this.activeShell, "\x7F", false);
           }
 
           if (data.match(ERROR_REGEX)) {

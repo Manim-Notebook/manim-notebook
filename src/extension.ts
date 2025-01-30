@@ -1,4 +1,3 @@
-import * as path from "path";
 import * as vscode from "vscode";
 import { window } from "vscode";
 import { ManimShell, NoActiveShellError } from "./manimShell";
@@ -12,6 +11,8 @@ import { ExportSceneCodeLens } from "./export";
 import { tryToDetermineManimVersion, LAST_WARNING_NO_VERSION_KEY } from "./manimVersion";
 import { setupTestEnvironment } from "./utils/testing";
 import { EventEmitter } from "events";
+import { applyWindowsPastePatch } from "./patches/applyPatches";
+import { getBinaryPathInPythonEnv } from "./utils/venv";
 
 export let manimNotebookContext: vscode.ExtensionContext;
 class WaitingForPythonExtensionCancelled extends Error {}
@@ -49,12 +50,11 @@ export async function activate(context: vscode.ExtensionContext) {
       await vscode.commands.executeCommand("workbench.action.openWalkthrough",
         `${context.extension.id}#manim-notebook-walkthrough`, false);
     });
-
   context.subscriptions.push(openWalkthroughCommand);
 
-  let manimglPath: string | undefined = undefined;
+  let pythonEnvPath: string | undefined = undefined;
   try {
-    manimglPath = await waitForPythonExtension();
+    pythonEnvPath = await waitForPythonExtension();
   } catch (err) {
     if (err instanceof WaitingForPythonExtensionCancelled) {
       Logger.info("💠 Waiting for Python extension cancelled, therefore"
@@ -62,10 +62,21 @@ export async function activate(context: vscode.ExtensionContext) {
       return;
     }
   }
-  if (manimglPath) {
-    manimglPath = pythonEnvToManimglPath(manimglPath);
+
+  if (process.platform === "win32") {
+    // Note that we shouldn't call `python3` on Windows,
+    // see https://github.com/Manim-Notebook/manim-notebook/pull/117#discussion_r1932764875
+    const pythonPath = pythonEnvPath
+      ? getBinaryPathInPythonEnv(pythonEnvPath, "python.exe")
+      : "python";
+    // not necessary to await here, can run in background
+    applyWindowsPastePatch(context, pythonPath);
   }
-  await tryToDetermineManimVersion(manimglPath);
+
+  const manimglBinary = pythonEnvPath
+    ? getBinaryPathInPythonEnv(pythonEnvPath, "manimgl")
+    : "manimgl";
+  await tryToDetermineManimVersion(manimglBinary);
 
   const previewManimCellCommand = vscode.commands.registerCommand(
     "manim-notebook.previewManimCell", (cellCode?: string, startLine?: number) => {
@@ -135,7 +146,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const redetectManimVersionCommand = vscode.commands.registerCommand(
     "manim-notebook.redetectManimVersion", async () => {
       Logger.info("💠 Command requested: Redetect Manim Version");
-      await tryToDetermineManimVersion();
+      await tryToDetermineManimVersion("manimgl");
     });
 
   registerWalkthroughCommands(context);
@@ -203,22 +214,6 @@ async function waitForPythonExtension(): Promise<string | undefined> {
     }
     return environment.path;
   });
-}
-
-/**
- * Transforms a path pointing to either an environment folder or a
- * Python executable into a path pointing to the ManimGL binary.
- *
- * @param path The path to the Python environment or Python executable.
- * @returns The path to the ManimGL binary.
- */
-function pythonEnvToManimglPath(envPath: string): string {
-  if (envPath.endsWith("python") || envPath.endsWith("python3")) {
-    return envPath.replace(/python3?$/, "manimgl");
-  } else {
-    const binFolderName = process.platform === "win32" ? "Scripts" : "bin";
-    return path.join(envPath, binFolderName, "manimgl");
-  }
 }
 
 /**
