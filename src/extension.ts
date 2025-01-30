@@ -59,7 +59,7 @@ export async function activate(context: vscode.ExtensionContext) {
     });
   } catch (err) {
     Logger.error("Error in background activation processing"
-      + ` (python extension waiting, windows paste patch, manim version check): ${err}`);
+      + ` (python extension waiting, windows paste patch or manim version check): ${err}`);
   }
 
   const previewManimCellCommand = vscode.commands.registerCommand(

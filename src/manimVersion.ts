@@ -8,6 +8,8 @@ import { Window, Logger } from "./logger";
  */
 let MANIM_VERSION: string | undefined;
 
+let lastPythonBinary: string | undefined;
+
 /**
  * Checks if the given version is at least the required version.
  *
@@ -58,17 +60,28 @@ export function hasUserMinimalManimVersion(versionRequired: string): boolean {
  * @param versionRequired The minimal Manim version required, e.g. '1.2.3'.
  * @returns True if the user has at least the required Manim version installed.
  */
-export function hasUserMinimalManimVersionAndWarn(versionRequired: string): boolean {
+export async function hasUserMinimalManimVersionAndWarn(versionRequired: string): Promise<boolean> {
   if (hasUserMinimalManimVersion(versionRequired)) {
     return true;
   }
-  const currentVersionMessage = MANIM_VERSION
-    ? `Your current version is v${MANIM_VERSION}.`
-    : "Your current version could not be determined yet.";
-  Window.showWarningMessage(
-    `Sorry, this feature requires Manim version v${versionRequired} or higher.`
-    + " " + currentVersionMessage,
-  );
+
+  const sorryBaseMessage = "Sorry, this feature requires Manim version"
+    + ` v${versionRequired} or higher.`;
+
+  if (MANIM_VERSION) {
+    Window.showWarningMessage(
+      `${sorryBaseMessage} Your current version is v${MANIM_VERSION}.`);
+    return false;
+  }
+
+  const tryAgainOption = "Try again to determine version";
+  const message = `${sorryBaseMessage} Your current version could not be determined yet.`;
+  const selected = await Window.showWarningMessage(message, tryAgainOption);
+  if (selected === tryAgainOption) {
+    await determineManimVersion(lastPythonBinary);
+    return hasUserMinimalManimVersion(versionRequired);
+  }
+
   return false;
 }
 
@@ -114,7 +127,12 @@ async function fetchLatestManimVersion(): Promise<string | undefined> {
  *
  * @param pythonBinary The path to the Python binary.
  */
-export async function determineManimVersion(pythonBinary: string) {
+export async function determineManimVersion(pythonBinary: string | undefined) {
+  if (!pythonBinary) {
+    Logger.error("Python binary path is undefined");
+    return;
+  }
+  lastPythonBinary = pythonBinary;
   MANIM_VERSION = undefined;
   let couldDetermineManimVersion = false;
 
@@ -139,7 +157,7 @@ export async function determineManimVersion(pythonBinary: string) {
     Logger.info(`👋 ManimGL version found: ${MANIM_VERSION}`);
     await showPositiveUserVersionFeedback();
   } else {
-    Logger.info("ManimGL version could not be determined");
+    Logger.info("👋 ManimGL version could not be determined");
     await showNegativeUserVersionFeedback();
   }
 }
@@ -165,7 +183,7 @@ async function showNegativeUserVersionFeedback() {
   const warningMessage = "Your ManimGL version could not be determined.";
   const answer = await Window.showWarningMessage(warningMessage, tryAgainAnswer);
   if (answer === tryAgainAnswer) {
-    await determineManimVersion("manimgl");
+    await determineManimVersion(lastPythonBinary);
   }
 }
 
