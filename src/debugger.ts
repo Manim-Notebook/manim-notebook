@@ -3,9 +3,15 @@ import { DebugAdapterTracker, DebugSession } from "vscode";
 export class ManimDebugAdapterTracker implements DebugAdapterTracker {
   private session: DebugSession;
   private gotoThreadId: number | undefined;
+  private filePath: string | undefined;
 
   constructor(session: DebugSession) {
     this.session = session;
+
+    const config = session.configuration;
+    const filePath = config.program;
+    console.log("🚀 Debugging", filePath);
+    this.filePath = filePath;
   }
 
   onDidSendMessage(message: any): void {
@@ -60,15 +66,13 @@ export class ManimDebugAdapterTracker implements DebugAdapterTracker {
   onWillReceiveMessage(message: any): void {
     console.log("✅ Message", message);
 
-    // Retrieve the path dynamically
-
     if (message.command === "continue" && message.arguments.threadId) {
       console.log("💨 Will pause debugger", message);
       this.gotoThreadId = message.arguments.threadId;
       this.session.customRequest("gotoTargets", {
         source: {
-          path: "your-path-to/exciting-first-start.py",
-          sourceRference: 0,
+          path: this.filePath,
+          sourceReference: 0,
         },
         line: 23,
       });
