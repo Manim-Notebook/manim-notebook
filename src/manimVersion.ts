@@ -9,9 +9,22 @@ import * as vscode from "vscode";
  */
 let MANIM_VERSION: string | undefined;
 
+/**
+ * The last Python binary path that was used to determine the Manim version.
+ *
+ * This is used to retry the version determination if it failed the first time.
+ */
 let lastPythonBinary: string | undefined;
 
+/**
+ * The URL to the Manim releases page.
+ */
 const MANIM_RELEASES_URL = "https://github.com/3b1b/manim/releases";
+
+/**
+ * The URL to the API endpoint showing information about the latest
+ * Manim release.
+ */
 const MANIM_LATEST_RELEASE_API_URL = "https://api.github.com/repos/3b1b/manim/releases/latest";
 
 /**
