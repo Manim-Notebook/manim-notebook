@@ -8,23 +8,13 @@ import { exportScene } from "./export";
 import { Logger, Window, LogRecorder } from "./logger";
 import { registerWalkthroughCommands } from "./walkthrough/commands";
 import { ExportSceneCodeLens } from "./export";
-import { tryToDetermineManimVersion, LAST_WARNING_NO_VERSION_KEY } from "./manimVersion";
+import { determineManimVersion } from "./manimVersion";
 import { setupTestEnvironment } from "./utils/testing";
 import { EventEmitter } from "events";
 import { applyWindowsPastePatch } from "./patches/applyPatches";
 import { getBinaryPathInPythonEnv } from "./utils/venv";
 
 export let manimNotebookContext: vscode.ExtensionContext;
-class WaitingForPythonExtensionCancelled extends Error {}
-
-/**
- * Resets the global state of the extension.
- * @param context The extension context.
- */
-function restoreGlobalState(context: vscode.ExtensionContext) {
-  const globalState = context.globalState;
-  globalState.update(LAST_WARNING_NO_VERSION_KEY, 0);
-}
 
 export async function activate(context: vscode.ExtensionContext) {
   if (process.env.IS_TESTING === "true") {
@@ -36,14 +26,12 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   manimNotebookContext = context;
-  restoreGlobalState(context);
 
   // Trigger the Manim shell to start listening to the terminal
   ManimShell.instance;
 
   // Register the open walkthrough command earlier, so that it can be used
-  // even while the Python extension is loading and the ManimGL version is
-  // being detected.
+  // even while other activation tasks are still running
   const openWalkthroughCommand = vscode.commands.registerCommand(
     "manim-notebook.openWalkthrough", async () => {
       Logger.info("💠 Command requested: Open Walkthrough");
@@ -52,31 +40,27 @@ export async function activate(context: vscode.ExtensionContext) {
     });
   context.subscriptions.push(openWalkthroughCommand);
 
-  let pythonEnvPath: string | undefined = undefined;
   try {
-    pythonEnvPath = await waitForPythonExtension();
+    waitForPythonExtension().then((pythonEnvPath: string | undefined) => {
+      // (These tasks here can be performed in the background)
+
+      // also see https://github.com/Manim-Notebook/manim-notebook/pull/117#discussion_r1932764875
+      const pythonBinInVenv = process.platform === "win32" ? "python.exe" : "python3";
+      const pythonBinOutsideVenv = process.platform === "win32" ? "python" : "python3";
+      const pythonBinary = pythonEnvPath
+        ? getBinaryPathInPythonEnv(pythonEnvPath, pythonBinInVenv)
+        : pythonBinOutsideVenv;
+
+      if (process.platform === "win32") {
+        applyWindowsPastePatch(context, pythonBinary);
+      }
+
+      determineManimVersion(pythonBinary);
+    });
   } catch (err) {
-    if (err instanceof WaitingForPythonExtensionCancelled) {
-      Logger.info("💠 Waiting for Python extension cancelled, therefore"
-        + " we cancel the extension activation");
-      return;
-    }
+    Logger.error("Error in background activation processing"
+      + ` (python extension waiting, windows paste patch, manim version check): ${err}`);
   }
-
-  if (process.platform === "win32") {
-    // Note that we shouldn't call `python3` on Windows,
-    // see https://github.com/Manim-Notebook/manim-notebook/pull/117#discussion_r1932764875
-    const pythonPath = pythonEnvPath
-      ? getBinaryPathInPythonEnv(pythonEnvPath, "python.exe")
-      : "python";
-    // not necessary to await here, can run in background
-    applyWindowsPastePatch(context, pythonPath);
-  }
-
-  const manimglBinary = pythonEnvPath
-    ? getBinaryPathInPythonEnv(pythonEnvPath, "manimgl")
-    : "manimgl";
-  await tryToDetermineManimVersion(manimglBinary);
 
   const previewManimCellCommand = vscode.commands.registerCommand(
     "manim-notebook.previewManimCell", (cellCode?: string, startLine?: number) => {
@@ -144,9 +128,9 @@ export async function activate(context: vscode.ExtensionContext) {
     });
 
   const redetectManimVersionCommand = vscode.commands.registerCommand(
-    "manim-notebook.redetectManimVersion", async () => {
+    "manim-notebook.redetectManimVersion", () => {
       Logger.info("💠 Command requested: Redetect Manim Version");
-      await tryToDetermineManimVersion("manimgl");
+      determineManimVersion("manimgl");
     });
 
   registerWalkthroughCommands(context);
@@ -176,44 +160,31 @@ export async function activate(context: vscode.ExtensionContext) {
  * installed.
  *
  * @returns The path to the Python environment, if it is available.
- * @throws {WaitingForPythonExtensionCancelled} If the user cancels the
- *  waiting process.
  */
 async function waitForPythonExtension(): Promise<string | undefined> {
   const pythonExtension = vscode.extensions.getExtension("ms-python.python");
   if (!pythonExtension) {
-    Logger.info("💠 Python extension not installed, skip waiting for it");
+    Logger.info("💠 Python extension not installed");
     return;
   }
 
-  const progressOptions = {
-    location: vscode.ProgressLocation.Notification,
-    title: "Waiting for Python extension to be fully loaded...",
-    cancellable: true,
-  };
+  // Waiting for Python extension
+  const pythonApi = await pythonExtension.activate();
+  Logger.info("💠 Python extension activated");
 
-  return await window.withProgress(progressOptions, async (progress, token) => {
-    token.onCancellationRequested(() => {
-      Window.showInformationMessage("Manim Notebook activation cancelled."
-        + " Open any Python file to again activate the extension.");
-      throw new WaitingForPythonExtensionCancelled();
-    });
+  // Path to venv
+  const environmentPath = pythonApi.environments.getActiveEnvironmentPath();
+  if (!environmentPath) {
+    Logger.debug("No active environment path found");
+    return;
+  }
+  const environment = await pythonApi.environments.resolveEnvironment(environmentPath);
+  if (!environment) {
+    Logger.debug("Environment could not be resolved");
+    return;
+  }
 
-    // Waiting for Python extension
-    const pythonApi = await pythonExtension.activate();
-    Logger.info("💠 Python extension activated");
-
-    // Path to venv
-    const environmentPath = pythonApi.environments.getActiveEnvironmentPath();
-    if (!environmentPath) {
-      return;
-    }
-    const environment = await pythonApi.environments.resolveEnvironment(environmentPath);
-    if (!environment) {
-      return;
-    }
-    return environment.path;
-  });
+  return environment.path;
 }
 
 /**

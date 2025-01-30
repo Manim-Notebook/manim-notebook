@@ -1,22 +1,12 @@
-import * as vscode from "vscode";
-import { window } from "vscode";
-import { waitNewTerminalDelay, onTerminalOutput } from "./utils/terminal";
+import { exec } from "child_process";
+
 import { Window, Logger } from "./logger";
-import { ManimShell } from "./manimShell";
-import { manimNotebookContext } from "./extension";
 
 /**
  * Manim version that the user has installed without the 'v' prefix,
  * e.g. '1.2.3'.
  */
 let MANIM_VERSION: string | undefined;
-let isCanceledByUser = false;
-
-/**
- * Key for the global state to store the last warning time for missing Manim
- * version detection.
- */
-export const LAST_WARNING_NO_VERSION_KEY = "manim-notebook.lastWarningTimeMissingVersionDetection";
 
 /**
  * Checks if the given version is at least the required version.
@@ -48,30 +38,13 @@ function isAtLeastVersion(versionRequired: string, version: string): boolean {
 }
 
 /**
- * Returns true if the current Manim version is at least the required version.
+ * Returns true if the users's Manim version is at least the required version.
+ * Does not show any warning message should the version be too low.
+ *
+ * @param versionRequired The minimal Manim version required, e.g. '1.2.3'.
+ * @returns True if the user has at least the required Manim version installed.
  */
-export async function isAtLeastManimVersion(versionRequired: string): Promise<boolean> {
-  if (!MANIM_VERSION) {
-    const context = manimNotebookContext;
-    if (!context) {
-      return false;
-    }
-    const lastWarningTime = context.globalState.get<number>(LAST_WARNING_NO_VERSION_KEY, 0);
-    const currentTime = Date.now();
-    const thirtyMinutes = 30 * 60 * 1000;
-
-    if (currentTime - lastWarningTime > thirtyMinutes) {
-      context.globalState.update(LAST_WARNING_NO_VERSION_KEY, currentTime);
-      const determineAgainOption = "Determine my ManimGL version again";
-      const answer = await Window.showInformationMessage("You might be"
-        + " missing out on some Manim Notebook features because your"
-        + " ManimGL version could not be determined.",
-      determineAgainOption, "I don't care");
-      if (answer === determineAgainOption) {
-        await tryToDetermineManimVersion("manimgl");
-      }
-    }
-  }
+export function hasUserMinimalManimVersion(versionRequired: string): boolean {
   if (!MANIM_VERSION) {
     return false;
   }
@@ -79,22 +52,23 @@ export async function isAtLeastManimVersion(versionRequired: string): Promise<bo
 }
 
 /**
- * Returns whether user has at least the given minimal Manim version installed.
- * If this is not the case, a warning message is shown.
+ * Returns true if the users's Manim version is at least the required version.
+ * Shows a generic warning message should the version be too low.
  *
- * @param requiredVersion The minimal Manim version required, e.g. '1.2.3'.
+ * @param versionRequired The minimal Manim version required, e.g. '1.2.3'.
  * @returns True if the user has at least the required Manim version installed.
  */
-export async function hasUserMinimalManimVersion(requiredVersion: string): Promise<boolean> {
-  if (await isAtLeastManimVersion(requiredVersion)) {
+export function hasUserMinimalManimVersionAndWarn(versionRequired: string): boolean {
+  if (hasUserMinimalManimVersion(versionRequired)) {
     return true;
   }
   const currentVersionMessage = MANIM_VERSION
     ? `Your current version is v${MANIM_VERSION}.`
     : "Your current version could not be determined yet.";
   Window.showWarningMessage(
-    `Sorry, this feature requires Manim version v${requiredVersion} or higher.`
-    + " " + currentVersionMessage);
+    `Sorry, this feature requires Manim version v${versionRequired} or higher.`
+    + " " + currentVersionMessage,
+  );
   return false;
 }
 
@@ -132,63 +106,46 @@ async function fetchLatestManimVersion(): Promise<string | undefined> {
 }
 
 /**
- * Tries to determine the Manim version with the `manimgl --version` command.
+ * Determines the ManimGL version.
  *
- * @param manimglBinary The path to the ManimGL executable, e.g. in a virtual
- * environment. If undefined, we assume that `manimgl` is in the PATH.
+ * Note that this *tries* to determine the version, but it could fail, in which
+ * case the user will be informed about this and the MANIM_VERSION is set to
+ * undefined.
+ *
+ * @param pythonBinary The path to the Python binary.
  */
-export async function tryToDetermineManimVersion(manimglBinary: string) {
+export async function determineManimVersion(pythonBinary: string) {
   MANIM_VERSION = undefined;
   let couldDetermineManimVersion = false;
-  isCanceledByUser = false;
-  const latestManimVersion = fetchLatestManimVersion(); // no actual execution yet
 
-  const terminal = await window.createTerminal(
-    {
-      name: "ManimGL Version",
-      iconPath: new vscode.ThemeIcon("tag"),
-    });
-  await waitNewTerminalDelay();
-
-  await window.withProgress({
-    location: vscode.ProgressLocation.Notification,
-    title: "Determining ManimGL version...",
-    cancellable: true,
-  }, async (progress, token) => {
-    try {
-      couldDetermineManimVersion = await new Promise<boolean>(async (resolve, _reject) => {
-        progress.report({ increment: 0 });
-
-        ManimShell.instance.lockManimWelcomeStringDetection = true;
-        Logger.info("🔒 Locking Manim welcome string detection");
-
-        const timeoutPromise = constructTimeoutPromise(8000, progress, token);
-        const versionPromise = lookForManimVersionString(terminal, `${manimglBinary} --version`);
-        Promise.race([timeoutPromise, versionPromise])
-          .then(couldResolveVersion => resolve(couldResolveVersion))
-          .catch((err) => {
-            Logger.error(
-              `Abnormal termination of ManimGL version determination: ${err}`);
-            resolve(false);
-          });
-      });
-    } finally {
-      ManimShell.instance.lockManimWelcomeStringDetection = false;
-      Logger.info("🔓 Unlocking Manim welcome string detection");
-    }
+  const timeoutPromise = new Promise<boolean>((resolve, _reject) => {
+    setTimeout(() => {
+      Logger.debug("Manim Version Determination: timed out");
+      resolve(false);
+    }, 3000);
   });
 
+  const versionCommand = `${pythonBinary} -c \"from importlib.metadata import version; `
+    + " print(version('manimgl'))\"";
+
+  try {
+    couldDetermineManimVersion = await Promise.race(
+      [execVersionCommandAndCheckForSuccess(versionCommand), timeoutPromise]);
+  } catch (err) {
+    Logger.error(`Abnormal termination of ManimGL Version Check: ${err}`);
+  }
+
   if (couldDetermineManimVersion) {
-    terminal.dispose();
-    await showPositiveUserVersionFeedback(latestManimVersion);
+    Logger.info(`👋 ManimGL version found: ${MANIM_VERSION}`);
+    await showPositiveUserVersionFeedback();
   } else {
-    terminal.show();
+    Logger.info("ManimGL version could not be determined");
     await showNegativeUserVersionFeedback();
   }
 }
 
-async function showPositiveUserVersionFeedback(latestManimVersion: Promise<string | undefined>) {
-  const latestVersion = await latestManimVersion;
+async function showPositiveUserVersionFeedback() {
+  const latestVersion = await fetchLatestManimVersion();
   if (latestVersion) {
     if (latestVersion === MANIM_VERSION) {
       Window.showInformationMessage(
@@ -204,86 +161,45 @@ async function showPositiveUserVersionFeedback(latestManimVersion: Promise<strin
 }
 
 async function showNegativeUserVersionFeedback() {
-  if (isCanceledByUser) {
-    return;
-  }
-
   const tryAgainAnswer = "Try again";
-  const errMessage = "Your ManimGL version could not be determined.";
-  const answer = await Window.showErrorMessage(errMessage, tryAgainAnswer);
+  const warningMessage = "Your ManimGL version could not be determined.";
+  const answer = await Window.showWarningMessage(warningMessage, tryAgainAnswer);
   if (answer === tryAgainAnswer) {
-    await tryToDetermineManimVersion("manimgl");
+    await determineManimVersion("manimgl");
   }
 }
 
 /**
- * Constructs a promise that times out after the given time and reports progress
- * automatically in the meantime every 500ms.
+ * Executes the given command as child process. We listen to the output and
+ * look for the ManimGL version string.
  *
- * @param timeout The time in milliseconds after which the promise
- *                should time out.
- * @param progress The progress indicator to report to.
- * @param token The cancellation token to listen to.
- * @returns A promise that times out after the given time.
+ * @param command The command to execute in the shell (via Node.js `exec`).
+ * @returns A promise that resolves to true if the version was successfully
+ * determined, and false otherwise. Might never resolve, so the caller should
+ * let this promise race with a timeout promise.
  */
-function constructTimeoutPromise(
-  timeout: number,
-  progress: vscode.Progress<unknown>,
-  token: vscode.CancellationToken,
-): Promise<boolean> {
-  return new Promise<boolean>(async (resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      clearTimeout(timeoutId);
-      reject();
-    }, timeout);
-
-    token.onCancellationRequested(() => {
-      isCanceledByUser = true;
-      clearTimeout(timeoutId);
-      reject();
-    });
-
-    const numChunks = Math.ceil(timeout / 500);
-    for (let i = 0; i < numChunks; i++) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      progress.report({ increment: 100 / numChunks });
-    }
-  });
-}
-
-/**
- * Looks for the ManimGL version string in the terminal output.
- *
- * @param terminaL The terminal to listen TO:
- * @param command The command to execute in the terminal.
- * @returns True if the version string could be found and assigned to the
- * `MANIM_VERSION` variable. False otherwise.
- */
-async function lookForManimVersionString(
-  terminal: vscode.Terminal, command: string): Promise<boolean> {
+async function execVersionCommandAndCheckForSuccess(command: string): Promise<boolean> {
   return new Promise<boolean>(async (resolve, _reject) => {
-    onTerminalOutput(terminal, (data: string) => {
-      const versionMatch = data.match(/^\s*ManimGL v([0-9]+\.[0-9]+\.[0-9]+)/m);
-      if (!versionMatch) {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        Logger.error(`Manim Version Check. error: ${error.message}`);
+        resolve(false);
+        return;
+      }
+      if (stderr) {
+        Logger.error(`Manim Version Check. stderr: ${stderr}`);
+        resolve(false);
         return;
       }
 
+      Logger.trace(`Manim Version Check. stdout: ${stdout}`);
+      const versionMatch = stdout.match(/^\s*([0-9]+\.[0-9]+\.[0-9]+)/m);
+      if (!versionMatch) {
+        resolve(false);
+        return;
+      }
       MANIM_VERSION = versionMatch[1];
-      Logger.info(`👋 ManimGL version found: ${MANIM_VERSION}`);
-      terminal.dispose();
       resolve(true);
     });
-
-    window.onDidEndTerminalShellExecution((event) => {
-      if (event.terminal !== terminal || MANIM_VERSION || isCanceledByUser) {
-        return;
-      }
-      if (event.exitCode !== 0) {
-        Logger.error("ManimGL version detection: shell exited with error code");
-        resolve(false);
-      }
-    });
-
-    terminal.sendText(command);
   });
 }
