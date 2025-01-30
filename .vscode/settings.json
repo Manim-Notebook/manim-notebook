@@ -87,6 +87,7 @@
     "autoplay",
     "autoreload",
     "cmds",
+    "debugpy",
     "elif",
     "ensurepip",
     "github",

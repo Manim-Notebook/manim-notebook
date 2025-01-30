@@ -13,6 +13,7 @@ import { setupTestEnvironment } from "./utils/testing";
 import { EventEmitter } from "events";
 import { applyWindowsPastePatch } from "./patches/applyPatches";
 import { getBinaryPathInPythonEnv } from "./utils/venv";
+import { ManimDebugAdapterTracker } from "./debugger";
 
 export let manimNotebookContext: vscode.ExtensionContext;
 
@@ -153,70 +154,11 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   registerManimCellProviders(context);
 
-  function interceptPythonDebugger(session: vscode.DebugSession): vscode.DebugAdapterTracker {
-    let gotoThreadId: number | undefined;
-
-    return {
-      onDidSendMessage: (message) => {
-        console.log("Debug Event:", message);
-
-        if (message.command === "gotoTargets") {
-          const target = message.body.targets[0];
-          console.log("🎯 Target", target);
-          session.customRequest("goto", { threadId: gotoThreadId, targetId: target.id });
-        }
-
-        if (!message.body || !message.body.threadId) {
-          return;
-        }
-        const threadId = message.body.threadId;
-
-        if (message.event === "stopped") {
-          // Request stack trace to get execution details
-          session.customRequest("stackTrace", { threadId })
-            .then((response) => {
-              const stackFrames = response.stackFrames;
-              if (stackFrames && stackFrames.length > 0) {
-                const topFrame = stackFrames[0];
-                const file = topFrame.source?.path || "unknown";
-                const line = topFrame.line;
-
-                console.log(`Debugger stopped at line ${line} in ${file}`);
-              }
-            });
-        }
-
-        // if (message.event === "continued" && message.body.threadId) {
-        //   console.log("💨 Will pause debugger (onDidSendMessage", message);
-        //   session.customRequest("pause", { threadId: message.body.threadId });
-        // }
-      },
-
-      // Intercept step commands (Step Over, Step Into, Step Out)
-      onWillReceiveMessage: (message) => {
-        console.log("✅ Message", message);
-
-        if (message.command === "continue" && message.arguments.threadId) {
-          console.log("💨 Will pause debugger", message);
-          gotoThreadId = message.arguments.threadId;
-          session.customRequest("gotoTargets", {
-            source: {
-              path: "/your/path/to/file.py",
-              sourceReference: 0,
-            },
-            line: 23,
-          });
-        }
-      },
-    };
-  }
-
   const debugInterception = vscode.debug.registerDebugAdapterTrackerFactory("debugpy", {
     createDebugAdapterTracker(session: vscode.DebugSession) {
-      return interceptPythonDebugger(session);
+      return new ManimDebugAdapterTracker(session);
     },
   });
-
   context.subscriptions.push(debugInterception);
 
   if (process.env.IS_TESTING === "true") {
