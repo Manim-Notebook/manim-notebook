@@ -154,45 +154,54 @@ export async function activate(context: vscode.ExtensionContext) {
   registerManimCellProviders(context);
 
   function interceptPythonDebugger(session: vscode.DebugSession): vscode.DebugAdapterTracker {
+    let isSteppingOverLine = false;
+
     return {
       onDidSendMessage: (message) => {
-        // Log all debugger messages for analysis
         console.log("Debug Event:", message);
 
-        // If the debugger stops at a line (step, breakpoint, etc.)
         if (message.event === "stopped") {
-          if (message.body && message.body.threadId) {
-            const threadId = message.body.threadId;
-
-            // Request stack trace to get execution details
-            session.customRequest("stackTrace", { threadId })
-              .then((response) => {
-                const stackFrames = response.stackFrames;
-                if (stackFrames && stackFrames.length > 0) {
-                  const topFrame = stackFrames[0];
-                  const file = topFrame.source?.path || "unknown";
-                  const line = topFrame.line;
-
-                  console.log(`Pausing execution at line ${line} in ${file}`);
-                }
-              });
+          isSteppingOverLine = false;
+          if (!message.body || !message.body.threadId) {
+            return;
           }
+          const threadId = message.body.threadId;
+
+          // Request stack trace to get execution details
+          session.customRequest("stackTrace", { threadId })
+            .then((response) => {
+              const stackFrames = response.stackFrames;
+              if (stackFrames && stackFrames.length > 0) {
+                const topFrame = stackFrames[0];
+                const file = topFrame.source?.path || "unknown";
+                const line = topFrame.line;
+
+                console.log(`Debugger stopped at line ${line} in ${file}`);
+              }
+            });
         }
       },
 
       // Intercept step commands (Step Over, Step Into, Step Out)
       onWillReceiveMessage: (message) => {
-        if (message.command === "next" || message.command === "stepIn"
-          || message.command === "stepOut") {
-          console.log(`Intercepted step command: ${message.command}`);
-
-          // Block execution temporarily
-          return new Promise<void>((resolve) => {
-            setTimeout(() => {
-              console.log(`Resuming step command: ${message.command}`);
-              resolve();
-            }, 5000); // Delay stepping by 5 seconds
-          });
+        if (message.command !== "next" || !message.arguments.threadId) {
+          if (message.command === "next") {
+            console.log("Message not accepted:", message);
+          }
+          return;
+        }
+        if (!isSteppingOverLine) {
+          isSteppingOverLine = true;
+          const threadId = message.arguments.threadId;
+          setTimeout(() => {
+            console.log("🔺 goto line 25");
+            session.customRequest("goto", { threadId, targetId: 25 })
+              .then(() => {
+                console.log("🎈 goto done");
+              });
+          }, 1500); // simulate a delay
+          console.log("🌟 pause");
+          session.customRequest("pause", { threadId });
         }
       },
     };
