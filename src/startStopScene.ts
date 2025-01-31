@@ -23,6 +23,7 @@ import { hasUserMinimalManimVersion } from "./manimVersion";
  * scene for another command at the given line number. You are probably doing
  * something wrong if you invoke this method with lineStart !== undefined
  * from somewhere else than the ManimShell.
+ * Note that the line number is 0-based (but is passed as 1-based to manimgl).
  */
 export async function startScene(lineStart?: number) {
   const editor = window.activeTextEditor;

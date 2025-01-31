@@ -67,6 +67,30 @@ export async function previewManimCell(cellCode?: string, startLine?: number) {
   await previewCode(cellCodeParsed, startLineParsed);
 }
 
+/**
+ * Previews the code of the active editor at the given line number.
+ *
+ * TODO: Pass the active editor as param, such that user can navigate to
+ * another file, while still previewing the code from the previous file.
+ *
+ * TODO: What about multi-line Python code that starts at the given line number
+ * and spans multiple lines? This is currently not supported.
+ *
+ * @param lineNumber The line number of the code to preview (0-based)
+ */
+export async function previewLine(lineNumber: number) {
+  const editor = window.activeTextEditor;
+  if (!editor) {
+    Window.showErrorMessage("No active editor found.");
+    return;
+  }
+
+  const line = editor.document.lineAt(lineNumber);
+  const code = editor.document.getText(line.range);
+
+  await previewCode(code, lineNumber);
+}
+
 export async function reloadAndPreviewManimCell(cellCode?: string, startLine?: number) {
   if (!await hasUserMinimalManimVersionAndWarn("1.7.2")) {
     return;
