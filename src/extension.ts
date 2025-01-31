@@ -13,7 +13,7 @@ import { setupTestEnvironment } from "./utils/testing";
 import { EventEmitter } from "events";
 import { applyWindowsPastePatch } from "./patches/applyPatches";
 import { getBinaryPathInPythonEnv } from "./utils/venv";
-import { ManimDebugAdapterTracker } from "./debugger";
+import { ManimDebugAdapterTracker, previewAndStepOverCurrentLine } from "./debugger";
 
 export let manimNotebookContext: vscode.ExtensionContext;
 
@@ -128,6 +128,19 @@ export async function activate(context: vscode.ExtensionContext) {
       await LogRecorder.finishRecordingLogFile(context);
     });
 
+  const debugStepOverCommand = vscode.commands.registerCommand(
+    "manim-notebook.debug.stepover", async () => {
+      Logger.info("💠 Command requested: Debug Step Over");
+      await previewAndStepOverCurrentLine();
+    },
+  );
+  const debugStepOverCommandOverwrite = vscode.commands.registerCommand(
+    "workbench.action.debug.stepOver", async () => {
+      Logger.info("💠 Command requested: Debug Step Over (Overwritten)");
+      await vscode.commands.executeCommand("manim-notebook.debug.stepover");
+    },
+  );
+
   const redetectManimVersionCommand = vscode.commands.registerCommand(
     "manim-notebook.redetectManimVersion", async () => {
       Logger.info("💠 Command requested: Redetect Manim Version");
@@ -150,6 +163,8 @@ export async function activate(context: vscode.ExtensionContext) {
     recordLogFileCommand,
     exportSceneCommand,
     finishRecordingLogFileCommand,
+    debugStepOverCommand,
+    debugStepOverCommandOverwrite,
     redetectManimVersionCommand,
   );
   registerManimCellProviders(context);
