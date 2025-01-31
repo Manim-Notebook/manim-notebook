@@ -18,7 +18,12 @@ export class ManimDebugAdapterTracker implements DebugAdapterTracker {
     this.filePath = filePath;
   }
 
-  onDidSendMessage(message: any): void {
+  /**
+   * The debug adapter has sent a Debug Adapter Protocol message to the editor.
+   *
+   * https://vscode-api.js.org/interfaces/vscode.DebugAdapterTracker.html#onDidSendMessage
+   */
+  async onDidSendMessage(message: any): Promise<void> {
     console.log("Debug Event:", message);
 
     if (message.command === "gotoTargets") {
@@ -28,6 +33,12 @@ export class ManimDebugAdapterTracker implements DebugAdapterTracker {
     }
   }
 
+  /**
+   * The debug adapter is about to receive a Debug Adapter Protocol message
+   * from the editor.
+   *
+   * https://vscode-api.js.org/interfaces/vscode.DebugAdapterTracker.html#onWillReceiveMessage
+   */
   async onWillReceiveMessage(message: any): Promise<void> {
     console.log("📰 Message:", message);
 
@@ -41,7 +52,13 @@ export class ManimDebugAdapterTracker implements DebugAdapterTracker {
       const lineNumber = await this.getCurrentLineNumber(threadId);
       console.log("👉 Preview line (1-based):", lineNumber + 1);
 
-      // this.session.customRequest("pause", { threadId });  // doesn't work
+      // --- Try to pause the debugger
+      // this.session.customRequest("pause", { threadId }); // doesn't work
+      // await commands.executeCommand("workbench.action.debug.pause");
+      this.requestGoToLine(threadId, lineNumber); // stay on the same line
+      // TODO: block entirely going to next line, such that we don't have
+      // a visual flickering
+
       await previewLine(lineNumber);
       this.requestGoToLine(threadId, lineNumber + 1);
     }
