@@ -85,6 +85,17 @@ enum ManimShellEvent {
  */
 export interface CommandExecutionEventHandler {
   /**
+   * Callback that is invoked right before the command is issued. This is useful
+   * to perform any actions before the command is actually sent to the terminal.
+   * Since beforehand, a new shell might be spawned which could take some time
+   * (e.g. depending on user-defined custom delay settings).
+   *
+   * This method is awaited for, i.e. the command execution is paused until this
+   * method has finished executing.
+   */
+  beforeCommandIssued?: () => Promise<void>;
+
+  /**
    * Callback that is invoked when the command is issued, i.e. sent to the
    * terminal. At this point, the command is probably not yet finished
    * executing.
@@ -357,6 +368,7 @@ export class ManimShell {
 
     let currentExecutionCount = this.iPythonCellCount;
 
+    await handler?.beforeCommandIssued?.();
     this.exec(shell, command);
     handler?.onCommandIssued?.(this.activeShell !== null);
 
