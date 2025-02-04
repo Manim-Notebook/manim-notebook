@@ -109,10 +109,13 @@ export async function previewCode(code: string, startLine: number): Promise<void
 
   try {
     const clipboardBuffer = await vscode.env.clipboard.readText();
-    await vscode.env.clipboard.writeText(code);
-
     await ManimShell.instance.executeIPythonCommand(
       PREVIEW_COMMAND, startLine, true, {
+
+        beforeCommandIssued: async () => {
+          await vscode.env.clipboard.writeText(code);
+        },
+
         onCommandIssued: (shellStillExists) => {
           Logger.debug(`📊 Command issued: ${PREVIEW_COMMAND}. Will restore clipboard`);
           restoreClipboard(clipboardBuffer);
@@ -123,12 +126,15 @@ export async function previewCode(code: string, startLine: number): Promise<void
             Logger.debug("📊 Shell was closed in the meantime, not showing progress");
           }
         },
+
         onData: (data) => {
           progress?.reportOnData(data);
         },
+
         onReset: () => {
           progress?.finish();
         },
+
       });
   } finally {
     progress?.finish();
