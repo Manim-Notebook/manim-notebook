@@ -352,6 +352,9 @@ export class ManimShell {
     };
     this.eventEmitter.on(ManimShellEvent.RESET, resetListener);
 
+    let stopEarly = false;
+    this.eventEmitter.once(ManimShellEvent.MANIM_NOT_STARTED, () => stopEarly = true);
+
     let shell: Terminal;
     if (errorOnNoActiveShell) {
       shell = this.activeShell as Terminal;
@@ -368,7 +371,18 @@ export class ManimShell {
 
     let currentExecutionCount = this.iPythonCellCount;
 
+    if (stopEarly) {
+      Logger.debug("🔆 Manim not started, won't exec IPython command (1)");
+      return;
+    }
+
     await handler?.beforeCommandIssued?.();
+
+    if (stopEarly) {
+      Logger.debug("🔆 Manim not started, won't exec IPython command (2)");
+      return;
+    }
+
     this.exec(shell, command);
     handler?.onCommandIssued?.(this.activeShell !== null);
 
@@ -447,8 +461,17 @@ export class ManimShell {
       title: shouldPreviewWholeScene
         ? "Previewing whole scene..."
         : "Starting Manim...",
-      cancellable: false,
-    }, async (_progress, _token) => {
+      cancellable: true,
+    }, async (_progress, token) => {
+      token.onCancellationRequested(() => {
+        Logger.trace("🔆 Start command cancelled by user");
+        this.forceQuitActiveShell();
+        this.resetActiveShell();
+      });
+      if (token.isCancellationRequested) {
+        return;
+      }
+
       // We are sure that the active shell is set since it is invoked
       // in `retrieveOrInitActiveShell()` or in the line above.
       this.shellWeTryToSpawnIn = this.activeShell;
