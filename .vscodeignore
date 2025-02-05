@@ -12,3 +12,6 @@ scripts/**
 CHANGELOG.md
 CONTRIBUTING.md
 out/tests/**
+.markdownlint.jsonc
+node_modules/**
+esbuild.js
