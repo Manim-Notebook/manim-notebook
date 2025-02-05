@@ -97,6 +97,13 @@ export async function activate(context: vscode.ExtensionContext) {
       }
     });
 
+    workspace.onDidChangeTextDocument((event) => {
+      const document = event.document;
+      if (document.languageId === "python" && ManimClass.findAllIn(document).length > 0) {
+        activateFully(context);
+      }
+    });
+
     return;
   }
 }
