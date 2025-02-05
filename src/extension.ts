@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { window } from "vscode";
+import { window, workspace } from "vscode";
 import { ManimShell, NoActiveShellError } from "./manimShell";
 import { ManimCell } from "./manimCell";
 import { previewManimCell, reloadAndPreviewManimCell, previewCode } from "./previewCode";
@@ -13,8 +13,44 @@ import { setupTestEnvironment } from "./utils/testing";
 import { EventEmitter } from "events";
 import { applyWindowsPastePatch } from "./patches/applyPatches";
 import { getBinaryPathInPythonEnv } from "./utils/venv";
+import { ManimClass } from "./pythonParsing";
 
 export let manimNotebookContext: vscode.ExtensionContext;
+
+/**
+ * Returns whether the extension should activate, i.e. whether the active
+ * document is a Python file with Manim classes in it.
+ *
+ * @returns True if the extension should fully activate, false otherwise.
+ */
+function shouldActivate(): boolean {
+  if (process.env.IS_TESTING === "true") {
+    return true;
+  }
+
+  // Find out if we are really in a Manim Python file. In case not, we won't
+  // activate the extension.
+  const activeEditor = window.activeTextEditor;
+  if (!activeEditor) {
+    console.log("💠 No active editor found, won't activate extension");
+    Logger.info("💠 No active editor found, won't activate extension");
+    return false;
+  }
+  const document = activeEditor.document;
+  if (document.languageId !== "python") {
+    console.log("💠 Not in a Python file, won't activate extension");
+    Logger.info("💠 Not in a Python file, won't activate extension");
+    return false;
+  }
+  const manimClasses = ManimClass.findAllIn(document);
+  if (manimClasses.length === 0) {
+    console.log("💠 No Manim classes found, won't activate extension");
+    Logger.info("💠 No Manim classes found, won't activate extension");
+    return false;
+  }
+
+  return true;
+}
 
 export async function activate(context: vscode.ExtensionContext) {
   if (process.env.IS_TESTING === "true") {
@@ -27,9 +63,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
   manimNotebookContext = context;
 
-  // Trigger the Manim shell to start listening to the terminal
-  ManimShell.instance;
-
   // Register the open walkthrough command earlier, so that it can be used
   // even while other activation tasks are still running
   const openWalkthroughCommand = vscode.commands.registerCommand(
@@ -39,6 +72,44 @@ export async function activate(context: vscode.ExtensionContext) {
         `${context.extension.id}#manim-notebook-walkthrough`, false);
     });
   context.subscriptions.push(openWalkthroughCommand);
+
+  if (shouldActivate()) {
+    activateFully(context);
+  } else {
+    workspace.onDidOpenTextDocument((document) => {
+      if (!document) {
+        return;
+      }
+      if (document.languageId === "python" && ManimClass.findAllIn(document).length > 0) {
+        Logger.debug("💠 Fully activating extension after opening a Manim Notebook file");
+        activateFully(context);
+      }
+    });
+
+    window.onDidChangeActiveTextEditor((editor) => {
+      if (!editor || !editor.document) {
+        return;
+      }
+      if (editor.document.languageId === "python"
+        && ManimClass.findAllIn(editor.document).length > 0) {
+        Logger.debug("💠 Fully activating extension after changing to a Manim Notebook file");
+        activateFully(context);
+      }
+    });
+
+    return;
+  }
+}
+
+/**
+ * Fully activates the extension, including all commands and providers.
+ *
+ * This does not register the open walkthrough command, which should be
+ * done beforehand.
+ */
+function activateFully(context: vscode.ExtensionContext) {
+  // Trigger the Manim shell to start listening to the terminal
+  ManimShell.instance;
 
   let pythonBinary: string;
   try {
