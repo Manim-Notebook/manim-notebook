@@ -252,14 +252,16 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
     "compile": "tsc --project .config/tsconfig.paths.json",
     "watch": "tsc --project .config/tsconfig.paths.json -watch",
     "lint": "eslint src --config ./.config/eslint.mjs",
     "install-manim": "node ./out/tests/utils/installManim.js",
     "pretest": "npm run compile && npm run install-manim",
     "test": "node ./out/tests/main.js",
-    "testInGithubActions": "node ./out/tests/main.js"
+    "testInGithubActions": "node ./out/tests/main.js",
+    "check-types": "tsc --project .config/tsconfig.paths.json --noEmit",
+    "vscode:prepublish": "npm run package",
+    "package": "npm run check-types && node esbuild.js"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.12.1",
@@ -271,6 +273,7 @@
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
     "chai": "^5.1.2",
+    "esbuild": "^0.24.2",
     "eslint": "^9.17.0",
     "glob": "^11.0.0",
     "globals": "^15.14.0",
