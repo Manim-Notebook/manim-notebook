@@ -134,7 +134,7 @@ export class Logger {
       fileName = path.basename(fileMatch[0]);
     }
 
-    const methodMatch = callerLine.match(/at (\w+) \(/);
+    const methodMatch = callerLine.match(/at ([\w\.]+) \(/);
     let methodName = "unknown";
     if (methodMatch && methodMatch[1]) {
       methodName = methodMatch[1];
