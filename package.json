@@ -29,7 +29,7 @@
   "activationEvents": [
     "onLanguage:python"
   ],
-  "main": "./out/src/extension.js",
+  "main": "./dist/extension",
   "contributes": {
     "commands": [
       {
@@ -252,16 +252,17 @@
     ]
   },
   "scripts": {
-    "compile": "tsc --project .config/tsconfig.paths.json",
-    "watch": "tsc --project .config/tsconfig.paths.json -watch",
+    "check-types": "tsc --noEmit --project .config/tsconfig.paths.json",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project .config/tsconfig.paths.json",
+    "package": "npm run check-types && node esbuild.js --production",
+    "vscode:prepublish": "npm run package",
+    "deploy": "vsce publish",
     "lint": "eslint src --config ./.config/eslint.mjs",
     "install-manim": "node ./out/tests/utils/installManim.js",
-    "pretest": "npm run compile && npm run install-manim",
-    "test": "node ./out/tests/main.js",
-    "testInGithubActions": "node ./out/tests/main.js",
-    "check-types": "tsc --project .config/tsconfig.paths.json --noEmit",
-    "vscode:prepublish": "npm run package",
-    "package": "npm run check-types && node esbuild.js"
+    "archive-pretest": "npm run compile && npm run install-manim",
+    "archive-test": "node ./out/tests/main.js",
+    "archive-testInGithubActions": "node ./out/tests/main.js"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.12.1",
@@ -272,8 +273,9 @@
     "@typescript-eslint/parser": "^8.18.2",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
+    "@vscode/vsce": "^3.2.2",
     "chai": "^5.1.2",
-    "esbuild": "^0.24.2",
+    "esbuild": "^0.25.0",
     "eslint": "^9.17.0",
     "glob": "^11.0.0",
     "globals": "^15.14.0",

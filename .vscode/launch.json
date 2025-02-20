@@ -13,9 +13,9 @@
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
       "outFiles": [
-        "${workspaceFolder}/out/src/**/*.js"
+        "${workspaceFolder}/dist/**/*.js"
       ],
-      "preLaunchTask": "Watch Files",
+      // "preLaunchTask": "Watch Files",
       "sourceMaps": true
     },
     {
@@ -32,7 +32,7 @@
       "outFiles": [
         "${workspaceFolder}/out/test/**/*.js"
       ],
-      "preLaunchTask": "Prepare For Tests",
+      // "preLaunchTask": "Prepare For Tests",
       "sourceMaps": true,
       "env": {
         // also see tests/main.ts
