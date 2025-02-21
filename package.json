@@ -29,7 +29,7 @@
   "activationEvents": [
     "onLanguage:python"
   ],
-  "main": "./out/src/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
@@ -252,25 +252,35 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc --project .config/tsconfig.paths.json",
-    "watch": "tsc --project .config/tsconfig.paths.json -watch",
+    "check-types": "tsc --noEmit --project .config/tsconfig.json",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project .config/tsconfig.json",
+    "watch:tests": "tsc --watch --outDir out-test --project .config/tsconfig.tests.json",
+    "package-dev": "npm run check-types && node esbuild.js",
+    "package": "npm run check-types && node esbuild.js --production",
+    "package-vsce": "vsce package",
+    "vscode:prepublish": "npm run package",
+    "deploy": "vsce publish",
     "lint": "eslint src --config ./.config/eslint.mjs",
-    "install-manim": "node ./out/tests/utils/installManim.js",
-    "pretest": "npm run compile && npm run install-manim",
-    "test": "node ./out/tests/main.js",
-    "testInGithubActions": "node ./out/tests/main.js"
+    "install-manim": "node out-test/tests/utils/installManim.js",
+    "compile-tests": "tsc --outDir out-test --project .config/tsconfig.tests.json",
+    "pretest": "node tests/scripts/setTestEntryPoint.js set && npm run package-dev && npm run compile-tests && npm run install-manim",
+    "test": "node out-test/tests/main.js",
+    "test-without-pre-or-posttest": "node out-test/tests/main.js",
+    "posttest": "node tests/scripts/setTestEntryPoint.js reset"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.12.1",
     "@types/chai": "^5.0.1",
     "@types/node": "^22.10.2",
     "@types/sinon": "^17.0.3",
-    "@types/vscode": "^1.96.0",
+    "@types/vscode": "1.93.0",
     "@typescript-eslint/parser": "^8.18.2",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
+    "@vscode/vsce": "^3.2.2",
     "chai": "^5.1.2",
+    "esbuild": "^0.25.0",
     "eslint": "^9.17.0",
     "glob": "^11.0.0",
     "globals": "^15.14.0",

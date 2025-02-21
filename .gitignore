@@ -3,6 +3,7 @@ tmp/
 *.mp4
 .DS_Store
 out
+out-test
 dist
 node_modules
 _debug_scenes/

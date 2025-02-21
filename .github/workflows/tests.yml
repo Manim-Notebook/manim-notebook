@@ -102,8 +102,11 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
             # Start an X virtual framebuffer (Xvfb) server, which emulates a
             # display server without requiring a physical display.
-            xvfb-run -a npm run testInGithubActions
+            xvfb-run -a npm run test-without-pre-or-posttest
           else
-            npm run testInGithubActions
+            npm run test-without-pre-or-posttest
           fi
         shell: bash
+
+      - name: Run posttest
+        run: npm run posttest

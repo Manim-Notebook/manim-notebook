@@ -9,5 +9,10 @@
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "removeComments": true,
+    "outDir": "../out/",
+    "rootDir": "../"
   },
+  "include": [
+    "../src/**/*.ts",
+  ],
 }
