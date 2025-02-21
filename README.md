@@ -61,6 +61,6 @@ In the long run, we aim to even provide a <strong>Debugger for Manim code</stron
 <br>
 <br>
 
-<a href="https://marketplace.visualstudio.com/items?itemName=bhoov.vscode-manim">
+<a href="https://marketplace.visualstudio.com/items?itemName=Manim-Notebook.manim-notebook">
   <img src="https://github.com/user-attachments/assets/b13a01f6-7d24-4bfb-9d3f-fee7b8a456a3" alt="Manim Notebook Logo with a fancy color-gradient background"/>
 </a>
