@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=bhoov.vscode-manim">
+  <a href="https://marketplace.visualstudio.com/items?itemName=Manim-Notebook.manim-notebook">
     <img src="./assets/manim-notebook-logo.png" width="130px" alt="Manim Notebook Logo showing a physical notebook with an 'M' letter on its title page"/>
   </a>
 
@@ -11,17 +11,16 @@
   </div>
 
   <div align="center">
-    <a href="https://marketplace.visualstudio.com/items?itemName=bhoov.vscode-manim">VSCode Marketplace (outdated)</a>
-    | <a href="https://github.com/Manim-Notebook/manim-notebook/">GitHub</a>
+    <a href="https://marketplace.visualstudio.com/items?itemName=Manim-Notebook.manim-notebook">VSCode Marketplace</a>
+    |
+    <a href="https://github.com/Manim-Notebook/manim-notebook/">GitHub</a>
   </div>
 </div>
 
-> [!note]
-> December 2024 / January 2025: Hey there👋 We are currently working to ship the first release of Manim Notebook. The version already available on the VSCode Marketplace is outdated. If you are interested in the current state of the extension, just clone this repo and follow the [Developing guide](https://github.com/Manim-Notebook/manim-notebook/wiki/Developing).
+<br>
 
 > [!warning]
-> This VSCode extension is specifically for [3b1b's original manim library](https://github.com/3b1b/manim)<br>
-> and *NOT* the [Manim Community Edition (Manim CE)](https://www.manim.community/).
+> This extension is for [3b1b's Manim library](https://github.com/3b1b/manim) and *NOT* the [Manim Community Edition (Manim CE)](https://www.manim.community/).
 
 ## 🎈 What is this?
 
@@ -31,7 +30,7 @@ Originally, the motivation for this extension was Grant Sanderson's video [How I
 
 ## 💻 Usage
 
-Our VSCode **walkthrough** will guide you through the first steps and provide a sample file. It should open automatically upon installation of [the Manim Notebook extension](https://marketplace.visualstudio.com/items?itemName=bhoov.vscode-manim). If not, you can invoke it manually: open the command palette (`Ctrl/Cmd + Shift + P`) and search for `Manim Notebook: Open Walkthrough`.
+Our VSCode **walkthrough** will guide you through the first steps and provide a sample file. The walkthrough should open automatically upon installation of [the Manim Notebook extension](https://marketplace.visualstudio.com/items?itemName=Manim-Notebook.manim-notebook). If not, you can invoke it manually: open the command palette (`Ctrl/Cmd + Shift + P`) and search for `Manim Notebook: Open Walkthrough`.
 
 The main concept is that of a Manim Cell, which is just a regular Python comment, but one that starts with `##` instead of `#`.
 
@@ -44,7 +43,7 @@ The main concept is that of a Manim Cell, which is just a regular Python comment
 
 ## 🚀 Features
 
-- **Manim Cells**. Split your code into Manim Cells that start with `##`. You will be presented with a CodeLens to preview the animation.
+- **Manim Cells**. Split your code into Manim Cells that start with `##`. You will be presented with a CodeLens to preview the animation. Optionally, reload your changed Python files to see the changes.
 - **Preview any code**. Simple as that, select any code and preview it.
 - **With or without Terminal**. The extension parses the `manimgl` terminal output to provide rich VSCode integrations and makes possible an almost terminal-free workflow.
   - Shows the progress of the live Manim preview as VSCode progress bar.
@@ -52,5 +51,3 @@ The main concept is that of a Manim Cell, which is just a regular Python comment
   - State management: keeps track of the ManimGL state to react accordingly in different situations, e.g. prevent from running multiple statements at the same time.
 - **Video export**. Export your animations to a video file. A small wizard will guide you through the most important settings.
 - **And more...** Find all commands in the command palette (`Ctrl/Cmd + Shift + P`) by searching for `> Manim Notebook`. E.g. another command lets you `clear()` the window. Yet with another one you can start the scene at your cursor.
-
-TODO: Add a more complete feature list (maybe to the Wiki?). Add images to showcase each feature.
