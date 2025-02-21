@@ -6,7 +6,7 @@ import { previewManimCell, reloadAndPreviewManimCell, previewCode } from "./prev
 import { startScene, exitScene } from "./startStopScene";
 import { exportScene } from "./export";
 import { Logger, Window, LogRecorder } from "./logger";
-import { registerWalkthroughCommands } from "./walkthrough/commands";
+import { registerWalkthroughCommands } from "./walkthrough";
 import { ExportSceneCodeLens } from "./export";
 import { determineManimVersion } from "./manimVersion";
 import { setupTestEnvironment } from "./utils/testing";
