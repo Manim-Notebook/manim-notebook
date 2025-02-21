@@ -1,0 +1,36 @@
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Package extension
+      run: npm run package-vsce
+
+    - name: Upload VSIX artifact to 
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-artifact@v4
+      with:
+        name: manim-notebook.vsix
+        path: manim-notebook-*.vsix
+        if-no-files-found: error
+
+    - name: Publish
+      if: startsWith(github.ref, 'refs/tags/')
+      run: npm run deploy
+      env:
+        VSCE_PAT: ${{ secrets.VSCE_PAT }}
