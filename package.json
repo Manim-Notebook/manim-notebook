@@ -2,7 +2,7 @@
   "name": "manim-notebook",
   "displayName": "Manim Notebook",
   "description": "ManimGL with interactive previewing to easily visualize and share the beauty of mathematics and related fields.",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "publisher": "Manim-Notebook",
   "author": {
     "name": "Manim Notebook Contributors"
@@ -293,5 +293,9 @@
     "type": "git",
     "url": "https://github.com/Manim-Notebook/manim-notebook.git"
   },
-  "icon": "assets/manim-notebook-logo.png"
+  "icon": "assets/manim-notebook-logo.png",
+  "galleryBanner": {
+    "color": "#112039",
+    "theme": "dark"
+  }
 }
