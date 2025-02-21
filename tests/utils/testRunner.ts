@@ -61,6 +61,7 @@ export function run(): Promise<void> {
 
       if (process.env.IS_CALLED_IN_NPM_SCRIPT !== "true") {
         console.log("💠 Tests requested via debug configuration");
+        // respective env variables are set in launch.json
       } else {
         process.env.IS_TESTING = "true";
         process.env.TEST_BASE_PATH = process.env.EXTENSION_DEV_PATH;

@@ -108,6 +108,7 @@
     "nodenext",
     "opengl",
     "Pango",
+    "posttest",
     "prerun",
     "pycache",
     "Pyglet",

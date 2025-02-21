@@ -265,8 +265,8 @@
     "compile-tests": "tsc --outDir out-test --project .config/tsconfig.tests.json",
     "pretest": "node tests/scripts/setTestEntryPoint.js set && npm run package-dev && npm run compile-tests && npm run install-manim",
     "test": "node out-test/tests/main.js",
-    "posttest": "node tests/scripts/setTestEntryPoint.js reset",
-    "testInGithubActions": "node out-test/tests/main.js"
+    "test-without-pre-or-posttest": "node out-test/tests/main.js",
+    "posttest": "node tests/scripts/setTestEntryPoint.js reset"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2.12.1",

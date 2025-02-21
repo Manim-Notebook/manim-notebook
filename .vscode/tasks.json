@@ -42,10 +42,21 @@
       }
     },
     {
+      "type": "npm",
+      "script": "watch:tests",
+      "group": "build",
+      "problemMatcher": "$tsc-watch",
+      "isBackground": true,
+      "label": "npm: watch:tests",
+      "presentation": {
+        "group": "watch",
+        "reveal": "never"
+      }
+    },
+    {
       "label": "Install Manim",
       "type": "npm",
       "script": "install-manim",
-      "cwd": "${workspaceFolder}",
       "presentation": {
         "reveal": "always"
       },
@@ -57,9 +68,18 @@
       "label": "Prepare For Tests",
       "dependsOrder": "sequence",
       "dependsOn": [
-        "Watch Files",
+        "npm: watch:tsc",
+        "npm: watch:esbuild",
+        "npm: watch:tests",
         "Install Manim"
-      ]
-    }
+      ],
+      "presentation": {
+        "reveal": "never"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
   ]
 }

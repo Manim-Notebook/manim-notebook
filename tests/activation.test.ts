@@ -9,7 +9,7 @@ import { applyWindowsPastePatch } from "../src/patches/applyPatches";
 import { manimNotebookContext } from "../src/extension";
 
 // eslint-disable-next-line no-unused-vars
-import * as manimNotebook from "@src/extension";
+import * as manimNotebook from "../src/extension";
 import { onTerminalOutput } from "../src/utils/terminal";
 
 const MANIM_VERSION_STRING_REGEX = /v\d+\.\d+\.\d+/;
