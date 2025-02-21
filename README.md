@@ -22,6 +22,8 @@
 > [!warning]
 > This extension is for [3b1b's Manim library](https://github.com/3b1b/manim) and *NOT* the [Manim Community Edition (Manim CE)](https://www.manim.community/).
 
+https://github.com/user-attachments/assets/24eab702-e351-4cc9-8f7b-7b94c54b4072
+
 ## 🎈 What is this?
 
 Manim Notebook is a VSCode extension that tailors your needs when writing Python code to animate mathematical concepts with 3Blue1Brown's [Manim library](https://github.com/3b1b/manim). It's *NOT* a Jupyter Notebook; instead it enriches your existing Python files with interactive Manim cells that let you live-preview parts of the code and instantly see the animations.
@@ -51,3 +53,9 @@ The main concept is that of a Manim Cell, which is just a regular Python comment
   - State management: keeps track of the ManimGL state to react accordingly in different situations, e.g. prevent from running multiple statements at the same time.
 - **Video export**. Export your animations to a video file. A small wizard will guide you through the most important settings.
 - **And more...** Find all commands in the command palette (`Ctrl/Cmd + Shift + P`) by searching for `> Manim Notebook`. E.g. another command lets you `clear()` the window. Yet with another one you can start the scene at your cursor.
+
+<br>
+
+<a href="https://marketplace.visualstudio.com/items?itemName=bhoov.vscode-manim">
+  <img src="https://github.com/user-attachments/assets/b13a01f6-7d24-4bfb-9d3f-fee7b8a456a3" alt="Manim Notebook Logo with a fancy color-gradient background"/>
+</a>
