@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { ExtensionContext, window, workspace, commands } from "vscode";
-import { Logger } from "../logger";
+import { Logger } from "./logger";
 import fs from "fs";
 import path from "path";
 
@@ -55,7 +55,7 @@ export function registerWalkthroughCommands(context: ExtensionContext) {
  */
 async function openSampleFile(context: ExtensionContext) {
   const sampleFilePath = path.join(context.extensionPath,
-    "src", "walkthrough", "sample_scene.py");
+    "assets", "walkthrough", "sample_scene.py");
   const sampleFileContent = fs.readFileSync(sampleFilePath, "utf-8");
 
   const sampleFile = await workspace.openTextDocument({
