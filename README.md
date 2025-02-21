@@ -22,7 +22,7 @@
 > [!warning]
 > This extension is for [3b1b's Manim library](https://github.com/3b1b/manim) and *NOT* the [Manim Community Edition (Manim CE)](https://www.manim.community/).
 
-https://github.com/user-attachments/assets/24eab702-e351-4cc9-8f7b-7b94c54b4072
+[**Manim Notebook Quick Showcase Video**](https://github.com/user-attachments/assets/24eab702-e351-4cc9-8f7b-7b94c54b4072)
 
 ## 🎈 What is this?
 
