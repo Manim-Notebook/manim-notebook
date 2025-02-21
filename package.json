@@ -293,5 +293,9 @@
     "type": "git",
     "url": "https://github.com/Manim-Notebook/manim-notebook.git"
   },
-  "icon": "assets/manim-notebook-logo.png"
+  "icon": "assets/manim-notebook-logo.png",
+  "galleryBanner": {
+    "color": "#112039",
+    "theme": "dark"
+  }
 }
