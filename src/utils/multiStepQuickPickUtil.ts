@@ -1,5 +1,9 @@
 import {
-  QuickPickItem, window, Disposable, QuickInputButton, QuickInput, QuickInputButtons,
+  Disposable,
+  QuickInput,
+  QuickInputButton,
+  QuickInputButtons,
+  QuickPickItem, window,
 } from "vscode";
 
 export function toQuickPickItem(names: string): QuickPickItem {

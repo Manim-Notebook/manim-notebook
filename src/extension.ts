@@ -1,18 +1,17 @@
+import { EventEmitter } from "events";
 import * as vscode from "vscode";
 import { window } from "vscode";
-import { ManimShell, NoActiveShellError } from "./manimShell";
+import { exportScene, ExportSceneCodeLens } from "./export";
+import { Logger, LogRecorder, Window } from "./logger";
 import { ManimCell } from "./manimCell";
-import { previewManimCell, reloadAndPreviewManimCell, previewCode } from "./previewCode";
-import { startScene, exitScene } from "./startStopScene";
-import { exportScene } from "./export";
-import { Logger, Window, LogRecorder } from "./logger";
-import { registerWalkthroughCommands } from "./walkthrough";
-import { ExportSceneCodeLens } from "./export";
+import { ManimShell, NoActiveShellError } from "./manimShell";
 import { determineManimVersion } from "./manimVersion";
-import { setupTestEnvironment } from "./utils/testing";
-import { EventEmitter } from "events";
 import { applyWindowsPastePatch } from "./patches/applyPatches";
+import { previewCode, previewManimCell, reloadAndPreviewManimCell } from "./previewCode";
+import { exitScene, startScene } from "./startStopScene";
+import { setupTestEnvironment } from "./utils/testing";
 import { getBinaryPathInPythonEnv } from "./utils/venv";
+import { registerWalkthroughCommands } from "./walkthrough";
 
 export let manimNotebookContext: vscode.ExtensionContext;
 

@@ -1,5 +1,5 @@
 import * as crypto from "crypto";
-import { TextDocument, Range } from "vscode";
+import { Range, TextDocument } from "vscode";
 
 /**
  * Cache is a simple key-value store that keeps a maximum number of entries.
