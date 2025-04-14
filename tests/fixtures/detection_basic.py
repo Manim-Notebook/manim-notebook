@@ -11,6 +11,14 @@ class BasicNotebook(Scene):
         print("And even more code")
 
 
+class BasicNotebookWithType(Scene):
+
+    def construct(self) -> None:
+        ## Cell inside construct(self) marked with "None" type
+        print("With some code None")
+        print("With some more code None")
+
+
 class NoManimScene(Scene):
     def constructtttt(self):
         ## Should not be detected as Manim Cell

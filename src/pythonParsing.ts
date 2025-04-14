@@ -1,5 +1,5 @@
 import * as crypto from "crypto";
-import { TextDocument, Range } from "vscode";
+import { Range, TextDocument } from "vscode";
 
 /**
  * Cache is a simple key-value store that keeps a maximum number of entries.
@@ -206,7 +206,7 @@ export class ManimClass {
   /**
    * Regular expression to match the construct() method definition.
    */
-  private static CONSTRUCT_METHOD_REGEX = /^\s*def\s+construct\s*\(self\)\s*:/;
+  private static CONSTRUCT_METHOD_REGEX = /^\s*def\s+construct\s*\(self\)\s*(->\s*None)?\s*:/;
 
   /**
    * The 0-based line number where the Manim Class is defined.
