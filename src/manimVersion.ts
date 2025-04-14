@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 
-import { Window, Logger } from "./logger";
 import * as vscode from "vscode";
+import { Logger, Window } from "./logger";
 
 /**
  * Manim version that the user has installed without the 'v' prefix,
@@ -159,7 +159,7 @@ export async function determineManimVersion(pythonBinary: string | undefined) {
     }, 3000);
   });
 
-  const versionCommand = `${pythonBinary} -c \"from importlib.metadata import version; `
+  const versionCommand = `"${pythonBinary}" -c \"from importlib.metadata import version; `
     + " print(version('manimgl'))\"";
 
   try {
