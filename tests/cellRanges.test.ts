@@ -9,7 +9,7 @@ describe("Manim Cell Ranges", function () {
   const tests = [
     {
       filename: "detection_basic.py",
-      expectedRanges: [[5, 7], [9, 10]],
+      expectedRanges: [[5, 7], [9, 10], [16, 18]],
     },
     {
       filename: "detection_class_definition.py",
