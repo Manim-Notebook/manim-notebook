@@ -1,4 +1,4 @@
-import { TextEditor, Selection } from "vscode";
+import { Selection, TextEditor } from "vscode";
 
 /**
  * Moves the cursor to the specified line number.

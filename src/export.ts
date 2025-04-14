@@ -1,10 +1,12 @@
 import * as vscode from "vscode";
-import { window, TextDocument, CancellationToken, CodeLens } from "vscode";
-import {
-  MultiStepInput, toQuickPickItems, shouldResumeNoOp,
-} from "./utils/multiStepQuickPickUtil";
-import { ManimClass } from "./pythonParsing";
+import { CancellationToken, CodeLens, TextDocument, window } from "vscode";
 import { Logger, Window } from "./logger";
+import { ManimClass } from "./pythonParsing";
+import {
+  MultiStepInput,
+  shouldResumeNoOp,
+  toQuickPickItems,
+} from "./utils/multiStepQuickPickUtil";
 import { waitNewTerminalDelay } from "./utils/terminal";
 
 class VideoQuality {

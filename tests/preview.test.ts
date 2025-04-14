@@ -1,8 +1,8 @@
-import { window, commands } from "vscode";
-import { describe, it, before } from "mocha";
+import { before, describe, it } from "mocha";
+import { commands, window } from "vscode";
+import { goToLine } from "./utils/editor";
 import { onAnyTerminalOutput } from "./utils/terminal";
 import { uriInWorkspace } from "./utils/testRunner";
-import { goToLine } from "./utils/editor";
 let expect: Chai.ExpectStatic;
 
 before(async () => {

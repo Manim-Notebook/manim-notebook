@@ -1,8 +1,8 @@
-import * as vscode from "vscode";
-import { ExtensionContext, window, workspace, commands } from "vscode";
-import { Logger } from "./logger";
 import fs from "fs";
 import path from "path";
+import * as vscode from "vscode";
+import { commands, ExtensionContext, window, workspace } from "vscode";
+import { Logger } from "./logger";
 
 export function registerWalkthroughCommands(context: ExtensionContext) {
   const openSampleFileCommand = commands.registerCommand(

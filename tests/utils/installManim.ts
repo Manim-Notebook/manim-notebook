@@ -1,5 +1,5 @@
-import { ManimInstaller } from "./manimInstaller";
 import * as path from "path";
+import { ManimInstaller } from "./manimInstaller";
 
 async function setupManimInstallation() {
   const baseFolder = process.cwd();

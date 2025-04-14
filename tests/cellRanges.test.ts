@@ -1,7 +1,7 @@
-import { workspace, Range } from "vscode";
 import { describe, it } from "mocha";
-import { uriInWorkspace } from "./utils/testRunner";
+import { Range, workspace } from "vscode";
 import { ManimCellRanges } from "../src/pythonParsing";
+import { uriInWorkspace } from "./utils/testRunner";
 
 describe("Manim Cell Ranges", function () {
   // in the expected ranges we only care about the start and end lines
@@ -9,7 +9,7 @@ describe("Manim Cell Ranges", function () {
   const tests = [
     {
       filename: "detection_basic.py",
-      expectedRanges: [[5, 7], [9, 10]],
+      expectedRanges: [[5, 7], [9, 10], [16, 18]],
     },
     {
       filename: "detection_class_definition.py",

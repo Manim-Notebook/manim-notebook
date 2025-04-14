@@ -1,6 +1,6 @@
+import { exec } from "child_process";
 import * as fs from "fs";
 import path from "path";
-import { exec } from "child_process";
 
 import { Logger, Window } from "../logger";
 

@@ -28,7 +28,7 @@
 
 Manim Notebook is a VSCode extension tailored to your needs when writing Python code to animate mathematical concepts with 3Blue1Brown's [Manim library](https://github.com/3b1b/manim). It's *NOT* a Jupyter Notebook; instead it enriches your existing Python files with interactive Manim cells that let you live-preview parts of the code and instantly see the animations.
 
-Originally, the motivation for this extension was Grant Sanderson's video [How I animate 3Blue1Brown](https://youtu.be/rbu7Zu5X1zI?feature=shared) where he shows his Manim workflow in Sublime Text. This extension brings a similar workflow to VSCode but even goes further and provides a rich VSCode integration.
+Originally, the motivation for this extension was Grant Sanderson's video [How I animate 3Blue1Brown](https://youtu.be/rbu7Zu5X1zI) where he shows his Manim workflow in Sublime Text. This extension brings a similar workflow to VSCode but even goes further and provides a rich VSCode integration.
 
 ## 💻 Usage
 
@@ -64,3 +64,5 @@ In the long run, we aim to even provide a <strong>Debugger for Manim code</stron
 <a href="https://marketplace.visualstudio.com/items?itemName=Manim-Notebook.manim-notebook">
   <img src="https://github.com/user-attachments/assets/b13a01f6-7d24-4bfb-9d3f-fee7b8a456a3" alt="Manim Notebook Logo with a fancy color-gradient background"/>
 </a>
+
+If you enjoy Manim, you might also like [Motion Canvas](https://motioncanvas.io/) by aarthificial. It even has its own editor integrated and uses HTML5 Canvas to render the animations. The learning curve is less steep and it's also very powerful.

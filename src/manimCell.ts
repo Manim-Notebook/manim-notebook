@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
-import { window, TextDocument, CancellationToken,
-  CodeLens, FoldingContext, FoldingRange } from "vscode";
+import {
+  CancellationToken,
+  CodeLens, FoldingContext, FoldingRange,
+  TextDocument,
+  window,
+} from "vscode";
 import { ManimCellRanges } from "./pythonParsing";
 
 export class ManimCell implements vscode.CodeLensProvider, vscode.FoldingRangeProvider {
