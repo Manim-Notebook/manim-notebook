@@ -1,5 +1,5 @@
-import { window } from "vscode";
 import * as path from "path";
+import { window } from "vscode";
 
 export class ManimCaller {
   public venvPath: string = "";

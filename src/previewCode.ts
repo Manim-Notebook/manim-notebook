@@ -1,10 +1,10 @@
+import { EventEmitter } from "events";
 import * as vscode from "vscode";
 import { window } from "vscode";
-import { ManimShell } from "./manimShell";
-import { EventEmitter } from "events";
-import { ManimCellRanges } from "./pythonParsing";
 import { Logger, Window } from "./logger";
+import { ManimShell } from "./manimShell";
 import { hasUserMinimalManimVersionAndWarn } from "./manimVersion";
+import { ManimCellRanges } from "./pythonParsing";
 
 // \x0C: is Ctrl + L, which clears the terminal screen
 const PREVIEW_COMMAND = "\x0Ccheckpoint_paste()";

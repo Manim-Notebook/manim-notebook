@@ -1,15 +1,13 @@
-import { window, commands } from "vscode";
+import { commands, window } from "vscode";
 
-import { describe, it, before, afterEach } from "mocha";
+import { afterEach, before, describe, it } from "mocha";
 import * as sinon from "sinon";
 let expect: Chai.ExpectStatic;
 
+import { manimNotebookContext } from "../src/extension";
 import { Logger } from "../src/logger";
 import { applyWindowsPastePatch } from "../src/patches/applyPatches";
-import { manimNotebookContext } from "../src/extension";
 
-// eslint-disable-next-line no-unused-vars
-import * as manimNotebook from "../src/extension";
 import { onTerminalOutput } from "../src/utils/terminal";
 
 const MANIM_VERSION_STRING_REGEX = /v\d+\.\d+\.\d+/;

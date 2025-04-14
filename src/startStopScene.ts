@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { ManimShell, NoActiveShellError } from "./manimShell";
 import { window, workspace } from "vscode";
 import { Logger, Window } from "./logger";
-import { ManimClass } from "./pythonParsing";
+import { ManimShell, NoActiveShellError } from "./manimShell";
 import { hasUserMinimalManimVersion } from "./manimVersion";
+import { ManimClass } from "./pythonParsing";
 
 /**
  * Runs the `manimgl` command in the terminal, with the current cursor's

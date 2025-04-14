@@ -12,14 +12,14 @@
 // import as soon as possible
 import { activatedEmitter } from "../../src/extension";
 
-import * as path from "path";
-import Mocha from "mocha";
 import * as assert from "assert";
 import { globSync } from "glob";
+import Mocha from "mocha";
+import * as path from "path";
 import "source-map-support/register";
 import "./prototype";
 
-import { window, workspace, Uri, extensions } from "vscode";
+import { Uri, extensions, window, workspace } from "vscode";
 
 const WORKSPACE_ROOT: string = workspace.workspaceFolders![0].uri.fsPath;
 
