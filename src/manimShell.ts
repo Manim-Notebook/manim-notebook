@@ -809,6 +809,8 @@ export class ManimShell {
     window.onDidEndTerminalShellExecution(
       async (event: vscode.TerminalShellExecutionEndEvent) => {
         if (this.shellWeTryToSpawnIn === event.terminal) {
+          if (event.execution.commandLine.value.split(" ")[0] !== "manimgl")
+            return;
           Logger.debug("❌ Tried to spawn a new Manim session, but it failed");
           this.eventEmitter.emit(ManimShellEvent.MANIM_NOT_STARTED);
           this.resetActiveShell();
