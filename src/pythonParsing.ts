@@ -325,6 +325,6 @@ export class ManimClass {
   public static getManimClassAtCursor(document: TextDocument, cursorLine: number):
   ManimClass | undefined {
     const manimClasses = this.findAllIn(document);
-    return manimClasses.reverse().find(({ lineNumber }) => lineNumber <= cursorLine);
+    return manimClasses.slice().reverse().find(({ lineNumber }) => lineNumber <= cursorLine);
   }
 }
