@@ -138,6 +138,7 @@ export class ManimInstaller {
       await this.runWithVenvBin("pip install PyOpenGL");
     }
 
+    // Remove once this is merged: https://github.com/3b1b/manim/pull/2439/
     this.runWithVenvBin("pip install trimesh");
 
     console.log("🔧 Additional dependencies successfully installed");
