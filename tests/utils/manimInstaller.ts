@@ -138,6 +138,8 @@ export class ManimInstaller {
       await this.runWithVenvBin("pip install PyOpenGL");
     }
 
+    this.runWithVenvBin("pip install trimesh");
+
     console.log("🔧 Additional dependencies successfully installed");
   }
 
