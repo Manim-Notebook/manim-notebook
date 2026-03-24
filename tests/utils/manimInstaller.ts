@@ -139,7 +139,7 @@ export class ManimInstaller {
     }
 
     // Remove once this is merged: https://github.com/3b1b/manim/pull/2439/
-    await this.runWithVenvBin("pip install trimesh");
+    await this.runWithVenvBin("pip install trimesh pywavefront");
 
     console.log("🔧 Additional dependencies successfully installed");
   }
