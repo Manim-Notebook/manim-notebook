@@ -32,7 +32,7 @@ describe("Previewing", function () {
   it("Can preview laggy scene", async function () {
     if (process.env.CI === "true" && process.platform === "linux") {
       // Linux CI runners can be significantly slower for this GPU-heavy scene
-      this.timeout(20_000);
+      this.timeout(120_000);
     }
 
     const editor = await window.showTextDocument(uriInWorkspace("laggy.py"));
