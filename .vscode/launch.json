@@ -15,7 +15,7 @@
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ],
-      "preLaunchTask": "Watch (Default)",
+      // "preLaunchTask": "Watch (Default)",
       "sourceMaps": true
     },
     {
@@ -32,7 +32,7 @@
       "outFiles": [
         "${workspaceFolder}/out-test/tests/**/*.js"
       ],
-      "preLaunchTask": "Prepare For Tests",
+      // "preLaunchTask": "Prepare For Tests",
       "sourceMaps": true,
       "env": {
         // also see tests/main.ts

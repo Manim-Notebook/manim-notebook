@@ -19,7 +19,7 @@ import * as path from "path";
 import "source-map-support/register";
 import "./prototype";
 
-import { Uri, extensions, window, workspace } from "vscode";
+import { ConfigurationTarget, Uri, extensions, window, workspace } from "vscode";
 
 const WORKSPACE_ROOT: string = workspace.workspaceFolders![0].uri.fsPath;
 
@@ -68,6 +68,8 @@ export function run(): Promise<void> {
         console.log("💠 Tests requested via npm script");
       }
 
+      await configureClipboardTimeoutForCI();
+
       // open any python file to trigger extension activation
       await window.showTextDocument(uriInWorkspace("basic.py"));
 
@@ -93,6 +95,26 @@ export function run(): Promise<void> {
       reject(err);
     }
   });
+}
+
+/**
+ * In CI, test execution can be slower and restoring clipboard contents may
+ * race with command handling. Increase timeout to reduce flaky tests.
+ */
+async function configureClipboardTimeoutForCI(): Promise<void> {
+  if (process.env.CI !== "true") {
+    return;
+  }
+
+  const timeoutMs = Number(process.env.MANIM_NOTEBOOK_TEST_CLIPBOARD_TIMEOUT_MS ?? "2000");
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    throw new Error("MANIM_NOTEBOOK_TEST_CLIPBOARD_TIMEOUT_MS must be a positive number");
+  }
+
+  await workspace
+    .getConfiguration("manim-notebook")
+    .update("clipboardTimeout", timeoutMs, ConfigurationTarget.Workspace);
+  console.log(`💠 CI override: manim-notebook.clipboardTimeout=${timeoutMs}ms`);
 }
 
 /**
