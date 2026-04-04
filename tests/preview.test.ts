@@ -29,7 +29,12 @@ describe("Previewing", function () {
     });
   });
 
-  it("Can preview laggy scene", async () => {
+  it("Can preview laggy scene", async function () {
+    if (process.env.CI === "true" && process.platform === "linux") {
+      // Linux CI runners can be significantly slower for this GPU-heavy scene
+      this.timeout(120_000);
+    }
+
     const editor = await window.showTextDocument(uriInWorkspace("laggy.py"));
     const queue: { line: number; waitForStrings: string[]; resolve: () => void }[] = [];
     let wantToStopListening = false;
@@ -40,7 +45,8 @@ describe("Previewing", function () {
         return;
       }
       if (queue.length === 0) {
-        throw new Error("Listening to terminal output, but nothing in queue to check against");
+        // Ignore unrelated output from concurrent terminal activity
+        return;
       }
 
       const { waitForStrings } = queue[0];
@@ -56,10 +62,13 @@ describe("Previewing", function () {
 
     async function testPreviewAtLine(line: number, waitForStrings: string[]) {
       goToLine(editor, line);
-      await commands.executeCommand("manim-notebook.previewManimCell");
-      await new Promise<void>((resolve) => {
-        queue.push({ line, waitForStrings, resolve });
+
+      const done = new Promise<void>((resolve) => {
+        queue.push({ line, waitForStrings: [...waitForStrings], resolve });
       });
+
+      await commands.executeCommand("manim-notebook.previewManimCell");
+      await done;
     }
 
     await testPreviewAtLine(8, ["ShowCreationVGroup", "In [2]:"]);

@@ -98,6 +98,8 @@ jobs:
         shell: bash
 
       - name: Run tests
+        env:
+          MANIM_NOTEBOOK_TEST_CLIPBOARD_TIMEOUT_MS: "3000"
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
             # Start an X virtual framebuffer (Xvfb) server, which emulates a
