@@ -47,9 +47,9 @@ export function run(): Promise<void> {
 
       if (process.env.IS_CALLED_IN_NPM_SCRIPT !== "true") {
         console.log("💠 Tests executed via debug configuration");
-        console.log("Waiting fixed timeout of 5s before running tests...");
+        console.log("Waiting fixed timeout of 20s before running tests...");
         console.log("(This is to ensure that the extension has properly activated.)");
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 20000));
       } else {
         console.log("💠 Tests executed via npm script");
         await new Promise(resolve => setTimeout(resolve, 20000));
@@ -60,6 +60,7 @@ export function run(): Promise<void> {
         if (failures > 0) {
           reject(new Error(`${failures} tests failed.`));
         } else {
+          console.log("✅ tests completed successfully");
           resolve();
         }
       });
